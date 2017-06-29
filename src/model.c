@@ -22,8 +22,10 @@
 
 #include "log.h"
 #include "model.h"
+#include "model/model_ultrasonic_sensor.h"
 #include "model/model_infrared_motion_sensor.h"
 #include "model/model_infrared_obstacle_avoidance_sensor.h"
+#include "model/model_touch_sensor.h"
 
 struct _model_s {
 	sensor_type_e sensor_type;
@@ -34,12 +36,16 @@ void model_fini(void)
 {
 	switch (model_s.sensor_type) {
 	case SENSOR_TYPE_ULTRASONIC:
+		model_fini_ultrasonic_sensor();
 		break;
 	case SENSOR_TYPE_INFRARED_MOTION:
 		model_fini_infrared_motion_sensor();
 		break;
 	case SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE:
 		model_fini_infrared_obstacle_avoidance_sensor();
+		break;
+	case SENSOR_TYPE_TOUCH:
+		model_fini_touch_sensor();
 		break;
 	default:
 		break;
@@ -53,12 +59,16 @@ int model_init(sensor_type_e sensor_type)
 
 	switch (sensor_type) {
 	case SENSOR_TYPE_ULTRASONIC:
+		ret = model_init_ultrasonic_sensor();
 		break;
 	case SENSOR_TYPE_INFRARED_MOTION:
 		ret = model_init_infrared_motion_sensor();
 		break;
 	case SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE:
 		ret = model_init_infrared_obstacle_avoidance_sensor();
+		break;
+	case SENSOR_TYPE_TOUCH:
+		model_init_touch_sensor();
 		break;
 	default:
 		break;
@@ -80,6 +90,7 @@ int model_alloc(void **data)
 		break;
 	case SENSOR_TYPE_INFRARED_MOTION:
 	case SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE:
+	case SENSOR_TYPE_TOUCH:
 		_E("No function for allocation");
 		break;
 	default:
@@ -100,7 +111,31 @@ int model_read_int_value(int *out_value)
 	case SENSOR_TYPE_INFRARED_MOTION:
 		ret = model_read_infrared_motion_sensor(out_value);
 		break;
+	case SENSOR_TYPE_TOUCH:
+		ret = model_read_touch_sensor(out_value);
+		break;
 	default:
+		break;
+	}
+
+	if (ret < 0) {
+		_E("Something wrong in the result[%d]", ret);
+		return -1;
+	}
+
+	return 0;
+}
+
+int model_read_double_value(double *out_value)
+{
+	int ret = 0;
+
+	switch (model_s.sensor_type) {
+	case SENSOR_TYPE_ULTRASONIC:
+		ret = model_read_ultrasonic_sensor(out_value);
+		break;
+	default:
+		_E("There is no data to retrieve");
 		break;
 	}
 
@@ -117,6 +152,7 @@ int model_write(void *data)
 	switch (model_s.sensor_type) {
 	case SENSOR_TYPE_ULTRASONIC:
 	case SENSOR_TYPE_INFRARED_MOTION:
+	case SENSOR_TYPE_TOUCH:
 		_E("No function for writing");
 		break;
 	default:

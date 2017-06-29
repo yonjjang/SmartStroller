@@ -32,10 +32,15 @@ typedef struct app_data_s {
 
 static Eina_Bool _getter_timer(void *data)
 {
+#if 0
 	int value = 0;
 	retv_if(model_read_int_value(&value) == -1, ECORE_CALLBACK_CANCEL);
-
 	_I("Value is [%d]", value);
+#else
+	double value = 0.0;
+	retv_if(model_read_double_value(&value) == -1, ECORE_CALLBACK_RENEW);
+	_I("Value is [%f]", value);
+#endif
 
 	return ECORE_CALLBACK_RENEW;
 }
@@ -44,9 +49,9 @@ static bool service_app_create(void *data)
 {
 	app_data *ad = (app_data *)data;
 
-	retv_if(model_init(SENSOR_TYPE_INFRARED_MOTION) == -1, false);
+	retv_if(model_init(SENSOR_TYPE_ULTRASONIC) == -1, false);
 
-	ad->getter_timer = ecore_timer_add(1.0, _getter_timer, NULL);
+	ad->getter_timer = ecore_timer_add(3.0, _getter_timer, NULL);
 	if (!ad->getter_timer) {
 		_D("Failed to add getter timer");
 		return false;

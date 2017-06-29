@@ -68,6 +68,7 @@ make %{?jobs:-j%jobs}
 %manifest org.tizen.position-finder-server.manifest
 %defattr(-,root,root,-)
 %{_pkg_dir}/bin/position-finder-server
+%{_pkg_dir}/res/*.dat
 %{_sys_packages_dir}/org.tizen.position-finder-server.xml
 %{_sys_icons_dir}/position_finder_server.png
 %{_pkg_dir}/author-signature.xml

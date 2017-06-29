@@ -24,123 +24,16 @@
 #define ULTRASONIC_RESOURCE_2_URI "/door/2"
 #define ULTRASONIC_RESOURCE_TYPE "org.tizen.door"
 
-/* Door Resource */
-struct _ultrasonic_resource_s {
-	bool attributes;
-	char *uri_path;
-	char *type;
-	uint8_t policies;
-	iotcon_resource_interfaces_h ifaces;
-	iotcon_resource_h handle;
+struct connectivity_resource {
+	iotcon_resource_h res;
 	iotcon_observers_h observers;
 	iotcon_representation_h repr;
 };
-typedef struct _ultrasonic_resource_s ultrasonic_resource_s;
+typedef struct connectivity_resource connectivity_resource_s;
 
 static bool _resource_created;
 
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
-
-static int _set_door_resource(ultrasonic_resource_s *door)
-{
-	int ret;
-
-	door->attributes = false;
-
-	door->uri_path = strdup(ULTRASONIC_RESOURCE_1_URI);
-	if (NULL == door->uri_path) {
-		_E("strdup(%s) Fail", ULTRASONIC_RESOURCE_1_URI);
-		return -1;
-	}
-
-	door->type = strdup(ULTRASONIC_RESOURCE_TYPE);
-	if (NULL == door->type) {
-		_E("strdup(%s) Fail", ULTRASONIC_RESOURCE_TYPE);
-		free(door->uri_path);
-		return -1;
-	}
-
-	ret = iotcon_resource_interfaces_create(&door->ifaces);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_interfaces_create() Fail(%d)", ret);
-		free(door->type);
-		free(door->uri_path);
-		return -1;
-	}
-
-	ret = iotcon_resource_interfaces_add(door->ifaces, IOTCON_INTERFACE_DEFAULT);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_interfaces_add() Fail(%d)", ret);
-		iotcon_resource_interfaces_destroy(door->ifaces);
-		free(door->type);
-		free(door->uri_path);
-		return -1;
-	}
-
-	door->policies = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE
-		| IOTCON_RESOURCE_SECURE;
-
-	ret = iotcon_observers_create(&door->observers);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_observers_create() Fail");
-		iotcon_resource_interfaces_destroy(door->ifaces);
-		free(door->type);
-		free(door->uri_path);
-		return -1;
-	}
-
-	return 0;
-}
-
-static void _free_door_resource(ultrasonic_resource_s *door)
-{
-	iotcon_observers_destroy(door->observers);
-	iotcon_resource_interfaces_destroy(door->ifaces);
-	free(door->type);
-	free(door->uri_path);
-}
-
-static void _check_door_attributes(ultrasonic_resource_s door)
-{
-	if (false == door.attributes)
-		_D("[Door] closed.");
-	else
-		_D("[Door] opened.");
-}
-
-static iotcon_resource_h _create_door_resource(char *uri_path, char *type,
-		iotcon_resource_interfaces_h ifaces, uint8_t policies, void *user_data)
-{
-	int ret;
-	iotcon_resource_h handle;
-	iotcon_resource_types_h resource_types;
-
-	ret = iotcon_resource_types_create(&resource_types);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_types_create() Fail(%d)", ret);
-		return NULL;
-	}
-
-	ret = iotcon_resource_types_add(resource_types, type);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_types_add() Fail(%d)", ret);
-		iotcon_resource_types_destroy(resource_types);
-		return NULL;
-	}
-
-	/* register door resource */
-	ret = iotcon_resource_create(uri_path, resource_types, ifaces, policies,
-			_request_handler, user_data, &handle);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_create() Fail");
-		iotcon_resource_types_destroy(resource_types);
-		return NULL;
-	}
-
-	iotcon_resource_types_destroy(resource_types);
-
-	return handle;
-}
 
 static int _send_response(iotcon_request_h request, iotcon_representation_h repr,
 		iotcon_response_result_e result)
@@ -181,65 +74,51 @@ static int _send_response(iotcon_request_h request, iotcon_representation_h repr
 	return 0;
 }
 
-static iotcon_representation_h _get_door_representation(ultrasonic_resource_s *door)
+static iotcon_representation_h _create_representation(connectivity_resource_s *door, bool value)
 {
+	iotcon_attributes_h attributes = NULL;
+	iotcon_representation_h repr = NULL;
+	char *uri_path = NULL;
 	int ret;
-	iotcon_attributes_h attributes;
-	iotcon_representation_h repr;
 
-	/* create a door Representation */
+	ret = iotcon_resource_get_uri_path(resource->res, &uri_path);
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
+
 	ret = iotcon_representation_create(&repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_representation_create() Fail(%d)", ret);
-		return NULL;
-	}
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
-	/* create a door attributes */
 	ret = iotcon_attributes_create(&attributes);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_attributes_create() Fail(%d)", ret);
-		iotcon_representation_destroy(repr);
-		return NULL;
-	}
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_representation_set_uri_path(repr, door->uri_path);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_representation_set_uri_path() Fail(%d)", ret);
-		iotcon_attributes_destroy(attributes);
-		iotcon_representation_destroy(repr);
-		return NULL;
-	}
+	ret = iotcon_representation_set_uri_path(repr, uri_path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_attributes_add_bool(attributes, "opened", door->attributes);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_attributes_add_bool() Fail(%d)", ret);
-		iotcon_attributes_destroy(attributes);
-		iotcon_representation_destroy(repr);
-		return NULL;
-	}
+	ret = iotcon_attributes_add_bool(attributes, "opened", value);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_representation_set_attributes(repr, attributes);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_representation_set_attributes() Fail(%d)", ret);
-		iotcon_attributes_destroy(attributes);
-		iotcon_representation_destroy(repr);
-		return NULL;
-	}
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	iotcon_attributes_destroy(attributes);
 
 	return repr;
+
+error:
+	if (attributes) iotcon_attributes_destroy(attributes);
+	if (repr) iotcon_representation_destroy(repr);
+
+	return NULL;
 }
 
-static int _request_handler_get(ultrasonic_resource_s *door, iotcon_request_h request)
+static int _request_handler_get(connectivity_resource_s *door, iotcon_request_h request)
 {
 	int ret;
 	iotcon_representation_h resp_repr;
 	_D("GET request");
 
-	resp_repr = _get_door_representation(door);
+	resp_repr = _create_representation(door);
 	if (NULL == resp_repr) {
-		_E("_get_door_representation() Fail");
+		_E("_create_representation() Fail");
 		return -1;
 	}
 
@@ -255,7 +134,7 @@ static int _request_handler_get(ultrasonic_resource_s *door, iotcon_request_h re
 	return 0;
 }
 
-static int _set_door_representation(ultrasonic_resource_s *door,
+static int _set_door_representation(connectivity_resource_s *door,
 		iotcon_representation_h repr)
 {
 	int ret;
@@ -279,7 +158,7 @@ static int _set_door_representation(ultrasonic_resource_s *door,
 	return 0;
 }
 
-static int _request_handler_put(ultrasonic_resource_s *door, iotcon_request_h request)
+static int _request_handler_put(connectivity_resource_s *door, iotcon_request_h request)
 {
 	int ret;
 	iotcon_representation_h req_repr, resp_repr;
@@ -297,11 +176,11 @@ static int _request_handler_put(ultrasonic_resource_s *door, iotcon_request_h re
 		return -1;
 	}
 
-	_check_door_attributes(*door);
+	/* FIXME : We need to check the sensor here */
 
-	resp_repr = _get_door_representation(door);
+	resp_repr = _create_representation(door);
 	if (NULL == resp_repr) {
-		_E("_get_door_representation() Fail");
+		_E("_create_representation() Fail");
 		return -1;
 	}
 
@@ -322,29 +201,21 @@ static int _request_handler_put(ultrasonic_resource_s *door, iotcon_request_h re
 	return 0;
 }
 
-static gboolean _door_attributes_changer(gpointer user_data)
+int connectivity_notify(connectivity_resource_s *resource, int value)
 {
 	int ret;
 	static int i = 0;
 	iotcon_representation_h repr;
-	ultrasonic_resource_s *door = user_data;
+	connectivity_resource_s *door = user_data;
 
-	if ((5 == i++) || NULL == door->observers)
-		return G_SOURCE_REMOVE;
+	retv_if(!resource, -1);
+	retv_if(!resource->observers, -1);
 
-	if (false == door->attributes) {
-		door->attributes = true;
-		_D("[Door] closed -> opened");
-	} else {
-		door->attributes = false;
-		_D("[Door] opened -> closed");
-	}
+	_D("Notify the value[%d]", value);
 
-	_D("NOTIFY!");
-
-	repr = _get_door_representation(door);
+	repr = _create_representation(door);
 	if (NULL == repr) {
-		_E("_get_door_representation() Fail");
+		_E("_create_representation() Fail");
 		return G_SOURCE_REMOVE;
 	}
 
@@ -359,7 +230,7 @@ static gboolean _door_attributes_changer(gpointer user_data)
 	return G_SOURCE_CONTINUE;
 }
 
-static int _request_handler_post(ultrasonic_resource_s *door, iotcon_request_h request)
+static int _request_handler_post(connectivity_resource_s *door, iotcon_request_h request)
 {
 	int ret;
 	iotcon_attributes_h resp_attributes;
@@ -372,8 +243,8 @@ static int _request_handler_post(ultrasonic_resource_s *door, iotcon_request_h r
 		return -1;
 	}
 
-	new_door_handle = _create_door_resource(ULTRASONIC_RESOURCE_2_URI, door->type,
-			door->ifaces, IOTCON_RESOURCE_SECURE, door);
+	/* FIXME */
+	ret = connectivity_create_resource(ULTRASONIC_RESOURCE_2_URI, door->type, NULL, &new_door_handle);
 	if (NULL == new_door_handle) {
 		_E("_create_door_resource() Fail");
 		return -1;
@@ -455,7 +326,7 @@ static bool _query_cb(const char *key, const char *value, void *user_data)
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data)
 {
-	ultrasonic_resource_s *door;
+	connectivity_resource_s *door = user_data;
 	iotcon_query_h query;
 	int ret, observe_id;
 	iotcon_request_type_e type;
@@ -487,8 +358,6 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 		return;
 	}
-
-	door = user_data;
 
 	if (IOTCON_REQUEST_GET == type)
 		ret = _request_handler_get(door, request);
@@ -539,89 +408,102 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	}
 }
 
-static gboolean _presence_timer(gpointer user_data)
+
+int connectivity_init(void)
 {
-	static int i = 0;
-	i++;
-	if (i % 2)
-		iotcon_stop_presence();
-	else
-		iotcon_start_presence(10);
+	int ret = 0;
 
-	if (3 == i)
-		return G_SOURCE_REMOVE;
+	ret = iotcon_initialize("../res/iotcon-test-svr-db-server.dat");
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-	return G_SOURCE_CONTINUE;
+	ret = iotcon_set_device_name("iotcon-test-basic-server");
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_start_presence(10);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	return 0;
+
+error:
+	iotcon_deinitialize();
+	return -1;
 }
+
+int connectivity_fini()
+{
+	iotcon_deinitialize();
+}
+
+void connectivity_destroy_resource(connectivity_resource_s *resource)
+{
+	iotcon_observers_destroy(resource->observers);
+}
+
+int connectivity_create_resource(const char *uri_path, const char *type, void *data, connectivity_resource_s *resource)
+{
+	iotcon_resource_types_h resource_types = NULL;
+	iotcon_resource_interfaces_h ifaces = NULL;
+	iotcon_resource_h handle = NULL;
+	uint8_t policies;
+	int ret;
+
+	ret = iotcon_resource_types_create(&resource_types);
+	retv_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_resource_types_add(resource_types, type);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_resource_interfaces_create(&ifaces);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_resource_interfaces_add(ifaces, IOTCON_INTERFACE_DEFAULT);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_resource_interfaces_add(ifaces, IOTCON_INTERFACE_BATCH);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	policies =
+		IOTCON_RESOURCE_DISCOVERABLE |
+		IOTCON_RESOURCE_OBSERVABLE |
+		IOTCON_RESOURCE_SECURE;
+
+	ret = iotcon_resource_create(uri_path, resource_types, ifaces, policies, _request_handler, data, &resource->res);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_observers_create(&resource->observers);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	iotcon_resource_types_destroy(resource_types);
+	iotcon_resource_interfaces_destroy(ifaces);
+
+	return 0;
+
+error:
+	if (resource->res) iotcon_resource_destroy(my_door.handle);
+	if (ifaces) iotcon_resource_interfaces_destroy(ifaces);
+	if (resource_types) iotcon_resource_types_destroy(resource_types);
+	return -1;
+}
+
+
 
 int main(int argc, char **argv)
 {
-	int ret;
-	GMainLoop *loop;
-	ultrasonic_resource_s my_door = {0};
+	connectivity_resource_s resource = {0, };
 
-	loop = g_main_loop_new(NULL, FALSE);
+	ret = connectivity_init();
+	retv_if(0 != ret, -1);
 
-	/* initialize iotcon */
-	ret = iotcon_initialize("/usr/bin/iotcon-test-svr-db-server.dat");
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_initialize() Fail(%d)", ret);
-		return -1;
-	}
+	ret = connectivity_create_resource(ULTRASONIC_RESOURCE_1_URI, ULTRASONIC_RESOURCE_TYPE, NULL, &resource)
+	retv_if(0 != ret, -1);
 
-	/* set device name */
-	ret = iotcon_set_device_name("iotcon-test-basic-server");
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_set_device_name() Fail(%d)", ret);
-		iotcon_deinitialize();
-		return -1;
-	}
+	/* FIXME */
+	g_timeout_add_seconds(5, connectivity_notify, &my_door);
 
-	/* set local door resource */
-	ret = _set_door_resource(&my_door);
-	if (0 != ret) {
-		_E("_set_door_resource() Fail");
-		iotcon_deinitialize();
-		return -1;
-	}
+	/* Enter the mainloop */
 
-	/* add resource options */
-	ret = iotcon_resource_interfaces_add(my_door.ifaces, IOTCON_INTERFACE_BATCH);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_interfaces_add() Fail(%d)", ret);
-		_free_door_resource(&my_door);
-		iotcon_deinitialize();
-		return -1;
-	}
-
-	/* add presence */
-	g_timeout_add_seconds(10, _presence_timer, NULL);
-	iotcon_start_presence(10);
-
-	/* create new door resource */
-	my_door.handle = _create_door_resource(my_door.uri_path, my_door.type, my_door.ifaces,
-			my_door.policies, &my_door);
-	if (NULL == my_door.handle) {
-		_E("_create_door_resource() Fail");
-		_free_door_resource(&my_door);
-		iotcon_deinitialize();
-		return -1;
-	}
-
-	_check_door_attributes(my_door);
-
-	/* add observe */
-	g_timeout_add_seconds(5, _door_attributes_changer, &my_door);
-
-	g_main_loop_run(loop);
-	g_main_loop_unref(loop);
-
-	iotcon_resource_destroy(my_door.handle);
-
-	_free_door_resource(&my_door);
-
-	/* deinitialize iotcon */
-	iotcon_deinitialize();
+	connectivity_destroy_resource(&my_door);
+	connectivity_fini();
 
 	return 0;
 }

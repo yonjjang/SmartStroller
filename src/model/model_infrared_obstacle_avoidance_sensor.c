@@ -32,7 +32,7 @@ static struct model_infrared_obstacle_avoidance_sensor model_infrared_obstacle_a
 
 void model_fini_infrared_obstacle_avoidance_sensor(void)
 {
-	_I("Infrared Motion Sensor is finishing...");
+	_I("Infrared Obstacle Avoidance Sensor is finishing...");
 
 	if (model_infrared_obstacle_avoidance_sensor_s.gpio)
 		peripheral_gpio_close(model_infrared_obstacle_avoidance_sensor_s.gpio);
@@ -42,7 +42,7 @@ int model_init_infrared_obstacle_avoidance_sensor(void)
 {
 	int ret = 0;
 
-	_I("Infrared Motion Sensor is initializing...");
+	_I("Infrared Obstacle Avoidance is initializing...");
 
 	/* GPIO for Ultrasonic Sensor's Transmit */
 	ret = peripheral_gpio_open(GPIO_NUM, &model_infrared_obstacle_avoidance_sensor_s.gpio);
@@ -66,7 +66,7 @@ int model_read_infrared_obstacle_avoidance_sensor(int *out_value)
 	ret = peripheral_gpio_read(model_infrared_obstacle_avoidance_sensor_s.gpio, out_value);
 	retv_if(ret < 0, -1);
 
-	_I("Infrared Motion Sensor Value : %d", *out_value);
+	_I("Infrared Obstacle Avoidance Sensor Value : %d", *out_value);
 
 	return 0;
 }

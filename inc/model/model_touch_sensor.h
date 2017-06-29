@@ -16,24 +16,14 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_H__
-#define __POSITION_FINDER_MODEL_H__
+#ifndef __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__
+#define __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__
 
-enum sensor_type {
-	SENSOR_TYPE_ULTRASONIC,
-	SENSOR_TYPE_INFRARED_MOTION, /* HC_SR501 */
-	SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE,
-	SENSOR_TYPE_TOUCH,
-};
-typedef enum sensor_type sensor_type_e;
+typedef struct touch_event touch_event_s;
 
-extern int model_init(sensor_type_e sensor_type);
-extern void model_fini(void);
+extern int model_init_touch_sensor(void);
+extern void model_fini_touch_sensor(void);
 
-extern int model_alloc(void **data);
+extern int model_read_touch_sensor(int *out_value);
 
-extern int model_read_int_value(int *out_value);
-extern int model_read_double_value(double *out_value);
-extern int model_write(void *data);
-
-#endif /* __POSITION_FINDER_MODEL_H__ */
+#endif /* __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__ */

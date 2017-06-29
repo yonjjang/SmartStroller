@@ -37,6 +37,7 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/model/model_ultrasonic_sensor.c
 	${PROJECT_ROOT_DIR}/src/model/model_infrared_motion_sensor.c
 	${PROJECT_ROOT_DIR}/src/model/model_infrared_obstacle_avoidance_sensor.c
+	${PROJECT_ROOT_DIR}/src/model/model_touch_sensor.c
 )
 #${PROJECT_ROOT_DIR}/src/connectivity.c
 
@@ -49,5 +50,7 @@ INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_EXEC_PREFIX})
 INSTALL(FILES ${PROJECT_ROOT_DIR}/tizen-manifest.xml DESTINATION ${SYS_PACKAGES_DIR} RENAME org.tizen.position-finder-server.xml)
 INSTALL(DIRECTORY DESTINATION ${PREFIX}/data)
 INSTALL(FILES ${PROJECT_ROOT_DIR}/shared/res/position_finder_server.png DESTINATION ${SYS_ICONS_DIR})
+INSTALL(FILES ${PROJECT_ROOT_DIR}/res/iotcon-test-svr-db-server.dat DESTINATION ${INSTALL_RESDIR})
+INSTALL(FILES ${PROJECT_ROOT_DIR}/res/iotcon-test-svr-db-client.dat DESTINATION ${INSTALL_RESDIR})
 
 # End of a file

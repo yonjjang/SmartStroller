@@ -19,11 +19,9 @@
 #ifndef __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__
 #define __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__
 
-typedef struct infrared_motion_event infrared_motion_event_s;
+extern int model_init_infrared_motion_sensor(int gpio_num, void **peripheral_info);
+extern void model_fini_infrared_motion_sensor(void *peripheral_info);
 
-extern int model_init_infrared_motion_sensor(void);
-extern void model_fini_infrared_motion_sensor(void);
-
-extern int model_read_infrared_motion_sensor(int *out_value);
+extern int model_read_infrared_motion_sensor(void *peripheral_info, int *out_value);
 
 #endif /* __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__ */

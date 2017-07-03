@@ -19,10 +19,4 @@
 #ifndef __POSITION_FINDER_CONTROLLER_H__
 #define __POSITION_FINDER_CONTROLLER_H__
 
-typedef int (*controller_event_cb)(const char *event_name, void *event_info, void *data);
-
-extern int controller_register_event_cb(const char *event_name, controller_event_cb event_cb, void *data);
-extern int controller_unregister_event_cb(const char *event_name, controller_event_cb event_cb);
-extern int controller_send_event(const char *event_name, void *event_info);
-
 #endif /* __POSITION_FINDER_CONTROLLER_H__ */

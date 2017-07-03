@@ -16,90 +16,140 @@
  * limitations under the License.
  */
 
-#include <Eina.h>
+
+#include <tizen.h>
+#include <Ecore.h>
+#include <service_app.h>
+#include <unistd.h>
+#include <glib.h>
 
 #include "log.h"
 #include "controller.h"
+#include "model.h"
 
-struct controller_s {
-	Eina_List *event_cb_list;
-};
-static struct controller_s controller_info;
+#define GPIO_NOT_USED -1
+#define GPIO_ULTRASONIC_TRIG_NUM 20
+#define GPIO_ULTRASONIC_ECHO_NUM 21
+#define GPIO_INFRARED_MOTION_NUM 4
 
-struct _controller_event_cb_info_s {
-	char *event_name;
-	controller_event_cb event_cb;
-	void *data;
-};
-typedef struct _controller_event_cb_info_s controller_event_cb_info_s;
+typedef struct app_data_s {
+	model_sensor_h sensor_info;
+	Ecore_Timer *getter_timer;
+	void *event;
+} app_data;
 
-
-int controller_register_event_cb(const char *event_name, controller_event_cb event_cb, void *data)
+static Eina_Bool _ultrasonic_getter_timer(void *data)
 {
-	controller_event_cb_info_s *event_cb_info = NULL;
+	app_data *ad = data;
 
-	retv_if(!event_name, -1);
-	retv_if(!event_cb, -1);
+#if 1
+	int value = 0;
+	retv_if(model_read_int_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_CANCEL);
+	_I("Ultrasonic Value is [%d]", value);
+#else
+	double value = 0.0;
+	retv_if(model_read_double_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_RENEW);
+	_I("Value is [%f]", value);
+#endif
 
-	event_cb_info = calloc(1, sizeof(controller_event_cb_info_s));
-	retv_if(!event_cb_info, -1);
-
-	event_cb_info->event_name = strdup(event_name);
-	goto_if(!event_cb_info->event_name, error);
-
-	event_cb_info->event_cb = event_cb;
-	event_cb_info->data = data;
-
-	controller_info.event_cb_list = eina_list_append(controller_info.event_cb_list, event_cb_info);
-
-	return 0;
-
-error:
-	if (event_cb_info) free(event_cb_info);
-
-	return -1;
+	return ECORE_CALLBACK_RENEW;
 }
 
-int controller_unregister_event_cb(const char *event_name, controller_event_cb event_cb)
+static Eina_Bool _infrared_motion_getter_timer(void *data)
 {
-	controller_event_cb_info_s *event_cb_info = NULL;
-	const Eina_List *l = NULL;
-	const Eina_List *ln = NULL;
+	app_data *ad = data;
 
-	retv_if(!event_name, -1);
-	retv_if(!event_cb, -1);
+#if 1
+	int value = 0;
+	retv_if(model_read_int_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_CANCEL);
+	_I("Infrared Motion Value is [%d]", value);
+#else
+	double value = 0.0;
+	retv_if(model_read_double_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_RENEW);
+	_I("Value is [%f]", value);
+#endif
 
-	EINA_LIST_FOREACH_SAFE(controller_info.event_cb_list, l, ln, event_cb_info) {
-		if (event_cb_info->event_name 
-			&& strcmp(event_cb_info->event_name, event_name)
-			&& event_cb_info->event_cb == event_cb)
-		{
-			controller_info.event_cb_list = eina_list_remove(controller_info.event_cb_list, event_cb_info);
-			break;
-		}
-	}
-
-	return 0;
+	return ECORE_CALLBACK_RENEW;
 }
 
-int controller_send_event(const char *event_name, void *event_info)
+static bool service_app_create(void *data)
 {
-	controller_event_cb_info_s *event_cb_info = NULL;
-	const Eina_List *l = NULL;
-	const Eina_List *ln = NULL;
+	model_sensor_h sensor_info = NULL;
+	app_data *ad = data;
 
-	retv_if(!event_name, -1);
+	retv_if(model_init("Ultrasonic", SENSOR_TYPE_ULTRASONIC, GPIO_ULTRASONIC_TRIG_NUM, GPIO_ULTRASONIC_ECHO_NUM, &sensor_info) == -1, false);
+	ad->sensor_info = sensor_info;
 
-	EINA_LIST_FOREACH_SAFE(controller_info.event_cb_list, l, ln, event_cb_info) {
-		if (event_cb_info->event_name 
-			&& strcmp(event_cb_info->event_name, event_name))
-		{
-			int ret = -1;
-			ret = event_cb_info->event_cb(event_name, event_info, event_cb_info->data);
-			if (ret < 0) _E("There were errors sending an event");
-			break;
-		}
+	ad->getter_timer = ecore_timer_add(3.0, _ultrasonic_getter_timer, ad);
+	if (!ad->getter_timer) {
+		_D("Failed to add getter timer");
+		return false;
 	}
 
-	return 0;
+	retv_if(model_init("Infrared_motion", SENSOR_TYPE_INFRARED_MOTION, GPIO_INFRARED_MOTION_NUM, GPIO_NOT_USED, &sensor_info) == -1, false);
+	ad->sensor_info = sensor_info;
+
+	ad->getter_timer = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
+	if (!ad->getter_timer) {
+		_D("Failed to add getter timer");
+		return false;
+	}
+
+    return true;
+}
+
+static void service_app_terminate(void *data)
+{
+	app_data *ad = (app_data *)data;
+	ecore_timer_del(ad->getter_timer);
+	model_fini(ad->sensor_info);
+	free(ad);
+}
+
+static void service_app_control(app_control_h app_control, void *data)
+{
+    // Todo: add your code here.
+}
+
+static void service_app_lang_changed(app_event_info_h event_info, void *user_data)
+{
+	/*APP_EVENT_LANGUAGE_CHANGED*/
+}
+
+static void service_app_region_changed(app_event_info_h event_info, void *user_data)
+{
+	/*APP_EVENT_REGION_FORMAT_CHANGED*/
+}
+
+static void service_app_low_battery(app_event_info_h event_info, void *user_data)
+{
+	/*APP_EVENT_LOW_BATTERY*/
+}
+
+static void service_app_low_memory(app_event_info_h event_info, void *user_data)
+{
+	/*APP_EVENT_LOW_MEMORY*/
+}
+
+int main(int argc, char* argv[])
+{
+	app_data *ad = NULL;
+	int ret = 0;
+	service_app_lifecycle_callback_s event_callback;
+	app_event_handler_h handlers[5] = {NULL, };
+
+	ad = calloc(1, sizeof(app_data));
+
+	event_callback.create = service_app_create;
+	event_callback.terminate = service_app_terminate;
+	event_callback.app_control = service_app_control;
+
+	service_app_add_event_handler(&handlers[APP_EVENT_LOW_BATTERY], APP_EVENT_LOW_BATTERY, service_app_low_battery, &ad);
+	service_app_add_event_handler(&handlers[APP_EVENT_LOW_MEMORY], APP_EVENT_LOW_MEMORY, service_app_low_memory, &ad);
+	service_app_add_event_handler(&handlers[APP_EVENT_LANGUAGE_CHANGED], APP_EVENT_LANGUAGE_CHANGED, service_app_lang_changed, &ad);
+	service_app_add_event_handler(&handlers[APP_EVENT_REGION_FORMAT_CHANGED], APP_EVENT_REGION_FORMAT_CHANGED, service_app_region_changed, &ad);
+
+	ret = service_app_main(argc, argv, &event_callback, ad);
+
+	return ret;
 }

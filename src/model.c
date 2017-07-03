@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>
 #include <unistd.h>
 #include <peripheral_io.h>
 #include <sys/time.h>
+#include <Eina.h>
 
 #include "log.h"
 #include "model.h"
@@ -27,48 +29,48 @@
 #include "model/model_infrared_obstacle_avoidance_sensor.h"
 #include "model/model_touch_sensor.h"
 
-struct _model_s {
+struct _model_sensor_s {
+	char *id;
 	sensor_type_e sensor_type;
+	int gpio_num[2];
+	void *peripheral_info;
 };
-static struct _model_s model_s;
+static struct {
+	Eina_List *list;
+} model_s;
 
-void model_fini(void)
+int model_init(const char *id, sensor_type_e sensor_type, int gpio_num1, int gpio_num2, model_sensor_h *out_info)
 {
-	switch (model_s.sensor_type) {
-	case SENSOR_TYPE_ULTRASONIC:
-		model_fini_ultrasonic_sensor();
-		break;
-	case SENSOR_TYPE_INFRARED_MOTION:
-		model_fini_infrared_motion_sensor();
-		break;
-	case SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE:
-		model_fini_infrared_obstacle_avoidance_sensor();
-		break;
-	case SENSOR_TYPE_TOUCH:
-		model_fini_touch_sensor();
-		break;
-	default:
-		break;
-	}
-}
+	model_sensor_h info = NULL;
+	int ret = -1;
 
-int model_init(sensor_type_e sensor_type)
-{
-	int ret = 0;
-	model_s.sensor_type = sensor_type;
+	retv_if(!id, -1);
+
+	info = calloc(1, sizeof(model_sensor_s));
+	retv_if(!info, -1);
+	*out_info = info;
+
+	info->sensor_type = sensor_type;
+	info->id = strdup(id);
+	goto_if(!info->id, error);
+
+	info->gpio_num[0] = gpio_num1;
+	info->gpio_num[1] = gpio_num2;
+	goto_if(gpio_num1 == -1, error);
 
 	switch (sensor_type) {
 	case SENSOR_TYPE_ULTRASONIC:
-		ret = model_init_ultrasonic_sensor();
+		goto_if(gpio_num2 == -1, error);
+		ret = model_init_ultrasonic_sensor(gpio_num1, gpio_num2, &info->peripheral_info);
 		break;
 	case SENSOR_TYPE_INFRARED_MOTION:
-		ret = model_init_infrared_motion_sensor();
+		ret = model_init_infrared_motion_sensor(gpio_num1, &info->peripheral_info);
 		break;
 	case SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE:
-		ret = model_init_infrared_obstacle_avoidance_sensor();
+		ret = model_init_infrared_obstacle_avoidance_sensor(gpio_num1, &info->peripheral_info);
 		break;
 	case SENSOR_TYPE_TOUCH:
-		model_init_touch_sensor();
+		ret = model_init_touch_sensor(gpio_num1, &info->peripheral_info);
 		break;
 	default:
 		break;
@@ -79,40 +81,50 @@ int model_init(sensor_type_e sensor_type)
 	return 0;
 
 error:
-	model_fini();
+	if (info->id) free(info->id);
+	if (info) free(info);
+	*out_info = NULL;
 	return -1;
 }
 
-int model_alloc(void **data)
+void model_fini(model_sensor_h info)
 {
-	switch (model_s.sensor_type) {
+	ret_if(!info);
+
+	switch (info->sensor_type) {
 	case SENSOR_TYPE_ULTRASONIC:
+		model_fini_ultrasonic_sensor(info->peripheral_info);
 		break;
 	case SENSOR_TYPE_INFRARED_MOTION:
+		model_fini_infrared_motion_sensor(info->peripheral_info);
+		break;
 	case SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE:
+		model_fini_infrared_obstacle_avoidance_sensor(info->peripheral_info);
+		break;
 	case SENSOR_TYPE_TOUCH:
-		_E("No function for allocation");
+		model_fini_touch_sensor(info->peripheral_info);
 		break;
 	default:
 		break;
 	}
 
-	return 0;
+	free(info->id);
+	free(info);
 }
 
-int model_read_int_value(int *out_value)
+int model_read_int_value(model_sensor_h info, int *out_value)
 {
 	int ret = 0;
 
-	switch (model_s.sensor_type) {
+	switch (info->sensor_type) {
 	case SENSOR_TYPE_ULTRASONIC:
-		ret = model_read_infrared_obstacle_avoidance_sensor(out_value);
+		ret = model_read_infrared_obstacle_avoidance_sensor(info, out_value);
 		break;
 	case SENSOR_TYPE_INFRARED_MOTION:
-		ret = model_read_infrared_motion_sensor(out_value);
+		ret = model_read_infrared_motion_sensor(info, out_value);
 		break;
 	case SENSOR_TYPE_TOUCH:
-		ret = model_read_touch_sensor(out_value);
+		ret = model_read_touch_sensor(info, out_value);
 		break;
 	default:
 		break;
@@ -126,13 +138,13 @@ int model_read_int_value(int *out_value)
 	return 0;
 }
 
-int model_read_double_value(double *out_value)
+int model_read_double_value(model_sensor_h info, double *out_value)
 {
 	int ret = 0;
 
-	switch (model_s.sensor_type) {
+	switch (info->sensor_type) {
 	case SENSOR_TYPE_ULTRASONIC:
-		ret = model_read_ultrasonic_sensor(out_value);
+		ret = model_read_ultrasonic_sensor(info, out_value);
 		break;
 	default:
 		_E("There is no data to retrieve");
@@ -147,16 +159,61 @@ int model_read_double_value(double *out_value)
 	return 0;
 }
 
-int model_write(void *data)
+int model_list_add_sensor(model_sensor_h info)
 {
-	switch (model_s.sensor_type) {
-	case SENSOR_TYPE_ULTRASONIC:
-	case SENSOR_TYPE_INFRARED_MOTION:
-	case SENSOR_TYPE_TOUCH:
-		_E("No function for writing");
-		break;
-	default:
-		break;
+	Eina_List *l, *ln;
+	model_sensor_h temp = NULL;
+
+	retv_if(!info, -1);
+	retv_if(!info->id, -1);
+
+	EINA_LIST_FOREACH_SAFE(model_s.list, l, ln, temp) {
+		retv_if(!temp->id, -1);
+		if (!strcmp(temp->id, info->id)) {
+			_E("That id[%s] already exists.", info->id);
+			return -1;
+		}
+	}
+	model_s.list = eina_list_append(model_s.list, info);
+	return 0;
+}
+
+int model_list_remove_sensor(model_sensor_h info)
+{
+	retv_if(!info, -1);
+	model_s.list = eina_list_remove(model_s.list, info);
+	return 0;
+}
+
+int model_list_get_sensor(const char *id, model_sensor_h *out_info)
+{
+	Eina_List *l, *ln;
+	model_sensor_h temp = NULL;
+
+	retv_if(!id, -1);
+
+	EINA_LIST_FOREACH_SAFE(model_s.list, l, ln, temp) {
+		retv_if(!temp->id, -1);
+		if (!strcmp(temp->id, id)) {
+			_E("That id[%s] already exists.", id);
+			*out_info = temp;
+			return 0;
+		}
+	}
+
+	*out_info = NULL;
+	return -1;
+}
+
+int model_list_foreach(void (*cb)(model_sensor_h info))
+{
+	Eina_List *l, *ln;
+	model_sensor_h temp = NULL;
+
+	retv_if(!cb, -1);
+
+	EINA_LIST_FOREACH_SAFE(model_s.list, l, ln, temp) {
+		cb(temp);
 	}
 
 	return 0;

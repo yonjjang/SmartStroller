@@ -19,8 +19,8 @@
 #ifndef __POSITION_FINDER_MODEL_ULTRASONIC_SENSOR_H__
 #define __POSITION_FINDER_MODEL_ULTRASONIC_SENSOR_H__
 
-extern int model_init_ultrasonic_sensor(void);
-extern void model_fini_ultrasonic_sensor(void);
-extern int model_read_ultrasonic_sensor(double *value);
+extern int model_init_ultrasonic_sensor(int gpio_num1, int gpio_num2, void **peripheral_info);
+extern void model_fini_ultrasonic_sensor(void *peripheral_info);
+extern int model_read_ultrasonic_sensor(void *peripheral_info, double *value);
 
 #endif /* __POSITION_FINDER_MODEL_ULTRASONIC_SENSOR_H__ */

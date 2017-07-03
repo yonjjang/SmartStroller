@@ -27,13 +27,18 @@ enum sensor_type {
 };
 typedef enum sensor_type sensor_type_e;
 
-extern int model_init(sensor_type_e sensor_type);
-extern void model_fini(void);
+typedef struct _model_sensor_s model_sensor_s;
+typedef model_sensor_s *model_sensor_h;
 
-extern int model_alloc(void **data);
+extern int model_init(const char *id, sensor_type_e sensor_type, int gpio_num1, int gpio_num2, model_sensor_h *out_info);
+extern void model_fini(model_sensor_h info);
 
-extern int model_read_int_value(int *out_value);
-extern int model_read_double_value(double *out_value);
-extern int model_write(void *data);
+extern int model_read_int_value(model_sensor_h info, int *out_value);
+extern int model_read_double_value(model_sensor_h info, double *out_value);
+
+extern int model_list_add_sensor(model_sensor_h info);
+extern int model_list_remove_sensor(model_sensor_h info);
+extern int model_list_get_sensor(const char *id, model_sensor_h *out_info);
+extern int model_list_foreach(void (*cb)(model_sensor_h info));
 
 #endif /* __POSITION_FINDER_MODEL_H__ */

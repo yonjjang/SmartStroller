@@ -16,9 +16,12 @@
 
 #include <stdlib.h>
 #include <glib.h>
+#include <Eina.h>
 
 #include <iotcon.h>
+
 #include "log.h"
+#include "connectivity.h"
 
 #define ULTRASONIC_RESOURCE_1_URI "/door/1"
 #define ULTRASONIC_RESOURCE_2_URI "/door/2"
@@ -27,215 +30,184 @@
 struct connectivity_resource {
 	iotcon_resource_h res;
 	iotcon_observers_h observers;
-	iotcon_representation_h repr;
 };
-typedef struct connectivity_resource connectivity_resource_s;
-
 static bool _resource_created;
+static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
 
-static void _request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
-
-static int _send_response(iotcon_request_h request, iotcon_representation_h repr,
-		iotcon_response_result_e result)
+static int _send_response(iotcon_request_h request, iotcon_representation_h representation, iotcon_response_result_e result)
 {
-	int ret;
+	int ret = -1;
 	iotcon_response_h response;
 
 	ret = iotcon_response_create(request, &response);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_response_create() Fail(%d)", ret);
-		return -1;
-	}
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	ret = iotcon_response_set_result(response, result);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_response_set_result() Fail(%d)", ret);
-		iotcon_response_destroy(response);
-		return -1;
-	}
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_response_set_representation(response, repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_response_set_representation() Fail(%d)", ret);
-		iotcon_response_destroy(response);
-		return -1;
-	}
+	ret = iotcon_response_set_representation(response, representation);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	/* send Representation to the client */
 	ret = iotcon_response_send(response);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_response_send() Fail(%d)", ret);
-		iotcon_response_destroy(response);
-		return -1;
-	}
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	iotcon_response_destroy(response);
 
 	return 0;
+
+error:
+	iotcon_response_destroy(response);
+	return -1;
 }
 
-static iotcon_representation_h _create_representation(connectivity_resource_s *door, bool value)
+static void _destroy_representation(iotcon_representation_h representation)
+{
+	ret_if(!representation);
+	iotcon_representation_destroy(representation);
+}
+
+static iotcon_representation_h _create_representation_with_attribute(iotcon_resource_h res, bool value)
 {
 	iotcon_attributes_h attributes = NULL;
-	iotcon_representation_h repr = NULL;
+	iotcon_representation_h representation = NULL;
 	char *uri_path = NULL;
-	int ret;
+	int ret = -1;
 
-	ret = iotcon_resource_get_uri_path(resource->res, &uri_path);
+	ret = iotcon_resource_get_uri_path(res, &uri_path);
 	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
-	ret = iotcon_representation_create(&repr);
+	ret = iotcon_representation_create(&representation);
 	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
 	ret = iotcon_attributes_create(&attributes);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_representation_set_uri_path(repr, uri_path);
+	ret = iotcon_representation_set_uri_path(representation, uri_path);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_attributes_add_bool(attributes, "opened", value);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_representation_set_attributes(repr, attributes);
+	ret = iotcon_representation_set_attributes(representation, attributes);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	iotcon_attributes_destroy(attributes);
 
-	return repr;
+	return representation;
 
 error:
 	if (attributes) iotcon_attributes_destroy(attributes);
-	if (repr) iotcon_representation_destroy(repr);
+	if (representation) iotcon_representation_destroy(representation);
 
 	return NULL;
 }
 
-static int _request_handler_get(connectivity_resource_s *door, iotcon_request_h request)
+static int _handle_get_request(iotcon_resource_h res, iotcon_request_h request)
 {
-	int ret;
-	iotcon_representation_h resp_repr;
-	_D("GET request");
+	iotcon_representation_h representation;
+	int ret = -1;
+	int value = 1;
 
-	resp_repr = _create_representation(door);
-	if (NULL == resp_repr) {
-		_E("_create_representation() Fail");
-		return -1;
-	}
+	/* FIXME : We need to check the value of sensors */
+	representation = _create_representation_with_attribute(res, (bool)value);
+	retv_if(!representation, -1);
 
-	ret = _send_response(request, resp_repr, IOTCON_RESPONSE_OK);
-	if (0 != ret) {
-		_E("_send_response() Fail(%d)", ret);
-		iotcon_representation_destroy(resp_repr);
-		return -1;
-	}
+	ret = _send_response(request, representation, IOTCON_RESPONSE_OK);
+	goto_if(0 != ret, error);
 
-	iotcon_representation_destroy(resp_repr);
+	_destroy_representation(representation);
 
 	return 0;
+
+error:
+	_destroy_representation(representation);
+	return -1;
 }
 
-static int _set_door_representation(connectivity_resource_s *door,
-		iotcon_representation_h repr)
+static int _get_value_from_representation(iotcon_representation_h representation, bool *value)
 {
-	int ret;
-	bool bval;
 	iotcon_attributes_h attributes;
+	int ret = -1;
 
-	ret = iotcon_representation_get_attributes(repr, &attributes);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_representation_get_attributes() Fail(%d)", ret);
-		return -1;
-	}
+	ret = iotcon_representation_get_attributes(representation, &attributes);
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-	ret = iotcon_attributes_get_bool(attributes, "opened", &bval);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_attributes_get_bool() Fail(%d)", ret);
-		return -1;
-	}
-
-	door->attributes = bval;
+	ret = iotcon_attributes_get_bool(attributes, "opened", value);
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	return 0;
 }
 
-static int _request_handler_put(connectivity_resource_s *door, iotcon_request_h request)
+static int _set_value_into_thing(iotcon_representation_h representation, bool value)
 {
-	int ret;
+	/* FIXME : We need to set the value into the thing */
+	return 0;
+}
+
+static int _handle_put_request(connectivity_resource_s *resource_info, iotcon_request_h request)
+{
 	iotcon_representation_h req_repr, resp_repr;
+	int ret = -1;
+	bool value = false;
+
 	_D("PUT request");
 
 	ret = iotcon_request_get_representation(request, &req_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_request_get_representation() Fail(%d)", ret);
-		return -1;
-	}
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-	ret = _set_door_representation(door, req_repr);
-	if (0 != ret) {
-		_E("_set_door_representation() Fail(%d)", ret);
-		return -1;
-	}
+	ret = _get_value_from_representation(req_repr, &value);
+	retv_if(0 != ret, -1);
 
-	/* FIXME : We need to check the sensor here */
+	ret = _set_value_into_thing(req_repr, value);
+	retv_if(0 != ret, -1);
 
-	resp_repr = _create_representation(door);
-	if (NULL == resp_repr) {
-		_E("_create_representation() Fail");
-		return -1;
-	}
+	resp_repr = _create_representation_with_attribute(resource_info->res, (bool)value);
+	retv_if(NULL == resp_repr, -1);
 
 	ret = _send_response(request, resp_repr, IOTCON_RESPONSE_OK);
-	if (0 != ret) {
-		_E("_send_response() Fail(%d)", ret);
-		iotcon_representation_destroy(resp_repr);
-		return -1;
-	}
+	goto_if(0 != ret, error);
 
-	/* notify */
-	ret = iotcon_resource_notify(door->handle, resp_repr, door->observers, IOTCON_QOS_HIGH);
-	if (IOTCON_ERROR_NONE != ret)
-		_E("iotcon_resource_notify() Fail(%d)", ret);
+	ret = iotcon_resource_notify(resource_info->res, resp_repr, resource_info->observers, IOTCON_QOS_HIGH);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	iotcon_representation_destroy(resp_repr);
+	_destroy_representation(resp_repr);
+
+	return 0;
+
+error:
+	_destroy_representation(resp_repr);
+	return -1;
+}
+
+int connectivity_notify(connectivity_resource_s *user_data, int value)
+{
+	iotcon_representation_h representation;
+	connectivity_resource_s *resource_info = user_data;
+	int ret = -1;
+
+	retv_if(!resource_info, -1);
+	retv_if(!resource_info->observers, -1);
+
+	_D("Notify the value[%d]", value);
+
+	representation = _create_representation_with_attribute(resource_info->res, (bool)value);
+	retv_if(!representation, -1);
+
+	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
+
+	_destroy_representation(representation);
 
 	return 0;
 }
 
-int connectivity_notify(connectivity_resource_s *resource, int value)
+static int _handle_post_request(connectivity_resource_s *resource_info, iotcon_request_h request)
 {
-	int ret;
-	static int i = 0;
-	iotcon_representation_h repr;
-	connectivity_resource_s *door = user_data;
-
-	retv_if(!resource, -1);
-	retv_if(!resource->observers, -1);
-
-	_D("Notify the value[%d]", value);
-
-	repr = _create_representation(door);
-	if (NULL == repr) {
-		_E("_create_representation() Fail");
-		return G_SOURCE_REMOVE;
-	}
-
-	ret = iotcon_resource_notify(door->handle, repr, door->observers, IOTCON_QOS_HIGH);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_notify() Fail(%d)", ret);
-		iotcon_representation_destroy(repr);
-		return G_SOURCE_REMOVE;
-	}
-
-	iotcon_representation_destroy(repr);
-	return G_SOURCE_CONTINUE;
-}
-
-static int _request_handler_post(connectivity_resource_s *door, iotcon_request_h request)
-{
-	int ret;
-	iotcon_attributes_h resp_attributes;
+	iotcon_attributes_h resp_attributes = NULL;
 	iotcon_representation_h resp_repr = NULL;
-	iotcon_resource_h new_door_handle;
+	connectivity_resource_s *new_resource_info = NULL;
+	int ret = -1;
+
 	_D("POST request");
 
 	if (_resource_created) {
@@ -243,180 +215,170 @@ static int _request_handler_post(connectivity_resource_s *door, iotcon_request_h
 		return -1;
 	}
 
-	/* FIXME */
-	ret = connectivity_create_resource(ULTRASONIC_RESOURCE_2_URI, door->type, NULL, &new_door_handle);
-	if (NULL == new_door_handle) {
-		_E("_create_door_resource() Fail");
-		return -1;
-	}
+	new_resource_info = calloc(1, sizeof(connectivity_resource_s));
+	retv_if(!new_resource_info, -1);
+
+	ret = connectivity_create_resource(ULTRASONIC_RESOURCE_2_URI, ULTRASONIC_RESOURCE_TYPE, &new_resource_info);
+	retv_if(0 != ret, -1);
+
 	_resource_created = true;
 
-	/* send information that new resource was created */
 	ret = iotcon_representation_create(&resp_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_representation_create() Fail(%d)", ret);
-		return -1;
-	}
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	ret = iotcon_attributes_create(&resp_attributes);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_attributes_create() Fail(%d)", ret);
-		iotcon_representation_destroy(resp_repr);
-		return -1;
-	}
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_attributes_add_str(resp_attributes, "createduripath", ULTRASONIC_RESOURCE_2_URI);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_attributes_add_str() Fail(%d)", ret);
-		iotcon_attributes_destroy(resp_attributes);
-		iotcon_representation_destroy(resp_repr);
-		return -1;
-	}
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_representation_set_attributes(resp_repr, resp_attributes);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_representation_set_attributes() Fail(%d)", ret);
-		iotcon_attributes_destroy(resp_attributes);
-		iotcon_representation_destroy(resp_repr);
-		return -1;
-	}
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	iotcon_attributes_destroy(resp_attributes);
 
 	ret = _send_response(request, resp_repr, IOTCON_RESPONSE_RESOURCE_CREATED);
-	if (0 != ret) {
-		_E("_send_response() Fail(%d)", ret);
-		iotcon_representation_destroy(resp_repr);
-		return -1;
-	}
+	goto_if(0 != ret, error);
 
 	iotcon_representation_destroy(resp_repr);
 
 	return 0;
+
+error:
+	if (resp_attributes) iotcon_attributes_destroy(resp_attributes);
+	iotcon_representation_destroy(resp_repr);
+	return -1;
 }
 
-static int _request_handler_delete(iotcon_resource_h resource,
-		iotcon_request_h request)
+static int _handle_delete_request(iotcon_resource_h resource, iotcon_request_h request)
 {
-	int ret;
+	int ret = -1;
+
 	_D("DELETE request");
 
 	ret = iotcon_resource_destroy(resource);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_resource_destroy() Fail(%d)", ret);
-		return -1;
-	}
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	ret = _send_response(request, NULL, IOTCON_RESPONSE_RESOURCE_DELETED);
-	if (0 != ret) {
-		_E("_send_response() Fail(%d)", ret);
-		return -1;
-	}
+	retv_if(0 != ret, -1);
 
 	return 0;
 }
 
 static bool _query_cb(const char *key, const char *value, void *user_data)
 {
-	_D("key : %s, value : %s", key, value);
+	_D("Key : [%s], Value : [%s]", key, value);
 
 	return IOTCON_FUNC_CONTINUE;
 }
 
-static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
-		void *user_data)
+static int _handle_query(iotcon_request_h request)
 {
-	connectivity_resource_s *door = user_data;
-	iotcon_query_h query;
-	int ret, observe_id;
-	iotcon_request_type_e type;
-	iotcon_observe_type_e observe_type;
-	char *host_address;
-
-	ret_if(NULL == request);
-
-	ret = iotcon_request_get_host_address(request, &host_address);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_request_get_host_address() Fail(%d)", ret);
-		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
-		return;
-	}
-	_D("host_address : %s", host_address);
+	iotcon_query_h query = NULL;
+	int ret = -1;
 
 	ret = iotcon_request_get_query(request, &query);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_request_get_query() Fail(%d)", ret);
-		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
-		return;
-	}
-	if (query)
-		iotcon_query_foreach(query, _query_cb, NULL);
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
+
+	if (query) iotcon_query_foreach(query, _query_cb, NULL);
+
+	return 0;
+}
+
+static int _handle_request_by_crud_type(iotcon_request_h request, connectivity_resource_s *resource_info)
+{
+	iotcon_request_type_e type;
+	int ret = -1;
 
 	ret = iotcon_request_get_request_type(request, &type);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_request_get_request_type() Fail(%d)", ret);
-		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
-		return;
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
+
+	switch (type) {
+	case IOTCON_REQUEST_GET:
+		ret = _handle_get_request(resource_info->res, request);
+		break;
+	case IOTCON_REQUEST_PUT:
+		ret = _handle_put_request(resource_info, request);
+		break;
+	case IOTCON_REQUEST_POST:
+		ret = _handle_post_request(resource_info, request);
+		break;
+	case IOTCON_REQUEST_DELETE:
+		ret = _handle_delete_request(resource_info->res, request);
+		break;
+	default:
+		_E("Cannot reach here");
+		ret = -1;
+		break;
 	}
+	retv_if(0 != ret, -1);
 
-	if (IOTCON_REQUEST_GET == type)
-		ret = _request_handler_get(door, request);
+	return 0;
+}
 
-	else if (IOTCON_REQUEST_PUT == type)
-		ret = _request_handler_put(door, request);
-
-	else if (IOTCON_REQUEST_POST == type)
-		ret = _request_handler_post(door, request);
-
-	else if (IOTCON_REQUEST_DELETE == type)
-		ret = _request_handler_delete(resource, request);
-
-	if (0 != ret) {
-		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
-		return;
-	}
+static int _handle_observer(iotcon_request_h request, iotcon_observers_h observers)
+{
+	iotcon_observe_type_e observe_type;
+	int ret = -1;
+	int observe_id = -1;
 
 	ret = iotcon_request_get_observe_type(request, &observe_type);
-	if (IOTCON_ERROR_NONE != ret) {
-		_E("iotcon_request_get_observe_type() Fail(%d)", ret);
-		return;
-	}
+	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	if (IOTCON_OBSERVE_REGISTER == observe_type) {
 		ret = iotcon_request_get_observe_id(request, &observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			_E("iotcon_request_get_observe_id() Fail(%d)", ret);
-			return;
-		}
+		retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-		ret = iotcon_observers_add(door->observers, observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			_E("iotcon_observers_add() Fail(%d)", ret);
-			return;
-		}
+		ret = iotcon_observers_add(observers, observe_id);
+		retv_if(IOTCON_ERROR_NONE != ret, -1);
 	} else if (IOTCON_OBSERVE_DEREGISTER == observe_type) {
 		ret = iotcon_request_get_observe_id(request, &observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			_E("iotcon_request_get_observe_id() Fail(%d)", ret);
-			return;
-		}
-		ret = iotcon_observers_remove(door->observers, observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			_E("iotcon_observers_remove() Fail(%d)", ret);
-			return;
-		}
+		retv_if(IOTCON_ERROR_NONE != ret, -1);
+
+		ret = iotcon_observers_remove(observers, observe_id);
+		retv_if(IOTCON_ERROR_NONE != ret, -1);
 	}
+
+	return 0;
 }
 
-
-int connectivity_init(void)
+static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data)
 {
-	int ret = 0;
+	connectivity_resource_s *resource_info = user_data;
+	int ret = -1;
+	char *host_address = NULL;
+
+	ret_if(!request);
+
+	ret = iotcon_request_get_host_address(request, &host_address);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	_D("Host address : %s", host_address);
+
+	ret = _handle_query(request);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = _handle_request_by_crud_type(request, resource_info);
+	goto_if(0 != ret, error);
+
+	ret = _handle_observer(request, resource_info->observers);
+	goto_if(0 != ret, error);
+
+	return;
+
+error:
+	_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
+}
+
+/* device_name : "iotcon-test-basic-server" */
+int connectivity_init(const char *device_name)
+{
+	int ret = -1;
 
 	ret = iotcon_initialize("../res/iotcon-test-svr-db-server.dat");
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-	ret = iotcon_set_device_name("iotcon-test-basic-server");
+	ret = iotcon_set_device_name(device_name);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_start_presence(10);
@@ -429,26 +391,34 @@ error:
 	return -1;
 }
 
-int connectivity_fini()
+int connectivity_fini(void)
 {
 	iotcon_deinitialize();
+	return 0;
 }
 
-void connectivity_destroy_resource(connectivity_resource_s *resource)
+void connectivity_destroy_resource(connectivity_resource_s *resource_info)
 {
-	iotcon_observers_destroy(resource->observers);
+	ret_if(!resource_info);
+	if (resource_info->observers) iotcon_observers_destroy(resource_info->observers);
+	if (resource_info->res) iotcon_resource_destroy(resource_info->res);
+	free(resource_info);
 }
 
-int connectivity_create_resource(const char *uri_path, const char *type, void *data, connectivity_resource_s *resource)
+int connectivity_create_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info)
 {
 	iotcon_resource_types_h resource_types = NULL;
 	iotcon_resource_interfaces_h ifaces = NULL;
-	iotcon_resource_h handle = NULL;
+	connectivity_resource_s *resource_info = NULL;
 	uint8_t policies;
-	int ret;
+	int ret = -1;
+
+	resource_info = calloc(1, sizeof(connectivity_resource_s));
+	retv_if(!resource_info, -1);
+	*out_resource_info = resource_info;
 
 	ret = iotcon_resource_types_create(&resource_types);
-	retv_if(IOTCON_ERROR_NONE != ret, error);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_resource_types_add(resource_types, type);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
@@ -467,10 +437,16 @@ int connectivity_create_resource(const char *uri_path, const char *type, void *d
 		IOTCON_RESOURCE_OBSERVABLE |
 		IOTCON_RESOURCE_SECURE;
 
-	ret = iotcon_resource_create(uri_path, resource_types, ifaces, policies, _request_handler, data, &resource->res);
+	ret = iotcon_resource_create(uri_path,
+			resource_types,
+			ifaces,
+			policies,
+			_request_resource_handler,
+			resource_info,
+			&resource_info->res);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_observers_create(&resource->observers);
+	ret = iotcon_observers_create(&resource_info->observers);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	iotcon_resource_types_destroy(resource_types);
@@ -479,31 +455,10 @@ int connectivity_create_resource(const char *uri_path, const char *type, void *d
 	return 0;
 
 error:
-	if (resource->res) iotcon_resource_destroy(my_door.handle);
 	if (ifaces) iotcon_resource_interfaces_destroy(ifaces);
 	if (resource_types) iotcon_resource_types_destroy(resource_types);
+	if (resource_info->res) iotcon_resource_destroy(resource_info->res);
+	if (resource_info) free(resource_info);
+
 	return -1;
-}
-
-
-
-int main(int argc, char **argv)
-{
-	connectivity_resource_s resource = {0, };
-
-	ret = connectivity_init();
-	retv_if(0 != ret, -1);
-
-	ret = connectivity_create_resource(ULTRASONIC_RESOURCE_1_URI, ULTRASONIC_RESOURCE_TYPE, NULL, &resource)
-	retv_if(0 != ret, -1);
-
-	/* FIXME */
-	g_timeout_add_seconds(5, connectivity_notify, &my_door);
-
-	/* Enter the mainloop */
-
-	connectivity_destroy_resource(&my_door);
-	connectivity_fini();
-
-	return 0;
 }

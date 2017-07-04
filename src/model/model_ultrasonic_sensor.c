@@ -56,8 +56,8 @@ int model_init_ultrasonic_sensor(int gpio_num1, int gpio_num2, void **peripheral
 	*peripheral_info = info;
 
 	ret = peripheral_gpio_open(gpio_num1, &info->trig_gpio);
-	retv_if(ret != 0, goto error);
-	retv_if(!info->trig_gpio, error);
+	goto_if(ret != 0, error);
+	goto_if(!info->trig_gpio, error);
 
 	ret = peripheral_gpio_set_direction(info->trig_gpio, PERIPHERAL_GPIO_DIRECTION_OUT);
 	goto_if(ret != 0, error);

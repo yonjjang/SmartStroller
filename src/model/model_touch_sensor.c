@@ -54,8 +54,8 @@ int model_init_touch_sensor(int gpio_num, void **peripheral_info)
 	*peripheral_info = info;
 
 	ret = peripheral_gpio_open(gpio_num, &info->gpio);
-	retv_if(ret != 0, -1);
-	retv_if(!info->gpio, -1);
+	goto_if(ret != 0, error);
+	goto_if(!info->gpio, error);
 
 	ret = peripheral_gpio_set_direction(info->gpio, PERIPHERAL_GPIO_DIRECTION_IN);
 	goto_if(ret != 0, error);

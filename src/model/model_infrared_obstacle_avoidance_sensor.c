@@ -55,8 +55,8 @@ int model_init_infrared_obstacle_avoidance_sensor(int gpio_num, void **periphera
 	*peripheral_info = info;
 
 	ret = peripheral_gpio_open(gpio_num, &info->gpio);
-	retv_if(ret != 0, -1);
-	retv_if(!info->gpio, -1);
+	goto_if(ret != 0, error);
+	goto_if(!info->gpio, error);
 
 	ret = peripheral_gpio_set_direction(info->gpio, PERIPHERAL_GPIO_DIRECTION_IN);
 	goto_if(ret != 0, error);

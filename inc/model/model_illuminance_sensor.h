@@ -19,10 +19,12 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
-#define __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
+#ifndef __POSITION_FINDER_MODEL_ILLUMINANCE_SENSOR_H__
+#define __POSITION_FINDER_MODEL_ILLUMINANCE_SENSOR_H__
 
-extern void model_close_infrared_obstacle_avoidance_sensor(int pin_num);
-extern int model_read_infrared_obstacle_avoidance_sensor(int pin_num, int *out_value);
+/* You have to use this illuminance sensor ONLY ONE in the pi board */
+extern int model_read_illuminance_sensor(int i2c_bus, int *out_value);
+extern void model_close_illuminance_sensor(void);
 
-#endif /* __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__ */
+#endif /* __POSITION_FINDER_MODEL_ILLUMINANCE_SENSOR_H__ */
+

@@ -25,60 +25,32 @@
 #include <sys/time.h>
 
 #include "log.h"
-#include "model/model_infrared_obstacle_avoidance_sensor.h"
+#include "model_internal.h"
 
-
-struct _model_infrared_obstacle_avoidance_sensor_s {
-	peripheral_gpio_h gpio;
-};
-typedef struct _model_infrared_obstacle_avoidance_sensor_s model_infrared_obstacle_avoidance_sensor_s;
-
-void model_fini_infrared_obstacle_avoidance_sensor(void *peripheral_info)
+void model_close_infrared_obstacle_avoidance_sensor(int pin_num)
 {
-	model_infrared_obstacle_avoidance_sensor_s *info = peripheral_info;
+	ret_if(!model_get_info(pin_num)->opened);
 
 	_I("Infrared Obstacle Avoidance Sensor is finishing...");
-	ret_if(!info);
-
-	if (info->gpio)
-		peripheral_gpio_close(info->gpio);
-
-	free(info);
+	peripheral_gpio_close(model_get_info(pin_num)->sensor_h);
+	model_get_info(pin_num)->opened = 0;
 }
 
-int model_init_infrared_obstacle_avoidance_sensor(int gpio_num, void **peripheral_info)
+int model_read_infrared_obstacle_avoidance_sensor(int pin_num, int *out_value)
 {
-	model_infrared_obstacle_avoidance_sensor_s *info = NULL;
-	int ret = 0;
+	int ret = PERIPHERAL_ERROR_NONE;
 
-	_I("Infrared Obstacle Avoidance is initializing...");
+	if (!model_get_info(pin_num)->opened) {
+		ret = peripheral_gpio_open(pin_num, &model_get_info(pin_num)->sensor_h);
+		retv_if(!model_get_info(pin_num)->sensor_h, -1);
 
-	info = calloc(1, sizeof(model_infrared_obstacle_avoidance_sensor_s));
-	retv_if(!info, -1);
-	*peripheral_info = info;
+		ret = peripheral_gpio_set_direction(model_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
+		retv_if(ret != 0, -1);
 
-	ret = peripheral_gpio_open(gpio_num, &info->gpio);
-	goto_if(ret != 0, error);
-	goto_if(!info->gpio, error);
+		model_get_info(pin_num)->opened = 1;
+	}
 
-	ret = peripheral_gpio_set_direction(info->gpio, PERIPHERAL_GPIO_DIRECTION_IN);
-	goto_if(ret != 0, error);
-
-	return 0;
-
-error:
-	model_fini_infrared_obstacle_avoidance_sensor(info);
-	free(info);
-	*peripheral_info = NULL;
-	return -1;
-}
-
-int model_read_infrared_obstacle_avoidance_sensor(void *peripheral_info, int *out_value)
-{
-	model_infrared_obstacle_avoidance_sensor_s *info = peripheral_info;
-	int ret = 0;
-
-	ret = peripheral_gpio_read(info->gpio, out_value);
+	ret = peripheral_gpio_read(model_get_info(pin_num)->sensor_h, out_value);
 	retv_if(ret < 0, -1);
 
 	_I("Infrared Obstacle Avoidance Sensor Value : %d", *out_value);

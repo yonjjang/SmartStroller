@@ -30,71 +30,69 @@
 #include "controller.h"
 #include "model.h"
 
+#define I2C_BUS_1 0x1
 #define GPIO_NOT_USED -1
-#define GPIO_ULTRASONIC_TRIG_NUM 20
-#define GPIO_ULTRASONIC_ECHO_NUM 21
-#define GPIO_INFRARED_MOTION_NUM 4
+#define GPIO_ULTRASONIC_TRIG_NUM_1 20
+#define GPIO_ULTRASONIC_ECHO_NUM_1 21
+#define GPIO_INFRARED_MOTION_NUM_1 4
+#define I2C_ILLUMINANCE_FIRST_PIN_1 3
 
 typedef struct app_data_s {
-	model_sensor_h sensor_info;
-	Ecore_Timer *getter_timer;
-	void *event;
+	Ecore_Timer *getter_timer[PIN_MAX];
 } app_data;
 
-static Eina_Bool _ultrasonic_getter_timer(void *data)
+static Eina_Bool _infrared_motion_getter_timer(void *data)
 {
-	app_data *ad = data;
-
-#if 1
 	int value = 0;
-	retv_if(model_read_int_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_CANCEL);
-	_I("Ultrasonic Value is [%d]", value);
-#else
-	double value = 0.0;
-	retv_if(model_read_double_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_RENEW);
-	_I("Value is [%f]", value);
-#endif
+
+	retv_if(model_read_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
+	_I("Infrared Motion Value is [%d]", value);
 
 	return ECORE_CALLBACK_RENEW;
 }
 
-static Eina_Bool _infrared_motion_getter_timer(void *data)
+static Eina_Bool _ultrasonic_getter_timer(void *data)
 {
-	app_data *ad = data;
+	double value = 0;
 
-#if 1
+	retv_if(model_read_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
+	_I("Ultra Sonic Distance is [%d cm]", value);
+
+	return ECORE_CALLBACK_RENEW;
+}
+
+static Eina_Bool _illuminance_getter_timer(void *data)
+{
 	int value = 0;
-	retv_if(model_read_int_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_CANCEL);
-	_I("Infrared Motion Value is [%d]", value);
-#else
-	double value = 0.0;
-	retv_if(model_read_double_value(ad->sensor_info, &value) == -1, ECORE_CALLBACK_RENEW);
-	_I("Value is [%f]", value);
-#endif
+
+	retv_if(model_read_illuminance_sensor(I2C_BUS_1, &value) == -1, ECORE_CALLBACK_CANCEL);
+	_I("Ultra Sonic Distance is [%d lux]", value);
 
 	return ECORE_CALLBACK_RENEW;
 }
 
 static bool service_app_create(void *data)
 {
-	model_sensor_h sensor_info = NULL;
 	app_data *ad = data;
 
-	retv_if(model_init("Ultrasonic", SENSOR_TYPE_ULTRASONIC, GPIO_ULTRASONIC_TRIG_NUM, GPIO_ULTRASONIC_ECHO_NUM, &sensor_info) == -1, false);
-	ad->sensor_info = sensor_info;
-
-	ad->getter_timer = ecore_timer_add(3.0, _ultrasonic_getter_timer, ad);
-	if (!ad->getter_timer) {
-		_D("Failed to add getter timer");
+	/* One Pin Sensor */
+	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
+	if (!ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1]) {
+		_D("Failed to add infrared motion getter timer");
 		return false;
 	}
 
-	retv_if(model_init("Infrared_motion", SENSOR_TYPE_INFRARED_MOTION, GPIO_INFRARED_MOTION_NUM, GPIO_NOT_USED, &sensor_info) == -1, false);
-	ad->sensor_info = sensor_info;
+	/* Two Pins Sensor */
+	ad->getter_timer[GPIO_ULTRASONIC_TRIG_NUM_1] = ecore_timer_add(1.0, _ultrasonic_getter_timer, ad);
+	if (!ad->getter_timer[GPIO_ULTRASONIC_TRIG_NUM_1]) {
+		_D("Failed to add ultra sonic getter timer");
+		return false;
+	}
 
-	ad->getter_timer = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
-	if (!ad->getter_timer) {
-		_D("Failed to add getter timer");
+	/* I2C Protocol Sensor */
+	ad->getter_timer[I2C_ILLUMINANCE_FIRST_PIN_1] = ecore_timer_add(1.0, _illuminance_getter_timer, ad);
+	if (!ad->getter_timer[I2C_ILLUMINANCE_FIRST_PIN_1]) {
+		_D("Failed to add ultra sonic getter timer");
 		return false;
 	}
 
@@ -104,8 +102,15 @@ static bool service_app_create(void *data)
 static void service_app_terminate(void *data)
 {
 	app_data *ad = (app_data *)data;
-	ecore_timer_del(ad->getter_timer);
-	model_fini(ad->sensor_info);
+
+	for (int i = 0; i < PIN_MAX; i++) {
+		if (ad->getter_timer[i]) {
+			ecore_timer_del(ad->getter_timer[i]);
+		}
+	}
+	model_close_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1);
+	model_close_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1);
+	model_close_illuminance_sensor();
 	free(ad);
 }
 

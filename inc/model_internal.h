@@ -19,10 +19,19 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
-#define __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
+#ifndef __POSITION_FINDER_MODEL_INTERNAL_H__
+#define __POSITION_FINDER_MODEL_INTERNAL_H__
 
-extern void model_close_infrared_obstacle_avoidance_sensor(int pin_num);
-extern int model_read_infrared_obstacle_avoidance_sensor(int pin_num, int *out_value);
+#include <peripheral_io.h>
 
-#endif /* __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__ */
+#define PIN_MAX 40
+
+struct _model_s {
+	int opened;
+	peripheral_gpio_h sensor_h;
+};
+typedef struct _model_s model_s;
+
+extern model_s *model_get_info(int pin_num);
+
+#endif /* __POSITION_FINDER_MODEL_INTERNAL_H__ */

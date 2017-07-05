@@ -22,9 +22,7 @@
 #ifndef __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__
 #define __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__
 
-extern int model_init_infrared_motion_sensor(int gpio_num, void **peripheral_info);
-extern void model_fini_infrared_motion_sensor(void *peripheral_info);
-
-extern int model_read_infrared_motion_sensor(void *peripheral_info, int *out_value);
+extern void model_close_infrared_motion_sensor(int sensor_index);
+extern int model_read_infrared_motion_sensor(int pin_num, int *out_value);
 
 #endif /* __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__ */

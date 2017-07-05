@@ -25,97 +25,80 @@
 #include <sys/time.h>
 
 #include "log.h"
+#include "model_internal.h"
 
-struct _model_ultrasonic_s {
-	peripheral_gpio_h trig_gpio;
-	peripheral_gpio_h echo_gpio;
-};
-typedef struct _model_ultrasonic_s model_ultrasonic_s;
-
-void model_fini_ultrasonic_sensor(void *peripheral_info)
+void model_close_ultrasonic_sensor(int echo_pin_num, int trig_pin_num)
 {
-	model_ultrasonic_s *info = peripheral_info;
+	ret_if(!model_get_info(echo_pin_num)->opened);
+	ret_if(!model_get_info(trig_pin_num)->opened);
 
-	ret_if(!info);
+	_I("Ultrasonic sensor is finishing...");
 
-	if (info->echo_gpio)
-		peripheral_gpio_close(info->echo_gpio);
+	peripheral_gpio_close(model_get_info(echo_pin_num)->sensor_h);
+	peripheral_gpio_close(model_get_info(trig_pin_num)->sensor_h);
 
-	if (info->trig_gpio)
-		peripheral_gpio_close(info->trig_gpio);
-
-	free(info);
+	model_get_info(echo_pin_num)->opened = 0;
+	model_get_info(trig_pin_num)->opened = 0;
 }
 
-int model_init_ultrasonic_sensor(int gpio_num1, int gpio_num2, void **peripheral_info)
-{
-	model_ultrasonic_s *info = NULL;
-	int ret = 0;
-
-	_I("Ultrasonic Sensor is initializing...");
-
-	info = calloc(1, sizeof(model_ultrasonic_s));
-	retv_if(!info, -1);
-	*peripheral_info = info;
-
-	ret = peripheral_gpio_open(gpio_num1, &info->trig_gpio);
-	goto_if(ret != 0, error);
-	goto_if(!info->trig_gpio, error);
-
-	ret = peripheral_gpio_set_direction(info->trig_gpio, PERIPHERAL_GPIO_DIRECTION_OUT);
-	goto_if(ret != 0, error);
-
-	ret = peripheral_gpio_open(gpio_num2, &info->echo_gpio);
-	goto_if(ret != 0, error);
-	goto_if(!info->echo_gpio, error);
-
-	ret = peripheral_gpio_set_direction(info->echo_gpio, PERIPHERAL_GPIO_DIRECTION_IN);
-	goto_if(ret != 0, error);
-
-	return 0;
-
-error:
-	model_fini_ultrasonic_sensor(info);
-	free(info);
-	*peripheral_info = NULL;
-	return -1;
-}
-
-static int _get_echo_value(model_ultrasonic_s *info)
+static int _get_echo_value(int echo_pin_num)
 {
 	int ret = 0;
 	int value = 0;
 
-	ret = peripheral_gpio_read(info->echo_gpio, &value);
+	ret = peripheral_gpio_read(model_get_info(echo_pin_num)->sensor_h, &value);
 	retv_if(ret < 0, -1);
 
 	return value;
 }
 
-int model_read_ultrasonic_sensor(void *peripheral_info, double *value)
+int model_read_ultrasonic_sensor(int echo_pin_num, int trig_pin_num, double *out_value)
 {
-	model_ultrasonic_s *info = peripheral_info;
 	int ret = 0;
 	double duration = 0.0;
 	struct timeval start_time, end_time, temp_start_time, temp_end_time;
 
-	ret = peripheral_gpio_write(info->trig_gpio, 0);
+	if (!model_get_info(echo_pin_num)->opened) {
+		_I("Ultrasonic sensor is initializing...");
+
+		ret = peripheral_gpio_open(echo_pin_num, &model_get_info(echo_pin_num)->sensor_h);
+		retv_if(!model_get_info(echo_pin_num)->sensor_h, -1);
+
+		ret = peripheral_gpio_set_direction(model_get_info(echo_pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
+		retv_if(ret != 0, -1);
+
+		model_get_info(echo_pin_num)->opened = 1;
+	}
+
+	if (!model_get_info(trig_pin_num)->opened) {
+		_I("Ultrasonic sensor is initializing...");
+
+		ret = peripheral_gpio_open(trig_pin_num, &model_get_info(trig_pin_num)->sensor_h);
+		retv_if(!model_get_info(trig_pin_num)->sensor_h, -1);
+
+		ret = peripheral_gpio_set_direction(model_get_info(trig_pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
+		retv_if(ret != 0, -1);
+
+		model_get_info(trig_pin_num)->opened = 1;
+	}
+
+	ret = peripheral_gpio_write(model_get_info(trig_pin_num)->sensor_h, 0);
 	retv_if(ret < 0, -1);
 
 	sleep(1);
 
-	ret = peripheral_gpio_write(info->trig_gpio, 1);
+	ret = peripheral_gpio_write(model_get_info(trig_pin_num)->sensor_h, 1);
 	retv_if(ret < 0, -1);
 
 	usleep(10);
 
-	ret = peripheral_gpio_write(info->trig_gpio, 0);
+	ret = peripheral_gpio_write(model_get_info(trig_pin_num)->sensor_h, 0);
 	retv_if(ret < 0, -1);
 
 	_D("Count the distance");
 	gettimeofday(&temp_start_time, NULL);
 
-	while (_get_echo_value(info) == 0) {
+	while (_get_echo_value(echo_pin_num) == 0) {
 		gettimeofday(&temp_end_time, NULL);
 		duration = (double)temp_end_time.tv_sec + (double)(temp_end_time.tv_usec / 1000000.0)
 			- (double)temp_start_time.tv_sec - (double)(temp_start_time.tv_usec / 1000000.0);
@@ -128,14 +111,16 @@ int model_read_ultrasonic_sensor(void *peripheral_info, double *value)
 
 	_D("After checking #1");
 
-	while (_get_echo_value(info) == 1);
+	while (_get_echo_value(echo_pin_num) == 1);
 	gettimeofday(&end_time, NULL);
 
 	_D("After checking #2");
 
 	duration = (double)end_time.tv_sec + (double)(end_time.tv_usec / 1000000.0)
 		- (double)start_time.tv_sec - (double)(start_time.tv_usec / 1000000.0);
-	*value = duration / 2 * 340.0;
+	*out_value = duration / 2 * 340.0;
+
+	_I("Ultrasonic Sensor Value : %f", *out_value);
 
 	return 0;
 }

@@ -27,30 +27,45 @@
 #include "log.h"
 #include "model_internal.h"
 
-void model_close_infrared_motion_sensor(int pin_num)
+#define I2C_PIN_MAX 28
+/* I2C */
+#define GY30_ADDR 0x23 /* Address of GY30 light sensor */
+#define GY30_CONT_HIGH_RES_MODE 0x10 /* Start measurement at 11x resolution. Measurement time is approx 120mx */
+#define GY30_CONSTANT_NUM (1.2)
+
+static struct {
+	int opened;
+	peripheral_i2c_h sensor_h;
+} model_sensor_s;
+
+void model_close_illuminance_sensor(void)
 {
-	ret_if(!model_get_info(pin_num)->opened);
+	ret_if(!model_sensor_s.opened);
 
 	_I("Infrared Motion Sensor is finishing...");
-	model_get_info(pin_num)->opened = 0;
+	peripheral_i2c_close(model_sensor_s.sensor_h);
+	model_sensor_s.opened = 0;
 }
 
-int model_read_infrared_motion_sensor(int pin_num, int *out_value)
+/* You have to use this illuminance sensor ONLY ONE in the pi board */
+int model_read_illuminance_sensor(int i2c_bus, int *out_value)
 {
 	int ret = PERIPHERAL_ERROR_NONE;
+	unsigned char buf[10] = { 0, };
 
-	if (!model_get_info(pin_num)->opened) {
-		ret = peripheral_gpio_open(pin_num, &model_get_info(pin_num)->sensor_h);
-		retv_if(!model_get_info(pin_num)->sensor_h, -1);
-
-		ret = peripheral_gpio_set_direction(model_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
-		retv_if(ret != 0, -1);
-
-		model_get_info(pin_num)->opened = 1;
+	if (!model_sensor_s.opened) {
+		ret = peripheral_i2c_open(i2c_bus, GY30_ADDR, &model_sensor_s.sensor_h);
+		retv_if(!model_sensor_s.sensor_h, -1);
+		model_sensor_s.opened = 1;
 	}
 
-	ret = peripheral_gpio_read(model_get_info(pin_num)->sensor_h, out_value);
+	ret = peripheral_i2c_write_byte(model_sensor_s.sensor_h, GY30_CONT_HIGH_RES_MODE);
 	retv_if(ret < 0, -1);
+
+	ret = peripheral_i2c_read(model_sensor_s.sensor_h, buf, 2);
+	retv_if(ret < 0, -1);
+
+	*out_value = (buf[0] << 8 | buf[1]) / GY30_CONSTANT_NUM; // Just Sum High 8bit and Low 8bit
 
 	_I("Infrared Motion Sensor Value : %d", *out_value);
 

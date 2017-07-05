@@ -22,9 +22,7 @@
 #ifndef __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__
 #define __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__
 
-extern int model_init_touch_sensor(int gpio_num, void **peripheral_info);
-extern void model_fini_touch_sensor(void *peripheral_info);
-
-extern int model_read_touch_sensor(void *peripheral_info, int *out_value);
+extern void model_close_touch_sensor(int pin_num);
+extern int model_read_touch_sensor(int pin_num, int *out_value);
 
 #endif /* __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__ */

@@ -22,26 +22,13 @@
 #ifndef __POSITION_FINDER_MODEL_H__
 #define __POSITION_FINDER_MODEL_H__
 
-enum sensor_type {
-	SENSOR_TYPE_ULTRASONIC,
-	SENSOR_TYPE_INFRARED_MOTION, /* HC_SR501 */
-	SENSOR_TYPE_INFRARED_OBSTACLE_AVOIDANCE,
-	SENSOR_TYPE_TOUCH,
-};
-typedef enum sensor_type sensor_type_e;
+#include <peripheral_io.h>
 
-typedef struct _model_sensor_s model_sensor_s;
-typedef model_sensor_s *model_sensor_h;
-
-extern int model_init(const char *id, sensor_type_e sensor_type, int gpio_num1, int gpio_num2, model_sensor_h *out_info);
-extern void model_fini(model_sensor_h info);
-
-extern int model_read_int_value(model_sensor_h info, int *out_value);
-extern int model_read_double_value(model_sensor_h info, double *out_value);
-
-extern int model_list_add_sensor(model_sensor_h info);
-extern int model_list_remove_sensor(model_sensor_h info);
-extern int model_list_get_sensor(const char *id, model_sensor_h *out_info);
-extern int model_list_foreach(void (*cb)(model_sensor_h info));
+#include "model_internal.h"
+#include "model/model_illuminance_sensor.h"
+#include "model/model_infrared_motion_sensor.h"
+#include "model/model_infrared_obstacle_avoidance_sensor.h"
+#include "model/model_touch_sensor.h"
+#include "model/model_ultrasonic_sensor.h"
 
 #endif /* __POSITION_FINDER_MODEL_H__ */

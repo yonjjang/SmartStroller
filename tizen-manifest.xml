@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <manifest xmlns="http://tizen.org/ns/packages" api-version="3.0" package="org.tizen.position-finder-server" version="1.0.0">
     <profile name="mobile"/>
+    <author email="jinny.yoon@samsung.com" href="www.samsung.com">Jin Yoon</author>
+    <author email="gs86.lee@samsung.com" href="www.samsung.com">Geunsun Lee</author>
+    <author email="ey928.lee@samsung.com" href="www.samsung.com">Eunyoung Lee</author>
+    <author email="junkyu.han@samsung.com" href="www.samsung.com">Junkyu Han</author>
     <service-application appid="org.tizen.position-finder-server" auto-restart="false" exec="position-finder-server" multiple="false" nodisplay="true" on-boot="false" taskmanage="false" type="capp">
         <label>Illumination</label>
         <icon>position_finder_server.png</icon>

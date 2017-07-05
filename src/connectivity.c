@@ -1,6 +1,11 @@
 /*
  * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
+ * Contact: Jin Yoon <jinny.yoon@samsung.com>
+ *          Geunsun Lee <gs86.lee@samsung.com>
+ *          Eunyoung Lee <ey928.lee@samsung.com>
+ *          Junkyu Han <junkyu.han@samsung.com>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at

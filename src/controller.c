@@ -37,16 +37,36 @@
 #define GPIO_INFRARED_MOTION_NUM_1 4
 #define I2C_ILLUMINANCE_FIRST_PIN_1 3
 
+#define USE_MULTIPLE_SENSOR 1
+
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer[PIN_MAX];
 } app_data;
 
 static Eina_Bool _infrared_motion_getter_timer(void *data)
 {
+#if USE_MULTIPLE_SENSOR
+	int gpio_num[3] = { 16, 23, 26 };
+	int i = 0;
+	int value[3] = { 0, };
+
+	for (i = 0; i < 3; i++) {
+		if (model_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
+			_E("Failed to get Infrared Motion value [GPIO:%d]", gpio_num[i]);
+			continue;
+		}
+		_I("[GPIO:%d] Infrared Motion Value is [%d]", gpio_num[i], value[i]);
+	}
+
+
+	//@TODO: Send the data to Analyzer using connectivity APIs
+
+#else
 	int value = 0;
 
 	retv_if(resource_read_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
 	_I("Infrared Motion Value is [%d]", value);
+#endif
 
 	return ECORE_CALLBACK_RENEW;
 }
@@ -75,6 +95,13 @@ static bool service_app_create(void *data)
 {
 	app_data *ad = data;
 
+#if USE_MULTIPLE_SENSOR
+	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
+	if (!ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1]) {
+		_E("Failed to add infrared motion getter timer");
+		return false;
+	}
+#else
 	/* One Pin Sensor */
 	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
 	if (!ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1]) {
@@ -95,6 +122,7 @@ static bool service_app_create(void *data)
 		_D("Failed to add ultra sonic getter timer");
 		return false;
 	}
+#endif
 
     return true;
 }

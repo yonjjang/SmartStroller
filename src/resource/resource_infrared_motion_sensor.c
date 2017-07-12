@@ -25,37 +25,34 @@
 #include <sys/time.h>
 
 #include "log.h"
-#include "model_internal.h"
+#include "resource_internal.h"
 
-void model_close_touch_sensor(int pin_num)
+void resource_close_infrared_motion_sensor(int pin_num)
 {
-	ret_if(!model_get_info(pin_num)->opened);
+	ret_if(!resource_get_info(pin_num)->opened);
 
-	_I("Touch Sensor is finishing...");
-	peripheral_gpio_close(model_get_info(pin_num)->sensor_h);
-	model_get_info(pin_num)->opened = 0;
+	_I("Infrared Motion Sensor is finishing...");
+	resource_get_info(pin_num)->opened = 0;
 }
 
-int model_read_touch_sensor(int pin_num, int *out_value)
+int resource_read_infrared_motion_sensor(int pin_num, int *out_value)
 {
 	int ret = PERIPHERAL_ERROR_NONE;
 
-	if (!model_get_info(pin_num)->opened) {
-		_I("Touch sensor is initializing...");
+	if (!resource_get_info(pin_num)->opened) {
+		ret = peripheral_gpio_open(pin_num, &resource_get_info(pin_num)->sensor_h);
+		retv_if(!resource_get_info(pin_num)->sensor_h, -1);
 
-		ret = peripheral_gpio_open(pin_num, &model_get_info(pin_num)->sensor_h);
-		retv_if(!model_get_info(pin_num)->sensor_h, -1);
-
-		ret = peripheral_gpio_set_direction(model_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
+		ret = peripheral_gpio_set_direction(resource_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
 		retv_if(ret != 0, -1);
 
-		model_get_info(pin_num)->opened = 1;
+		resource_get_info(pin_num)->opened = 1;
 	}
 
-	ret = peripheral_gpio_read(model_get_info(pin_num)->sensor_h, out_value);
+	ret = peripheral_gpio_read(resource_get_info(pin_num)->sensor_h, out_value);
 	retv_if(ret < 0, -1);
 
-	_I("Touch Sensor Value : %d", *out_value);
+	_I("Infrared Motion Sensor Value : %d", *out_value);
 
 	return 0;
 }

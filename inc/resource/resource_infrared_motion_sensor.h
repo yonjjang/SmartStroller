@@ -19,10 +19,10 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__
-#define __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__
+#ifndef __POSITION_FINDER_RESOURCE_INFRARED_MOTION_SENSOR_H__
+#define __POSITION_FINDER_RESOURCE_INFRARED_MOTION_SENSOR_H__
 
-extern void model_close_infrared_motion_sensor(int sensor_index);
-extern int model_read_infrared_motion_sensor(int pin_num, int *out_value);
+extern void resource_close_infrared_motion_sensor(int sensor_index);
+extern int resource_read_infrared_motion_sensor(int pin_num, int *out_value);
 
-#endif /* __POSITION_FINDER_MODEL_INFRARED_MOTION_SENSOR_H__ */
+#endif /* __POSITION_FINDER_RESOURCE_INFRARED_MOTION_SENSOR_H__ */

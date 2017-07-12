@@ -19,19 +19,10 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_INTERNAL_H__
-#define __POSITION_FINDER_MODEL_INTERNAL_H__
+#ifndef __POSITION_FINDER_RESOURCE_TOUCH_SENSOR_H__
+#define __POSITION_FINDER_RESOURCE_TOUCH_SENSOR_H__
 
-#include <peripheral_io.h>
+extern void resource_close_touch_sensor(int pin_num);
+extern int resource_read_touch_sensor(int pin_num, int *out_value);
 
-#define PIN_MAX 40
-
-struct _model_s {
-	int opened;
-	peripheral_gpio_h sensor_h;
-};
-typedef struct _model_s model_s;
-
-extern model_s *model_get_info(int pin_num);
-
-#endif /* __POSITION_FINDER_MODEL_INTERNAL_H__ */
+#endif /* __POSITION_FINDER_RESOURCE_TOUCH_SENSOR_H__ */

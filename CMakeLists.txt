@@ -33,12 +33,12 @@ INCLUDE_DIRECTORIES(${PROJECT_ROOT_DIR}/inc)
 ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/controller.c
 	${PROJECT_ROOT_DIR}/src/connectivity.c
-	${PROJECT_ROOT_DIR}/src/model.c
-	${PROJECT_ROOT_DIR}/src/model/model_illuminance_sensor.c
-	${PROJECT_ROOT_DIR}/src/model/model_infrared_motion_sensor.c
-	${PROJECT_ROOT_DIR}/src/model/model_infrared_obstacle_avoidance_sensor.c
-	${PROJECT_ROOT_DIR}/src/model/model_touch_sensor.c
-	${PROJECT_ROOT_DIR}/src/model/model_ultrasonic_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_illuminance_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_infrared_motion_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_infrared_obstacle_avoidance_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_touch_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_ultrasonic_sensor.c
 )
 #${PROJECT_ROOT_DIR}/src/connectivity.c
 

@@ -28,7 +28,7 @@
 
 #include "log.h"
 #include "controller.h"
-#include "model.h"
+#include "resource.h"
 
 #define I2C_BUS_1 0x1
 #define GPIO_NOT_USED -1
@@ -45,7 +45,7 @@ static Eina_Bool _infrared_motion_getter_timer(void *data)
 {
 	int value = 0;
 
-	retv_if(model_read_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
+	retv_if(resource_read_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
 	_I("Infrared Motion Value is [%d]", value);
 
 	return ECORE_CALLBACK_RENEW;
@@ -55,7 +55,7 @@ static Eina_Bool _ultrasonic_getter_timer(void *data)
 {
 	double value = 0;
 
-	retv_if(model_read_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
+	retv_if(resource_read_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
 	_I("Ultra Sonic Distance is [%d cm]", value);
 
 	return ECORE_CALLBACK_RENEW;
@@ -65,7 +65,7 @@ static Eina_Bool _illuminance_getter_timer(void *data)
 {
 	int value = 0;
 
-	retv_if(model_read_illuminance_sensor(I2C_BUS_1, &value) == -1, ECORE_CALLBACK_CANCEL);
+	retv_if(resource_read_illuminance_sensor(I2C_BUS_1, &value) == -1, ECORE_CALLBACK_CANCEL);
 	_I("Ultra Sonic Distance is [%d lux]", value);
 
 	return ECORE_CALLBACK_RENEW;
@@ -108,9 +108,9 @@ static void service_app_terminate(void *data)
 			ecore_timer_del(ad->getter_timer[i]);
 		}
 	}
-	model_close_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1);
-	model_close_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1);
-	model_close_illuminance_sensor();
+	resource_close_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1);
+	resource_close_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1);
+	resource_close_illuminance_sensor();
 	free(ad);
 }
 

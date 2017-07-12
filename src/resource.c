@@ -19,16 +19,12 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_H__
-#define __POSITION_FINDER_MODEL_H__
-
 #include <peripheral_io.h>
+#include "resource.h"
 
-#include "model_internal.h"
-#include "model/model_illuminance_sensor.h"
-#include "model/model_infrared_motion_sensor.h"
-#include "model/model_infrared_obstacle_avoidance_sensor.h"
-#include "model/model_touch_sensor.h"
-#include "model/model_ultrasonic_sensor.h"
+static resource_s resource_info[PIN_MAX] = { 0, };
 
-#endif /* __POSITION_FINDER_MODEL_H__ */
+resource_s *resource_get_info(int pin_num)
+{
+	return &resource_info[pin_num];
+}

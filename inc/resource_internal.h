@@ -19,12 +19,19 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_ILLUMINANCE_SENSOR_H__
-#define __POSITION_FINDER_MODEL_ILLUMINANCE_SENSOR_H__
+#ifndef __POSITION_FINDER_RESOURCE_INTERNAL_H__
+#define __POSITION_FINDER_RESOURCE_INTERNAL_H__
 
-/* You have to use this illuminance sensor ONLY ONE in the pi board */
-extern int model_read_illuminance_sensor(int i2c_bus, int *out_value);
-extern void model_close_illuminance_sensor(void);
+#include <peripheral_io.h>
 
-#endif /* __POSITION_FINDER_MODEL_ILLUMINANCE_SENSOR_H__ */
+#define PIN_MAX 40
 
+struct _resource_s {
+	int opened;
+	peripheral_gpio_h sensor_h;
+};
+typedef struct _resource_s resource_s;
+
+extern resource_s *resource_get_info(int pin_num);
+
+#endif /* __POSITION_FINDER_RESOURCE_INTERNAL_H__ */

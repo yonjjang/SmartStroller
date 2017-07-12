@@ -19,10 +19,10 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
-#define __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
+#ifndef __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__
+#define __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__
 
-extern void model_close_infrared_obstacle_avoidance_sensor(int pin_num);
-extern int model_read_infrared_obstacle_avoidance_sensor(int pin_num, int *out_value);
+extern void resource_close_ultrasonic_sensor(int echo_pin_num, int trig_pin_num);
+extern int resource_read_ultrasonic_sensor(int echo_pin_num, int trig_pin_num, double *out_value);
 
-#endif /* __POSITION_FINDER_MODEL_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__ */
+#endif /* __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__ */

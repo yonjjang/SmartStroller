@@ -19,10 +19,16 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__
-#define __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__
+#ifndef __POSITION_FINDER_RESOURCE_H__
+#define __POSITION_FINDER_RESOURCE_H__
 
-extern void model_close_touch_sensor(int pin_num);
-extern int model_read_touch_sensor(int pin_num, int *out_value);
+#include <peripheral_io.h>
 
-#endif /* __POSITION_FINDER_MODEL_TOUCH_SENSOR_H__ */
+#include "resource_internal.h"
+#include "resource/resource_illuminance_sensor.h"
+#include "resource/resource_infrared_motion_sensor.h"
+#include "resource/resource_infrared_obstacle_avoidance_sensor.h"
+#include "resource/resource_touch_sensor.h"
+#include "resource/resource_ultrasonic_sensor.h"
+
+#endif /* __POSITION_FINDER_RESOURCE_H__ */

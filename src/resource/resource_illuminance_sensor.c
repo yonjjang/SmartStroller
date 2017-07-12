@@ -40,7 +40,7 @@ static struct {
 
 void resource_close_illuminance_sensor(void)
 {
-	ret_if(!resource_sensor_s.opened);
+	if (!resource_sensor_s.opened) return;
 
 	_I("Infrared Motion Sensor is finishing...");
 	peripheral_i2c_close(resource_sensor_s.sensor_h);

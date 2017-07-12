@@ -29,8 +29,8 @@
 
 void resource_close_ultrasonic_sensor(int echo_pin_num, int trig_pin_num)
 {
-	ret_if(!resource_get_info(echo_pin_num)->opened);
-	ret_if(!resource_get_info(trig_pin_num)->opened);
+	if (!resource_get_info(echo_pin_num)->opened) return;
+	if (!resource_get_info(trig_pin_num)->opened) return;
 
 	_I("Ultrasonic sensor is finishing...");
 

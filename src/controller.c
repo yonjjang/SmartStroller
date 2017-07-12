@@ -108,9 +108,7 @@ static void service_app_terminate(void *data)
 			ecore_timer_del(ad->getter_timer[i]);
 		}
 	}
-	resource_close_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM_1);
-	resource_close_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1);
-	resource_close_illuminance_sensor();
+	resource_close_all();
 	free(ad);
 }
 

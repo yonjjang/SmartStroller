@@ -19,11 +19,9 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_H__
-#define __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_H__
+#ifndef __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_INTERNAL_H__
+#define __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_INTERNAL_H__
 
-/* You have to use this illuminance sensor ONLY ONE in the pi board */
-extern int resource_read_illuminance_sensor(int i2c_bus, int *out_value);
+extern void resource_close_infrared_obstacle_avoidance_sensor(int pin_num);
 
-#endif /* __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_H__ */
-
+#endif /* __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_INTERNAL_H__ */

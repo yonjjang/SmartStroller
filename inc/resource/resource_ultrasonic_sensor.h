@@ -22,7 +22,6 @@
 #ifndef __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__
 #define __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__
 
-extern void resource_close_ultrasonic_sensor(int echo_pin_num, int trig_pin_num);
 extern int resource_read_ultrasonic_sensor(int echo_pin_num, int trig_pin_num, double *out_value);
 
 #endif /* __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__ */

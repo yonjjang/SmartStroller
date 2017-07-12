@@ -22,7 +22,6 @@
 #ifndef __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
 #define __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__
 
-extern void resource_close_infrared_obstacle_avoidance_sensor(int pin_num);
 extern int resource_read_infrared_obstacle_avoidance_sensor(int pin_num, int *out_value);
 
 #endif /* __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_H__ */

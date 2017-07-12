@@ -29,9 +29,10 @@
 
 void resource_close_infrared_motion_sensor(int pin_num)
 {
-	ret_if(!resource_get_info(pin_num)->opened);
+	if (!resource_get_info(pin_num)->opened) return;
 
 	_I("Infrared Motion Sensor is finishing...");
+	peripheral_gpio_close(resource_get_info(pin_num)->sensor_h);
 	resource_get_info(pin_num)->opened = 0;
 }
 

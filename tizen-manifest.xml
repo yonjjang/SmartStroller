@@ -6,7 +6,11 @@
     <author email="ey928.lee@samsung.com" href="www.samsung.com">Eunyoung Lee</author>
     <author email="junkyu.han@samsung.com" href="www.samsung.com">Junkyu Han</author>
     <service-application appid="org.tizen.position-finder-server" auto-restart="false" exec="position-finder-server" multiple="false" nodisplay="true" on-boot="false" taskmanage="false" type="capp">
-        <label>Illumination</label>
+        <label>Position Finder</label>
         <icon>position_finder_server.png</icon>
     </service-application>
+    <privileges>
+        <privilege>http://tizen.org/privilege/network.get</privilege>
+		<privilege>http://tizen.org/privilege/internet</privilege>
+    </privileges>
 </manifest>

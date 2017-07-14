@@ -26,9 +26,12 @@
 #include <unistd.h>
 #include <glib.h>
 
+#include <iotcon.h> // Please remove this after test
+
 #include "log.h"
-#include "controller.h"
 #include "resource.h"
+#include "connectivity.h"
+#include "controller.h"
 
 #define I2C_BUS_1 0x1
 #define GPIO_NOT_USED -1
@@ -36,11 +39,14 @@
 #define GPIO_ULTRASONIC_ECHO_NUM_1 21
 #define GPIO_INFRARED_MOTION_NUM_1 4
 #define I2C_ILLUMINANCE_FIRST_PIN_1 3
-
 #define USE_MULTIPLE_SENSOR 1
+
+static void _start_internal_function(void);
+static void _stop_internal_function(void);
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer[PIN_MAX];
+	connectivity_resource_s *resource_info;
 } app_data;
 
 static Eina_Bool _infrared_motion_getter_timer(void *data)
@@ -51,7 +57,7 @@ static Eina_Bool _infrared_motion_getter_timer(void *data)
 	int value[3] = { 0, };
 
 	for (i = 0; i < 3; i++) {
-		if (model_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
+		if (resource_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
 			_E("Failed to get Infrared Motion value [GPIO:%d]", gpio_num[i]);
 			continue;
 		}
@@ -71,6 +77,7 @@ static Eina_Bool _infrared_motion_getter_timer(void *data)
 	return ECORE_CALLBACK_RENEW;
 }
 
+#ifndef USE_MULTIPLE_SENSOR
 static Eina_Bool _ultrasonic_getter_timer(void *data)
 {
 	double value = 0;
@@ -90,10 +97,17 @@ static Eina_Bool _illuminance_getter_timer(void *data)
 
 	return ECORE_CALLBACK_RENEW;
 }
+#endif
 
 static bool service_app_create(void *data)
 {
 	app_data *ad = data;
+	int ret = -1;
+
+	_start_internal_function();
+
+	ret = connectivity_set_resource("/door/1", "org.tizen.door", &ad->resource_info);
+	if (ret == -1) _E("Cannot broadcast resource");
 
 #if USE_MULTIPLE_SENSOR
 	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
@@ -103,7 +117,7 @@ static bool service_app_create(void *data)
 	}
 #else
 	/* One Pin Sensor */
-	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
+	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(1.0f, _infrared_motion_getter_timer, ad);
 	if (!ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1]) {
 		_D("Failed to add infrared motion getter timer");
 		return false;
@@ -136,7 +150,10 @@ static void service_app_terminate(void *data)
 			ecore_timer_del(ad->getter_timer[i]);
 		}
 	}
-	resource_close_all();
+
+	connectivity_unset_resource(ad->resource_info);
+	_stop_internal_function();
+
 	free(ad);
 }
 
@@ -186,4 +203,17 @@ int main(int argc, char* argv[])
 	ret = service_app_main(argc, argv, &event_callback, ad);
 
 	return ret;
+}
+
+/* Do not modify codes under this comment */
+static void _start_internal_function(void)
+{
+	connectivity_init("iotcon-test-basic-server");
+}
+
+static void _stop_internal_function(void)
+{
+	_I("Terminating...");
+	resource_close_all();
+	connectivity_fini();
 }

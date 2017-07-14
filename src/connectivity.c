@@ -32,10 +32,6 @@
 #define ULTRASONIC_RESOURCE_2_URI "/door/2"
 #define ULTRASONIC_RESOURCE_TYPE "org.tizen.door"
 
-struct connectivity_resource {
-	iotcon_resource_h res;
-	iotcon_observers_h observers;
-};
 static bool _resource_created;
 static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
 
@@ -184,10 +180,9 @@ error:
 	return -1;
 }
 
-int connectivity_notify(connectivity_resource_s *user_data, int value)
+int connectivity_notify(connectivity_resource_s *resource_info, int value)
 {
 	iotcon_representation_h representation;
-	connectivity_resource_s *resource_info = user_data;
 	int ret = -1;
 
 	retv_if(!resource_info, -1);
@@ -223,7 +218,7 @@ static int _handle_post_request(connectivity_resource_s *resource_info, iotcon_r
 	new_resource_info = calloc(1, sizeof(connectivity_resource_s));
 	retv_if(!new_resource_info, -1);
 
-	ret = connectivity_create_resource(ULTRASONIC_RESOURCE_2_URI, ULTRASONIC_RESOURCE_TYPE, &new_resource_info);
+	ret = connectivity_set_resource(ULTRASONIC_RESOURCE_2_URI, ULTRASONIC_RESOURCE_TYPE, &new_resource_info);
 	retv_if(0 != ret, -1);
 
 	_resource_created = true;
@@ -380,7 +375,7 @@ int connectivity_init(const char *device_name)
 {
 	int ret = -1;
 
-	ret = iotcon_initialize("../res/iotcon-test-svr-db-server.dat");
+	ret = iotcon_initialize("/usr/apps/org.tizen.position-finder-server/res/iotcon-test-svr-db-server.dat");
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	ret = iotcon_set_device_name(device_name);
@@ -402,7 +397,7 @@ int connectivity_fini(void)
 	return 0;
 }
 
-void connectivity_destroy_resource(connectivity_resource_s *resource_info)
+void connectivity_unset_resource(connectivity_resource_s *resource_info)
 {
 	ret_if(!resource_info);
 	if (resource_info->observers) iotcon_observers_destroy(resource_info->observers);
@@ -410,7 +405,7 @@ void connectivity_destroy_resource(connectivity_resource_s *resource_info)
 	free(resource_info);
 }
 
-int connectivity_create_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info)
+int connectivity_set_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info)
 {
 	iotcon_resource_types_h resource_types = NULL;
 	iotcon_resource_interfaces_h ifaces = NULL;

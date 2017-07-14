@@ -19,21 +19,10 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_CONNECTIVITY_H__
-#define __POSITION_FINDER_CONNECTIVITY_H__
+#ifndef __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__
+#define __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__
 
-#include "connectivity_internal.h"
+extern int connectivity_init(const char *device_name);
+extern int connectivity_fini(void);
 
-struct connectivity_resource {
-	iotcon_resource_h res;
-	iotcon_observers_h observers;
-};
-
-typedef struct connectivity_resource connectivity_resource_s;
-
-extern int connectivity_set_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info);
-extern void connectivity_unset_resource(connectivity_resource_s *resource);
-
-extern int connectivity_notify(connectivity_resource_s *resource_info, int value);
-
-#endif /* __POSITION_FINDER_CONNECTIVITY_H__ */
+#endif /* __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__ */

@@ -24,6 +24,12 @@
 
 #include <peripheral_io.h>
 
+#include "resource/resource_illuminance_sensor_internal.h"
+#include "resource/resource_infrared_motion_sensor_internal.h"
+#include "resource/resource_infrared_obstacle_avoidance_sensor_internal.h"
+#include "resource/resource_touch_sensor_internal.h"
+#include "resource/resource_ultrasonic_sensor_internal.h"
+
 #define PIN_MAX 40
 
 struct _resource_s {

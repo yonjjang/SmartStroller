@@ -25,20 +25,10 @@
 #include <peripheral_io.h>
 
 #include "resource_internal.h"
-
 #include "resource/resource_illuminance_sensor.h"
-#include "resource/resource_illuminance_sensor_internal.h"
-
 #include "resource/resource_infrared_motion_sensor.h"
-#include "resource/resource_infrared_motion_sensor_internal.h"
-
 #include "resource/resource_infrared_obstacle_avoidance_sensor.h"
-#include "resource/resource_infrared_obstacle_avoidance_sensor_internal.h"
-
 #include "resource/resource_touch_sensor.h"
-#include "resource/resource_touch_sensor_internal.h"
-
 #include "resource/resource_ultrasonic_sensor.h"
-#include "resource/resource_ultrasonic_sensor_internal.h"
 
 #endif /* __POSITION_FINDER_RESOURCE_H__ */

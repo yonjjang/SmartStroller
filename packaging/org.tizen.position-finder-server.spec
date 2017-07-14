@@ -61,14 +61,16 @@ make %{?jobs:-j%jobs}
 
 %post
 /sbin/ldconfig
+chsmack -a "User::App::Shared" %{_pkg_dir}/res/*.dat
+chmod 666 %{_pkg_dir}/res/*.dat
 
 %postun -p /sbin/ldconfig
 
 %files
 %manifest org.tizen.position-finder-server.manifest
+%{_pkg_dir}/res/*.dat
 %defattr(-,root,root,-)
 %{_pkg_dir}/bin/position-finder-server
-%{_pkg_dir}/res/*.dat
 %{_sys_packages_dir}/org.tizen.position-finder-server.xml
 %{_sys_icons_dir}/position_finder_server.png
 %{_pkg_dir}/author-signature.xml

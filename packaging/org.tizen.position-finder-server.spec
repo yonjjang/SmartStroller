@@ -30,6 +30,7 @@ Server for Position Finder
 %define _pkg_dir %{TZ_SYS_RO_APP}/%{alias}
 %define _pkg_shared_dir %{_pkg_dir}/shared
 %define _pkg_data_dir %{_pkg_dir}/data
+%define _pkg_rw_data_dir /home/owner/apps_rw/org.tizen.position-finder-server/data
 %define _sys_icons_dir %{_pkg_shared_dir}/res
 %define _sys_packages_dir %{TZ_SYS_RO_PACKAGES}
 %define _sys_license_dir %{TZ_SYS_SHARE}/license
@@ -61,14 +62,15 @@ make %{?jobs:-j%jobs}
 
 %post
 /sbin/ldconfig
-chsmack -a "User::App::Shared" %{_pkg_dir}/res/*.dat
-chmod 666 %{_pkg_dir}/res/*.dat
+chsmack -a "User::Pkg::org.tizen.position-finder-server" %{_pkg_rw_data_dir}/*.dat
+chmod 666 %{_pkg_rw_data_dir}/*.dat
 
 %postun -p /sbin/ldconfig
 
 %files
 %manifest org.tizen.position-finder-server.manifest
-%{_pkg_dir}/res/*.dat
+%{_pkg_rw_data_dir}/*.dat
+/home/owner/apps_rw/org.tizen.position-finder-server/data/iotcon-test-svr-db-server.dat
 %defattr(-,root,root,-)
 %{_pkg_dir}/bin/position-finder-server
 %{_sys_packages_dir}/org.tizen.position-finder-server.xml

@@ -375,7 +375,7 @@ int connectivity_init(const char *device_name)
 {
 	int ret = -1;
 
-	ret = iotcon_initialize("/usr/apps/org.tizen.position-finder-server/res/iotcon-test-svr-db-server.dat");
+	ret = iotcon_initialize("/home/owner/apps_rw/org.tizen.position-finder-server/data/iotcon-test-svr-db-server.dat");
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	ret = iotcon_set_device_name(device_name);

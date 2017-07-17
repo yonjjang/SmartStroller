@@ -55,18 +55,19 @@ static Eina_Bool _infrared_motion_getter_timer(void *data)
 	int gpio_num[3] = { 16, 23, 26 };
 	int i = 0;
 	int value[3] = { 0, };
+	int detected = 0;
+	app_data *ad = data;
 
 	for (i = 0; i < 3; i++) {
 		if (resource_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
 			_E("Failed to get Infrared Motion value [GPIO:%d]", gpio_num[i]);
 			continue;
 		}
-		_I("[GPIO:%d] Infrared Motion Value is [%d]", gpio_num[i], value[i]);
+		detected |= value[i];
 	}
 
-
-	//@TODO: Send the data to Analyzer using connectivity APIs
-
+	if (connectivity_notify(ad->resource_info, detected) == -1)
+		_E("Cannot notify message");
 #else
 	int value = 0;
 

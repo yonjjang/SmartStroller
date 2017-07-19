@@ -94,7 +94,7 @@ static Eina_Bool _illuminance_getter_timer(void *data)
 	int value = 0;
 
 	retv_if(resource_read_illuminance_sensor(I2C_BUS_1, &value) == -1, ECORE_CALLBACK_CANCEL);
-	_I("Ultra Sonic Distance is [%d lux]", value);
+	_I("Illuminance sensor is [%d lux]", value);
 
 	return ECORE_CALLBACK_RENEW;
 }
@@ -111,7 +111,7 @@ static bool service_app_create(void *data)
 	if (ret == -1) _E("Cannot broadcast resource");
 
 #if USE_MULTIPLE_SENSOR
-	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(3.0, _infrared_motion_getter_timer, ad);
+	ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1] = ecore_timer_add(3.0f, _infrared_motion_getter_timer, ad);
 	if (!ad->getter_timer[GPIO_INFRARED_MOTION_NUM_1]) {
 		_E("Failed to add infrared motion getter timer");
 		return false;
@@ -125,16 +125,16 @@ static bool service_app_create(void *data)
 	}
 
 	/* Two Pins Sensor */
-	ad->getter_timer[GPIO_ULTRASONIC_TRIG_NUM_1] = ecore_timer_add(1.0, _ultrasonic_getter_timer, ad);
+	ad->getter_timer[GPIO_ULTRASONIC_TRIG_NUM_1] = ecore_timer_add(1.0f, _ultrasonic_getter_timer, ad);
 	if (!ad->getter_timer[GPIO_ULTRASONIC_TRIG_NUM_1]) {
 		_D("Failed to add ultra sonic getter timer");
 		return false;
 	}
 
 	/* I2C Protocol Sensor */
-	ad->getter_timer[I2C_ILLUMINANCE_FIRST_PIN_1] = ecore_timer_add(1.0, _illuminance_getter_timer, ad);
+	ad->getter_timer[I2C_ILLUMINANCE_FIRST_PIN_1] = ecore_timer_add(1.0f, _illuminance_getter_timer, ad);
 	if (!ad->getter_timer[I2C_ILLUMINANCE_FIRST_PIN_1]) {
-		_D("Failed to add ultra sonic getter timer");
+		_D("Failed to add illuminance getter timer");
 		return false;
 	}
 #endif

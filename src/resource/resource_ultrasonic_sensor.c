@@ -52,14 +52,26 @@ static int _get_echo_value(int echo_pin_num)
 	return value;
 }
 
-int resource_read_ultrasonic_sensor(int echo_pin_num, int trig_pin_num, double *out_value)
+int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, double *out_value)
 {
 	int ret = 0;
 	double duration = 0.0;
 	struct timeval start_time, end_time, temp_start_time, temp_end_time;
 
+	if (!resource_get_info(trig_pin_num)->opened) {
+		_I("Ultrasonic sensor's trig is initializing...");
+
+		ret = peripheral_gpio_open(trig_pin_num, &resource_get_info(trig_pin_num)->sensor_h);
+		retv_if(!resource_get_info(trig_pin_num)->sensor_h, -1);
+
+		ret = peripheral_gpio_set_direction(resource_get_info(trig_pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_OUT);
+		retv_if(ret != 0, -1);
+
+		resource_get_info(trig_pin_num)->opened = 1;
+	}
+
 	if (!resource_get_info(echo_pin_num)->opened) {
-		_I("Ultrasonic sensor is initializing...");
+		_I("Ultrasonic sensor's echo is initializing...");
 
 		ret = peripheral_gpio_open(echo_pin_num, &resource_get_info(echo_pin_num)->sensor_h);
 		retv_if(!resource_get_info(echo_pin_num)->sensor_h, -1);
@@ -68,18 +80,6 @@ int resource_read_ultrasonic_sensor(int echo_pin_num, int trig_pin_num, double *
 		retv_if(ret != 0, -1);
 
 		resource_get_info(echo_pin_num)->opened = 1;
-	}
-
-	if (!resource_get_info(trig_pin_num)->opened) {
-		_I("Ultrasonic sensor is initializing...");
-
-		ret = peripheral_gpio_open(trig_pin_num, &resource_get_info(trig_pin_num)->sensor_h);
-		retv_if(!resource_get_info(trig_pin_num)->sensor_h, -1);
-
-		ret = peripheral_gpio_set_direction(resource_get_info(trig_pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
-		retv_if(ret != 0, -1);
-
-		resource_get_info(trig_pin_num)->opened = 1;
 	}
 
 	ret = peripheral_gpio_write(resource_get_info(trig_pin_num)->sensor_h, 0);

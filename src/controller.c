@@ -78,7 +78,7 @@ static Eina_Bool _infrared_motion_getter_timer(void *data)
 	return ECORE_CALLBACK_RENEW;
 }
 
-#ifndef USE_MULTIPLE_SENSOR
+#if (!USE_MULTIPLE_SENSOR)
 static Eina_Bool _ultrasonic_getter_timer(void *data)
 {
 	double value = 0;

@@ -370,15 +370,14 @@ error:
 	_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 }
 
-/* device_name : "iotcon-test-basic-server" */
-int connectivity_init(const char *device_name)
+int connectivity_init(void)
 {
 	int ret = -1;
 
 	ret = iotcon_initialize("/home/owner/apps_rw/org.tizen.position-finder-server/data/iotcon-test-svr-db-server.dat");
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-	ret = iotcon_set_device_name(device_name);
+	ret = iotcon_set_device_name(ULTRASONIC_RESOURCE_TYPE);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_start_presence(10);

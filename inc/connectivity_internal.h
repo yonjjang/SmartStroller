@@ -22,7 +22,7 @@
 #ifndef __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__
 #define __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__
 
-extern int connectivity_init(const char *device_name);
+extern int connectivity_init(void);
 extern int connectivity_fini(void);
 
 #endif /* __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__ */

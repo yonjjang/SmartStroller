@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
 /* Do not modify codes under this comment */
 static void _start_internal_function(void)
 {
-	connectivity_init("iotcon-test-basic-server");
+	connectivity_init();
 }
 
 static void _stop_internal_function(void)

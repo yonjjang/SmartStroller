@@ -5,7 +5,7 @@
     <author email="gs86.lee@samsung.com" href="www.samsung.com">Geunsun Lee</author>
     <author email="ey928.lee@samsung.com" href="www.samsung.com">Eunyoung Lee</author>
     <author email="junkyu.han@samsung.com" href="www.samsung.com">Junkyu Han</author>
-    <service-application appid="org.tizen.position-finder-server" auto-restart="false" exec="position-finder-server" multiple="false" nodisplay="true" on-boot="false" taskmanage="false" type="capp">
+    <service-application appid="org.tizen.position-finder-server" auto-restart="true" exec="position-finder-server" multiple="false" nodisplay="true" on-boot="true" taskmanage="false" type="capp">
         <label>Position Finder</label>
         <icon>position_finder_server.png</icon>
     </service-application>

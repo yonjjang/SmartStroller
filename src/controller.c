@@ -40,6 +40,7 @@
 #define GPIO_INFRARED_MOTION_NUM_1 4
 #define I2C_ILLUMINANCE_FIRST_PIN_1 3
 #define USE_MULTIPLE_SENSOR 1
+#define MULTIPLE_SENSOR_NUMBER 5
 
 static void _start_internal_function(void);
 static void _stop_internal_function(void);
@@ -52,19 +53,20 @@ typedef struct app_data_s {
 static Eina_Bool _infrared_motion_getter_timer(void *data)
 {
 #if USE_MULTIPLE_SENSOR
-	int gpio_num[3] = { 16, 23, 26 };
+	int gpio_num[MULTIPLE_SENSOR_NUMBER] = { 5, 6, 13, 19, 26 };
 	int i = 0;
-	int value[3] = { 0, };
+	int value[MULTIPLE_SENSOR_NUMBER] = { 0, };
 	int detected = 0;
 	app_data *ad = data;
 
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < MULTIPLE_SENSOR_NUMBER; i++) {
 		if (resource_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
 			_E("Failed to get Infrared Motion value [GPIO:%d]", gpio_num[i]);
 			continue;
 		}
 		detected |= value[i];
 	}
+	_I("[5:%d][6:%d][13:%d][19:%d][26:%d]", value[0], value[1], value[2], value[3], value[4]);
 
 	if (connectivity_notify(ad->resource_info, detected) == -1)
 		_E("Cannot notify message");

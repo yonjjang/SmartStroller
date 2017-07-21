@@ -19,6 +19,7 @@ pkg_check_modules(APP_PKGS REQUIRED
 	ecore
 	eina
 	iotcon
+	gio-2.0
 )
 
 FOREACH (flag ${APP_PKGS_CFLAGS})

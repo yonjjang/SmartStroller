@@ -22,6 +22,6 @@
 #ifndef __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__
 #define __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__
 
-extern int resource_read_ultrasonic_sensor(int echo_pin_num, int trig_pin_num, double *out_value);
+extern int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource_read_cb cb, void *data);
 
 #endif /* __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_H__ */

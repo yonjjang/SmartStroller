@@ -14,10 +14,11 @@ BuildRequires:  pkgconfig(capi-appfw-application)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(libtzplatform-config)
 BuildRequires:  pkgconfig(capi-appfw-service-application)
-BuildRequires:	pkgconfig(capi-system-peripheral-io)
-BuildRequires:	pkgconfig(ecore)
-BuildRequires:	pkgconfig(eina)
-BuildRequires:	pkgconfig(iotcon)
+BuildRequires:  pkgconfig(capi-system-peripheral-io)
+BuildRequires:  pkgconfig(ecore)
+BuildRequires:  pkgconfig(eina)
+BuildRequires:  pkgconfig(iotcon)
+BuildRequires:  pkgconfig(gio-2.0)
 
 %description
 Server for Position Finder

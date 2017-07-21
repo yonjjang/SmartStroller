@@ -38,6 +38,15 @@ struct _resource_s {
 };
 typedef struct _resource_s resource_s;
 
+typedef void (*resource_read_cb)(double value, void *data);
+
+struct _resource_read_cb_s {
+	resource_read_cb cb;
+	void *data;
+	int pin_num;
+};
+typedef struct _resource_read_cb_s resource_read_s;
+
 extern resource_s *resource_get_info(int pin_num);
 extern void resource_close_all(void);
 

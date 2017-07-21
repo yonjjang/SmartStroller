@@ -39,7 +39,7 @@
 #define GPIO_ULTRASONIC_ECHO_NUM_1 21
 #define GPIO_INFRARED_MOTION_NUM_1 4
 #define I2C_ILLUMINANCE_FIRST_PIN_1 3
-#define USE_MULTIPLE_SENSOR 1
+#define USE_MULTIPLE_SENSOR 0
 #define MULTIPLE_SENSOR_NUMBER 5
 
 static void _start_internal_function(void);
@@ -81,12 +81,16 @@ static Eina_Bool _infrared_motion_getter_timer(void *data)
 }
 
 #if (!USE_MULTIPLE_SENSOR)
+static void ultrasonic_sensor_read_cb(double value, void *data)
+{
+	_I("Distance : %.2fcm", value);
+}
+
 static Eina_Bool _ultrasonic_getter_timer(void *data)
 {
 	double value = 0;
 
-	retv_if(resource_read_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1, &value) == -1, ECORE_CALLBACK_CANCEL);
-	_I("Ultra Sonic Distance is [%d cm]", value);
+	retv_if(resource_read_ultrasonic_sensor(GPIO_ULTRASONIC_TRIG_NUM_1, GPIO_ULTRASONIC_ECHO_NUM_1, ultrasonic_sensor_read_cb, NULL) == -1, ECORE_CALLBACK_CANCEL);
 
 	return ECORE_CALLBACK_RENEW;
 }

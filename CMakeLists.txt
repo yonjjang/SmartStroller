@@ -34,6 +34,7 @@ INCLUDE_DIRECTORIES(${PROJECT_ROOT_DIR}/inc)
 
 ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/controller.c
+	${PROJECT_ROOT_DIR}/src/controller_internal.c
 	${PROJECT_ROOT_DIR}/src/connectivity.c
 	${PROJECT_ROOT_DIR}/src/resource.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_illuminance_sensor.c

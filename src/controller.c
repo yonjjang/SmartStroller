@@ -42,9 +42,6 @@
 #define USE_MULTIPLE_SENSOR 0
 #define MULTIPLE_SENSOR_NUMBER 5
 
-static void _start_internal_function(void);
-static void _stop_internal_function(void);
-
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer[PIN_MAX];
 	connectivity_resource_s *resource_info;
@@ -111,7 +108,7 @@ static bool service_app_create(void *data)
 	app_data *ad = data;
 	int ret = -1;
 
-	_start_internal_function();
+	controller_init_internal_functions();
 
 	ret = connectivity_set_resource("/door/1", "org.tizen.door", &ad->resource_info);
 	if (ret == -1) _E("Cannot broadcast resource");
@@ -159,7 +156,7 @@ static void service_app_terminate(void *data)
 	}
 
 	connectivity_unset_resource(ad->resource_info);
-	_stop_internal_function();
+	controller_fini_internal_functions();
 
 	free(ad);
 }
@@ -210,17 +207,4 @@ int main(int argc, char* argv[])
 	ret = service_app_main(argc, argv, &event_callback, ad);
 
 	return ret;
-}
-
-/* Do not modify codes under this comment */
-static void _start_internal_function(void)
-{
-	connectivity_init();
-}
-
-static void _stop_internal_function(void)
-{
-	_I("Terminating...");
-	resource_close_all();
-	connectivity_fini();
 }

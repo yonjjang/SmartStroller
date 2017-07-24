@@ -19,9 +19,20 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_CONTROLLER_H__
-#define __POSITION_FINDER_CONTROLLER_H__
+#include <iotcon.h>
 
-#include "controller_internal.h"
+#include "log.h"
+#include "connectivity.h"
+#include "resource.h"
 
-#endif /* __POSITION_FINDER_CONTROLLER_H__ */
+void controller_init_internal_functions(void)
+{
+	connectivity_init();
+}
+
+void controller_fini_internal_functions(void)
+{
+	_I("Terminating...");
+	resource_close_all();
+	connectivity_fini();
+}

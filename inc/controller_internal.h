@@ -19,9 +19,10 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_CONTROLLER_H__
-#define __POSITION_FINDER_CONTROLLER_H__
+#ifndef __POSITION_FINDER_CONTROLLER_INTERNAL_H__
+#define __POSITION_FINDER_CONTROLLER_INTERNAL_H__
 
-#include "controller_internal.h"
+extern void controller_init_internal_functions(void);
+extern void controller_fini_internal_functions(void);
 
-#endif /* __POSITION_FINDER_CONTROLLER_H__ */
+#endif /* __POSITION_FINDER_CONTROLLER_INTERNAL_H__ */

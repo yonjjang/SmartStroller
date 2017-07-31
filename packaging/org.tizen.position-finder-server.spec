@@ -4,7 +4,7 @@ Summary:    IoTivity Application
 Group:      Applications/Core Applications
 Version:    0.0.1
 Release:    1
-License:    Apache-2.0
+License:    Flora-1.1
 Provides:   org.tizen.position-finder-server = %{version}-%{release}
 Source0:    %{name}-%{version}.tar.gz
 

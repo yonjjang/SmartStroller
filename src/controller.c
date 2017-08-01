@@ -36,6 +36,7 @@
 #define GPIO_ULTRASONIC_TRIG_NUM_1 20
 #define GPIO_ULTRASONIC_ECHO_NUM_1 21
 #define MULTIPLE_SENSOR_NUMBER 5
+#define CONNECTIVITY_KEY "opened"
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;
@@ -57,11 +58,10 @@ static Eina_Bool control_read_sensors_cb(void *data)
 		}
 		total |= value[i];
 	}
-
-	if (connectivity_notify(ad->resource_info, total) == -1)
-		_E("Cannot notify message");
-
 	_I("[5:%d] | [6:%d] | [13:%d] | [19:%d] | [26:%d] = [Total:%d]", value[0], value[1], value[2], value[3], value[4], total);
+
+	if (connectivity_notify_bool(ad->resource_info, CONNECTIVITY_KEY, total) == -1)
+		_E("Cannot notify message");
 
 	return ECORE_CALLBACK_RENEW;
 }

@@ -20,6 +20,7 @@
  */
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <glib.h>
 #include <Eina.h>
 
@@ -32,7 +33,6 @@
 #define ULTRASONIC_RESOURCE_2_URI "/door/2"
 #define ULTRASONIC_RESOURCE_TYPE "org.tizen.door"
 
-static bool _resource_created;
 static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
 
 static int _send_response(iotcon_request_h request, iotcon_representation_h representation, iotcon_response_result_e result)
@@ -67,7 +67,7 @@ static void _destroy_representation(iotcon_representation_h representation)
 	iotcon_representation_destroy(representation);
 }
 
-static iotcon_representation_h _create_representation_with_attribute(iotcon_resource_h res, bool value)
+static iotcon_representation_h _create_representation_with_bool(iotcon_resource_h res, const char *key, bool value)
 {
 	iotcon_attributes_h attributes = NULL;
 	iotcon_representation_h representation = NULL;
@@ -103,84 +103,79 @@ error:
 	return NULL;
 }
 
-static int _handle_get_request(iotcon_resource_h res, iotcon_request_h request)
+static iotcon_representation_h _create_representation_with_int(iotcon_resource_h res, const char *key, int value)
 {
-	iotcon_representation_h representation;
-	int ret = -1;
-	int value = 1;
-
-	/* FIXME : We need to check the value of sensors */
-	representation = _create_representation_with_attribute(res, (bool)value);
-	retv_if(!representation, -1);
-
-	ret = _send_response(request, representation, IOTCON_RESPONSE_OK);
-	goto_if(0 != ret, error);
-
-	_destroy_representation(representation);
-
-	return 0;
-
-error:
-	_destroy_representation(representation);
-	return -1;
-}
-
-static int _get_value_from_representation(iotcon_representation_h representation, bool *value)
-{
-	iotcon_attributes_h attributes;
+	iotcon_attributes_h attributes = NULL;
+	iotcon_representation_h representation = NULL;
+	char *uri_path = NULL;
 	int ret = -1;
 
-	ret = iotcon_representation_get_attributes(representation, &attributes);
-	retv_if(IOTCON_ERROR_NONE != ret, -1);
+	ret = iotcon_resource_get_uri_path(res, &uri_path);
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
-	ret = iotcon_attributes_get_bool(attributes, "opened", value);
-	retv_if(IOTCON_ERROR_NONE != ret, -1);
+	ret = iotcon_representation_create(&representation);
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
-	return 0;
-}
-
-static int _set_value_into_thing(iotcon_representation_h representation, bool value)
-{
-	/* FIXME : We need to set the value into the thing */
-	return 0;
-}
-
-static int _handle_put_request(connectivity_resource_s *resource_info, iotcon_request_h request)
-{
-	iotcon_representation_h req_repr, resp_repr;
-	int ret = -1;
-	bool value = false;
-
-	_D("PUT request");
-
-	ret = iotcon_request_get_representation(request, &req_repr);
-	retv_if(IOTCON_ERROR_NONE != ret, -1);
-
-	ret = _get_value_from_representation(req_repr, &value);
-	retv_if(0 != ret, -1);
-
-	ret = _set_value_into_thing(req_repr, value);
-	retv_if(0 != ret, -1);
-
-	resp_repr = _create_representation_with_attribute(resource_info->res, (bool)value);
-	retv_if(NULL == resp_repr, -1);
-
-	ret = _send_response(request, resp_repr, IOTCON_RESPONSE_OK);
-	goto_if(0 != ret, error);
-
-	ret = iotcon_resource_notify(resource_info->res, resp_repr, resource_info->observers, IOTCON_QOS_HIGH);
+	ret = iotcon_attributes_create(&attributes);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	_destroy_representation(resp_repr);
+	ret = iotcon_representation_set_uri_path(representation, uri_path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	return 0;
+	ret = iotcon_attributes_add_int(attributes, "opened", value);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_representation_set_attributes(representation, attributes);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	iotcon_attributes_destroy(attributes);
+
+	return representation;
 
 error:
-	_destroy_representation(resp_repr);
-	return -1;
+	if (attributes) iotcon_attributes_destroy(attributes);
+	if (representation) iotcon_representation_destroy(representation);
+
+	return NULL;
 }
 
-int connectivity_notify(connectivity_resource_s *resource_info, int value)
+static iotcon_representation_h _create_representation_with_double(iotcon_resource_h res, const char *key, double value)
+{
+	iotcon_attributes_h attributes = NULL;
+	iotcon_representation_h representation = NULL;
+	char *uri_path = NULL;
+	int ret = -1;
+
+	ret = iotcon_resource_get_uri_path(res, &uri_path);
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
+
+	ret = iotcon_representation_create(&representation);
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
+
+	ret = iotcon_attributes_create(&attributes);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_representation_set_uri_path(representation, uri_path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_attributes_add_double(attributes, "opened", value);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_representation_set_attributes(representation, attributes);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	iotcon_attributes_destroy(attributes);
+
+	return representation;
+
+error:
+	if (attributes) iotcon_attributes_destroy(attributes);
+	if (representation) iotcon_representation_destroy(representation);
+
+	return NULL;
+}
+
+int connectivity_notify_bool(connectivity_resource_s *resource_info, const char *key, bool value)
 {
 	iotcon_representation_h representation;
 	int ret = -1;
@@ -190,7 +185,7 @@ int connectivity_notify(connectivity_resource_s *resource_info, int value)
 
 	_D("Notify the value[%d]", value);
 
-	representation = _create_representation_with_attribute(resource_info->res, (bool)value);
+	representation = _create_representation_with_bool(resource_info->res, key, value);
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
@@ -201,66 +196,44 @@ int connectivity_notify(connectivity_resource_s *resource_info, int value)
 	return 0;
 }
 
-static int _handle_post_request(connectivity_resource_s *resource_info, iotcon_request_h request)
+int connectivity_notify_int(connectivity_resource_s *resource_info, const char *key, int value)
 {
-	iotcon_attributes_h resp_attributes = NULL;
-	iotcon_representation_h resp_repr = NULL;
-	connectivity_resource_s *new_resource_info = NULL;
+	iotcon_representation_h representation;
 	int ret = -1;
 
-	_D("POST request");
+	retv_if(!resource_info, -1);
+	retv_if(!resource_info->observers, -1);
 
-	if (_resource_created) {
-		_E("Resource(%s) is already created", ULTRASONIC_RESOURCE_2_URI);
-		return -1;
-	}
+	_D("Notify the value[%d]", value);
 
-	new_resource_info = calloc(1, sizeof(connectivity_resource_s));
-	retv_if(!new_resource_info, -1);
+	representation = _create_representation_with_int(resource_info->res, key, value);
+	retv_if(!representation, -1);
 
-	ret = connectivity_set_resource(ULTRASONIC_RESOURCE_2_URI, ULTRASONIC_RESOURCE_TYPE, &new_resource_info);
-	retv_if(0 != ret, -1);
-
-	_resource_created = true;
-
-	ret = iotcon_representation_create(&resp_repr);
+	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-	ret = iotcon_attributes_create(&resp_attributes);
-	goto_if(IOTCON_ERROR_NONE != ret, error);
-
-	ret = iotcon_attributes_add_str(resp_attributes, "createduripath", ULTRASONIC_RESOURCE_2_URI);
-	goto_if(IOTCON_ERROR_NONE != ret, error);
-
-	ret = iotcon_representation_set_attributes(resp_repr, resp_attributes);
-	goto_if(IOTCON_ERROR_NONE != ret, error);
-
-	iotcon_attributes_destroy(resp_attributes);
-
-	ret = _send_response(request, resp_repr, IOTCON_RESPONSE_RESOURCE_CREATED);
-	goto_if(0 != ret, error);
-
-	iotcon_representation_destroy(resp_repr);
+	_destroy_representation(representation);
 
 	return 0;
-
-error:
-	if (resp_attributes) iotcon_attributes_destroy(resp_attributes);
-	iotcon_representation_destroy(resp_repr);
-	return -1;
 }
 
-static int _handle_delete_request(iotcon_resource_h resource, iotcon_request_h request)
+int connectivity_notify_double(connectivity_resource_s *resource_info, const char *key, double value)
 {
+	iotcon_representation_h representation;
 	int ret = -1;
 
-	_D("DELETE request");
+	retv_if(!resource_info, -1);
+	retv_if(!resource_info->observers, -1);
 
-	ret = iotcon_resource_destroy(resource);
+	_D("Notify the value[%f]", value);
+
+	representation = _create_representation_with_double(resource_info->res, key, value);
+	retv_if(!representation, -1);
+
+	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
-	ret = _send_response(request, NULL, IOTCON_RESPONSE_RESOURCE_DELETED);
-	retv_if(0 != ret, -1);
+	_destroy_representation(representation);
 
 	return 0;
 }
@@ -295,16 +268,16 @@ static int _handle_request_by_crud_type(iotcon_request_h request, connectivity_r
 
 	switch (type) {
 	case IOTCON_REQUEST_GET:
-		ret = _handle_get_request(resource_info->res, request);
+		_I("Do not support 'get' query");
 		break;
 	case IOTCON_REQUEST_PUT:
-		ret = _handle_put_request(resource_info, request);
+		_I("Do not support 'put' query");
 		break;
 	case IOTCON_REQUEST_POST:
-		ret = _handle_post_request(resource_info, request);
+		_I("Do not support 'post' query");
 		break;
 	case IOTCON_REQUEST_DELETE:
-		ret = _handle_delete_request(resource_info->res, request);
+		_I("Do not support 'delete' query");
 		break;
 	default:
 		_E("Cannot reach here");

@@ -34,6 +34,8 @@ typedef struct connectivity_resource connectivity_resource_s;
 extern int connectivity_set_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info);
 extern void connectivity_unset_resource(connectivity_resource_s *resource);
 
-extern int connectivity_notify(connectivity_resource_s *resource_info, int value);
+extern int connectivity_notify_bool(connectivity_resource_s *resource_info, const char *key, bool value);
+extern int connectivity_notify_int(connectivity_resource_s *resource_info, const char *key, int value);
+extern int connectivity_notify_double(connectivity_resource_s *resource_info, const char *key, double value);
 
 #endif /* __POSITION_FINDER_CONNECTIVITY_H__ */

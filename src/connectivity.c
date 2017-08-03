@@ -353,9 +353,6 @@ int connectivity_init(void)
 	ret = iotcon_set_device_name(ULTRASONIC_RESOURCE_TYPE);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_start_presence(10);
-	goto_if(IOTCON_ERROR_NONE != ret, error);
-
 	return 0;
 
 error:

@@ -19,11 +19,11 @@
  * limitations under the License.
  */
 
-#include <tizen.h>
-#include <Ecore.h>
-#include <service_app.h>
 #include <unistd.h>
 #include <glib.h>
+#include <Ecore.h>
+#include <tizen.h>
+#include <service_app.h>
 
 #include <iotcon.h> // Please remove this after test
 

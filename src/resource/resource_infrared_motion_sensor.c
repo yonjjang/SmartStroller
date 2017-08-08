@@ -53,7 +53,5 @@ int resource_read_infrared_motion_sensor(int pin_num, int *out_value)
 	ret = peripheral_gpio_read(resource_get_info(pin_num)->sensor_h, out_value);
 	retv_if(ret < 0, -1);
 
-	_I("Infrared Motion Sensor Value : %d", *out_value);
-
 	return 0;
 }

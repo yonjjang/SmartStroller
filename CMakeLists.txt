@@ -3,7 +3,7 @@ PROJECT(position-finder-server C)
 
 SET(INSTALL_EXEC_PREFIX "${INSTALL_PREFIX}/bin")
 SET(INSTALL_RESDIR "${INSTALL_PREFIX}/res")
-SET(INSTALL_DATADIR "/home/owner/apps_rw/org.tizen.position-finder-server/data")
+SET(INSTALL_RESDIR "/home/owner/apps_rw/org.tizen.position-finder-server/res")
 SET(CMAKE_VERBOSE_MAKEFILE 0)
 
 SET(PROJECT_ROOT_DIR "${CMAKE_SOURCE_DIR}")
@@ -43,7 +43,6 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/resource/resource_touch_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_ultrasonic_sensor.c
 )
-#${PROJECT_ROOT_DIR}/src/connectivity.c
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} -lm)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${APP_PKGS_LDFLAGS})
@@ -54,6 +53,6 @@ INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_EXEC_PREFIX})
 INSTALL(FILES ${PROJECT_ROOT_DIR}/tizen-manifest.xml DESTINATION ${SYS_PACKAGES_DIR} RENAME org.tizen.position-finder-server.xml)
 INSTALL(DIRECTORY DESTINATION ${PREFIX}/data)
 INSTALL(FILES ${PROJECT_ROOT_DIR}/shared/res/position_finder_server.png DESTINATION ${SYS_ICONS_DIR})
-INSTALL(FILES ${PROJECT_ROOT_DIR}/res/iotcon-test-svr-db-server.dat DESTINATION ${INSTALL_DATADIR})
+INSTALL(FILES ${PROJECT_ROOT_DIR}/res/iotcon-test-svr-db-server.dat DESTINATION ${INSTALL_RESDIR})
 
 # End of a file

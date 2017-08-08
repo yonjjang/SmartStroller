@@ -19,6 +19,7 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <glib.h>
@@ -32,6 +33,9 @@
 #define ULTRASONIC_RESOURCE_1_URI "/door/1"
 #define ULTRASONIC_RESOURCE_2_URI "/door/2"
 #define ULTRASONIC_RESOURCE_TYPE "org.tizen.door"
+#define BUFSIZE 1024
+#define CBOR_FILE_IN_RES "/home/owner/apps_rw/org.tizen.position-finder-server/res/iotcon-test-svr-db-server.dat"
+#define CBOR_FILE_IN_DATA "/home/owner/apps_rw/org.tizen.position-finder-server/data/iotcon-test-svr-db-server.dat"
 
 static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
 
@@ -302,11 +306,15 @@ static int _handle_observer(iotcon_request_h request, iotcon_observers_h observe
 		ret = iotcon_request_get_observe_id(request, &observe_id);
 		retv_if(IOTCON_ERROR_NONE != ret, -1);
 
+		_I("Add an observer : %d", observe_id);
+
 		ret = iotcon_observers_add(observers, observe_id);
 		retv_if(IOTCON_ERROR_NONE != ret, -1);
 	} else if (IOTCON_OBSERVE_DEREGISTER == observe_type) {
 		ret = iotcon_request_get_observe_id(request, &observe_id);
 		retv_if(IOTCON_ERROR_NONE != ret, -1);
+
+		_I("Remove an observer : %d", observe_id);
 
 		ret = iotcon_observers_remove(observers, observe_id);
 		retv_if(IOTCON_ERROR_NONE != ret, -1);
@@ -343,11 +351,46 @@ error:
 	_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 }
 
+static void _copy_file(const char *in_filename, const char *out_filename)
+{
+	char buf[BUFSIZE] = { 0, };
+	size_t nread = 0;
+	FILE *in = NULL;
+	FILE *out = NULL;
+
+	ret_if(!in_filename);
+	ret_if(!out_filename);
+
+	in = fopen(in_filename, "r");
+	ret_if(!in);
+
+	out = fopen(out_filename, "w");
+	goto_if(!out, error);
+
+	rewind(in);
+	while ((nread = fread(buf, 1, sizeof(buf), in)) > 0) {
+		if (fwrite (buf, 1, nread, out) < nread) {
+			_E("critical error to copy a file");
+			break;
+		}
+	}
+
+	fclose(in);
+	fclose(out);
+
+	return;
+
+error:
+	fclose(out);
+}
+
 int connectivity_init(void)
 {
 	int ret = -1;
 
-	ret = iotcon_initialize("/home/owner/apps_rw/org.tizen.position-finder-server/data/iotcon-test-svr-db-server.dat");
+	_copy_file(CBOR_FILE_IN_RES, CBOR_FILE_IN_DATA);
+
+	ret = iotcon_initialize(CBOR_FILE_IN_DATA);
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	ret = iotcon_set_device_name(ULTRASONIC_RESOURCE_TYPE);

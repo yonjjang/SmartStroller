@@ -132,6 +132,7 @@ int main(int argc, char* argv[])
 	app_event_handler_h handlers[5] = {NULL, };
 
 	ad = calloc(1, sizeof(app_data));
+	retv_if(!ad, -1);
 
 	event_callback.create = service_app_create;
 	event_callback.terminate = service_app_terminate;

@@ -19,17 +19,9 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_RESOURCE_H__
-#define __POSITION_FINDER_RESOURCE_H__
+#ifndef __POSITION_FINDER_RESOURCE_LED_INTERNAL_H__
+#define __POSITION_FINDER_RESOURCE_LED_INTERNAL_H__
 
-#include <peripheral_io.h>
+extern void resource_close_led(int pin_num);
 
-#include "resource_internal.h"
-#include "resource/resource_illuminance_sensor.h"
-#include "resource/resource_infrared_motion_sensor.h"
-#include "resource/resource_infrared_obstacle_avoidance_sensor.h"
-#include "resource/resource_touch_sensor.h"
-#include "resource/resource_ultrasonic_sensor.h"
-#include "resource/resource_led.h"
-
-#endif /* __POSITION_FINDER_RESOURCE_H__ */
+#endif /* __POSITION_FINDER_RESOURCE_LED_INTERNAL_H__ */

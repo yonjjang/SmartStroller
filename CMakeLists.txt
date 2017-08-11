@@ -43,6 +43,7 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/resource/resource_infrared_obstacle_avoidance_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_touch_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_ultrasonic_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_led.c
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} -lm)

@@ -88,7 +88,7 @@ static iotcon_representation_h _create_representation_with_bool(iotcon_resource_
 	ret = iotcon_representation_set_uri_path(representation, uri_path);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_attributes_add_bool(attributes, "opened", value);
+	ret = iotcon_attributes_add_bool(attributes, key, value);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_representation_set_attributes(representation, attributes);

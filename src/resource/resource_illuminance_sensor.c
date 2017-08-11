@@ -42,12 +42,11 @@ void resource_close_illuminance_sensor(void)
 {
 	if (!resource_sensor_s.opened) return;
 
-	_I("Infrared Motion Sensor is finishing...");
+	_I("Illuminance Sensor is finishing...");
 	peripheral_i2c_close(resource_sensor_s.sensor_h);
 	resource_sensor_s.opened = 0;
 }
 
-/* You have to use this illuminance sensor ONLY ONE in the pi board */
 int resource_read_illuminance_sensor(int i2c_bus, int *out_value)
 {
 	int ret = PERIPHERAL_ERROR_NONE;
@@ -67,7 +66,7 @@ int resource_read_illuminance_sensor(int i2c_bus, int *out_value)
 
 	*out_value = (buf[0] << 8 | buf[1]) / GY30_CONSTANT_NUM; // Just Sum High 8bit and Low 8bit
 
-	_I("Infrared Motion Sensor Value : %d", *out_value);
+	_I("Illuminance Sensor Value : %d", *out_value);
 
 	return 0;
 }

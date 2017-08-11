@@ -31,11 +31,51 @@ struct connectivity_resource {
 
 typedef struct connectivity_resource connectivity_resource_s;
 
+/**
+ * @brief Create connectivity resources and registers the resource in server.
+ * @param[in] uri_path The URI path of the resource
+ * @param[in] type The string data to insert into the resource types (e.g. "org.tizen.light")
+ * @param[out] out_resource_info A structure containing information about connectivity resources
+ * @return 0 on success, otherwise a negative error value
+ * @see uri_path length must be less than 128.
+ * @see You must destroy resource by calling iotcon_resource_destroy() if resource is no longer needed.
+ */
 extern int connectivity_set_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info);
+
+/**
+ * @brief Releases all resources about connectivity.
+ * @param[in] resource_info A structure containing information about connectivity resources
+ */
 extern void connectivity_unset_resource(connectivity_resource_s *resource);
 
+/**
+ * @brief Notifies specific clients that resource's attributes have changed with boolean vaule.
+ * @param[in] resource_info A structure containing information about connectivity resources
+ * @param[in] key A new key to be added into attributes
+ * @param[in] value A boolean value to be added into attributes
+ * @return 0 on success, otherwise a negative error value
+ * @see If key is already exists, current value will be replaced with new value.
+ */
 extern int connectivity_notify_bool(connectivity_resource_s *resource_info, const char *key, bool value);
+
+/**
+ * @brief Notifies specific clients that resource's attributes have changed with int vaule.
+ * @param[in] resource_info A structure containing information about connectivity resources
+ * @param[in] key A new key to be added into attributes
+ * @param[in] value A int value to be added into attributes
+ * @return 0 on success, otherwise a negative error value
+ * @see If key is already exists, current value will be replaced with new value.
+ */
 extern int connectivity_notify_int(connectivity_resource_s *resource_info, const char *key, int value);
+
+/**
+ * @brief Notifies specific clients that resource's attributes have changed with double vaule.
+ * @param[in] resource_info A structure containing information about connectivity resources
+ * @param[in] key A new key to be added into attributes
+ * @param[in] value A double value to be added into attributes
+ * @return 0 on success, otherwise a negative error value
+ * @see If key is already exists, current value will be replaced with new value.
+ */
 extern int connectivity_notify_double(connectivity_resource_s *resource_info, const char *key, double value);
 
 #endif /* __POSITION_FINDER_CONNECTIVITY_H__ */

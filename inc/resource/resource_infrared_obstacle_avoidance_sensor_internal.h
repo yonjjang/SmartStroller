@@ -22,6 +22,10 @@
 #ifndef __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_INTERNAL_H__
 #define __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_INTERNAL_H__
 
+/**
+ * @brief Releases the gpio handle and changes the gpio pin state to the close(0).
+ * @param[in] pin_num The number of the gpio pin connected to the infrared obstacle avoidance sensor
+ */
 extern void resource_close_infrared_obstacle_avoidance_sensor(int pin_num);
 
 #endif /* __POSITION_FINDER_RESOURCE_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_INTERNAL_H__ */

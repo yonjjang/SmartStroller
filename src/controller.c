@@ -42,7 +42,7 @@ typedef struct app_data_s {
 	connectivity_resource_s *resource_info;
 } app_data;
 
-static Eina_Bool control_read_sensors_cb(void *data)
+static Eina_Bool control_sensors_cb(void *data)
 {
 	int value[MULTIPLE_SENSOR_NUMBER] = { 0, };
 	int total = 0;
@@ -50,15 +50,29 @@ static Eina_Bool control_read_sensors_cb(void *data)
 	int i = 0;
 	app_data *ad = data;
 
+	/**
+	 * This is the case when a number of the same sensors are installed.
+	 * Each of the five infrared motion sensors will receive the value.
+	 */
 	for (i = 0; i < MULTIPLE_SENSOR_NUMBER; i++) {
+		/**
+		 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is detected.
+		 */
 		if (resource_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
 			_E("Failed to get Infrared Motion value [GPIO:%d]", gpio_num[i]);
 			continue;
 		}
+		/**
+		 * If one of the five infrared motion sensors detects motion (1),
+		 * it is judged that there is a person (total == 1).
+		 */
 		total |= value[i];
 	}
 	_I("[5:%d] | [6:%d] | [13:%d] | [19:%d] | [26:%d] = [Total:%d]", value[0], value[1], value[2], value[3], value[4], total);
 
+	/**
+	 * Notifies specific clients that resource's attributes have changed.
+	 */
 	if (connectivity_notify_bool(ad->resource_info, CONNECTIVITY_KEY, total) == -1)
 		_E("Cannot notify message");
 
@@ -70,11 +84,23 @@ static bool service_app_create(void *data)
 	app_data *ad = data;
 	int ret = -1;
 
+	/**
+	 * No modification required!!!
+	 * Access only when modifying internal functions.
+	 */
 	controller_init_internal_functions();
+
+	/**
+	 * Create connectivity resources and registers the resource in server.
+	 */
 	ret = connectivity_set_resource("/door/1", "org.tizen.door", &ad->resource_info);
 	if (ret == -1) _E("Cannot broadcast resource");
 
-	ad->getter_timer = ecore_timer_add(0.5f, control_read_sensors_cb, ad);
+	/**
+	 * Creates a timer to call the given function in the given period of time.
+	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
+	 */
+	ad->getter_timer = ecore_timer_add(0.5f, control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add infrared motion getter timer");
 		return false;
@@ -93,7 +119,15 @@ static void service_app_terminate(void *data)
 		}
 	}
 
+	/**
+	 * Releases all resources about connectivity.
+	 */
 	connectivity_unset_resource(ad->resource_info);
+
+	/**
+	 * No modification required!!!
+	 * Access only when modifying internal functions.
+	 */
 	controller_fini_internal_functions();
 
 	free(ad);

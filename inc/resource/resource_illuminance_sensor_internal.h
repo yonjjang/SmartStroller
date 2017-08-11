@@ -22,6 +22,9 @@
 #ifndef __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_INTERNAL_H__
 #define __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_INTERNAL_H__
 
+/**
+ * @brief Destory the i2c handle and changes the gpio pin state to the close(0).
+ */
 extern void resource_close_illuminance_sensor(void);
 
 #endif /* __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_INTERNAL_H__ */

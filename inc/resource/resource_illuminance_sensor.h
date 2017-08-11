@@ -22,7 +22,13 @@
 #ifndef __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_H__
 #define __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_H__
 
-/* You have to use this illuminance sensor ONLY ONE in the pi board */
+/**
+ * @brief Reads the value of i2c bus connected illuminance sensor.
+ * @param[in] i2c_bus The i2c bus number that the slave device is connected
+ * @param[out] out_value The vaule read by the illuminance sensor
+ * @return 0 on success, otherwise a negative error value
+ * @see If the i2c bus is not open, creates i2c handle before reading data from the i2c slave device.
+ */
 extern int resource_read_illuminance_sensor(int i2c_bus, int *out_value);
 
 #endif /* __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_H__ */

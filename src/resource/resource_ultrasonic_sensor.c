@@ -28,18 +28,18 @@
 #include "log.h"
 #include "resource_internal.h"
 
-void resource_close_ultrasonic_sensor(int echo_pin_num, int trig_pin_num)
+void resource_close_ultrasonic_sensor(int trig_pin_num, int echo_pin_num)
 {
 	if (!resource_get_info(echo_pin_num)->opened) return;
 	if (!resource_get_info(trig_pin_num)->opened) return;
 
 	_I("Ultrasonic sensor is finishing...");
 
-	peripheral_gpio_close(resource_get_info(echo_pin_num)->sensor_h);
 	peripheral_gpio_close(resource_get_info(trig_pin_num)->sensor_h);
+	peripheral_gpio_close(resource_get_info(echo_pin_num)->sensor_h);
 
-	resource_get_info(echo_pin_num)->opened = 0;
 	resource_get_info(trig_pin_num)->opened = 0;
+	resource_get_info(echo_pin_num)->opened = 0;
 }
 
 static void _resource_read_ultrasonic_sensor_cb(gpio_isr_cb_s *data, void *user_data)

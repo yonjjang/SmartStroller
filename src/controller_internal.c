@@ -19,8 +19,6 @@
  * limitations under the License.
  */
 
-#include <iotcon.h>
-
 #include "log.h"
 #include "connectivity.h"
 #include "resource.h"

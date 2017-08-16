@@ -65,9 +65,8 @@ make %{?jobs:-j%jobs}
 %post
 /sbin/ldconfig
 chsmack -a "User::Pkg::org.tizen.position-finder-server" %{_pkg_res_dir}/*.dat
-chmod 666 %{_pkg_res_dir}/*.dat
+chmod 444 %{_pkg_res_dir}/*.dat
 
-mkdir -p %{_pkg_rw_data_dir}
 touch %{_pkg_rw_data_dir}/iotcon-test-svr-db-server.dat
 chsmack -a "User::Pkg::org.tizen.position-finder-server" %{_pkg_rw_data_dir}/*.dat
 chmod 666 %{_pkg_rw_data_dir}/*.dat
@@ -77,6 +76,7 @@ chmod 666 %{_pkg_rw_data_dir}/*.dat
 %files
 %manifest org.tizen.position-finder-server.manifest
 %{_pkg_res_dir}/*.dat
+%{_pkg_rw_data_dir}
 %defattr(-,root,root,-)
 %{_pkg_dir}/bin/position-finder-server
 %{_sys_packages_dir}/org.tizen.position-finder-server.xml

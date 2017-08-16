@@ -25,8 +25,6 @@
 #include <glib.h>
 #include <Eina.h>
 
-#include <iotcon.h>
-
 #include "log.h"
 #include "connectivity.h"
 

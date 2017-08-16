@@ -22,6 +22,8 @@
 #ifndef __POSITION_FINDER_CONNECTIVITY_H__
 #define __POSITION_FINDER_CONNECTIVITY_H__
 
+#include <iotcon.h>
+
 #include "connectivity_internal.h"
 
 struct connectivity_resource {

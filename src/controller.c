@@ -91,7 +91,7 @@ static bool service_app_create(void *data)
 	controller_init_internal_functions();
 
 	/**
-	 * Create connectivity resources and registers the resource in server.
+	 * Create a connectivity resource and registers the resource in server.
 	 */
 	ret = connectivity_set_resource("/door/1", "org.tizen.door", &ad->resource_info);
 	if (ret == -1) _E("Cannot broadcast resource");
@@ -120,7 +120,7 @@ static void service_app_terminate(void *data)
 	}
 
 	/**
-	 * Releases all resources about connectivity.
+	 * Releases the resource about connectivity.
 	 */
 	connectivity_unset_resource(ad->resource_info);
 

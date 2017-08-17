@@ -1,11 +1,15 @@
-Name:       org.tizen.position-finder-server
-%define alias org.tizen.position-finder-server
+%define P_NAME position-finder-server
+%define APP_LABEL "Position Finder Server"
+%define ORG_PREFIX org.tizen
+
+Name:       %{ORG_PREFIX}.%{P_NAME}
+%define alias %{name}
 Summary:    IoTivity Application
 Group:      Applications/Core Applications
 Version:    0.0.1
 Release:    1
 License:    Flora-1.1
-Provides:   org.tizen.position-finder-server = %{version}-%{release}
+Provides:   %{name} = %{version}-%{release}
 Source0:    %{name}-%{version}.tar.gz
 
 BuildRequires:  cmake
@@ -31,11 +35,12 @@ Server for Position Finder
 %define _pkg_dir %{TZ_SYS_RO_APP}/%{alias}
 %define _pkg_shared_dir %{_pkg_dir}/shared
 %define _pkg_data_dir %{_pkg_dir}/data
-%define _pkg_rw_data_dir /home/owner/apps_rw/org.tizen.position-finder-server/data
-%define _pkg_res_dir /home/owner/apps_rw/org.tizen.position-finder-server/res
+%define _pkg_rw_data_dir /home/owner/apps_rw/%{alias}/data
+%define _pkg_res_dir %{_pkg_dir}/res
 %define _sys_icons_dir %{_pkg_shared_dir}/res
 %define _sys_packages_dir %{TZ_SYS_RO_PACKAGES}
 %define _sys_license_dir %{TZ_SYS_SHARE}/license
+%define _cbor_file iotcon-test-svr-db-server.dat
 
 %ifarch %{arm}
 export CFLAGS="$CFLAGS -DTIZEN_BUILD_TARGET"
@@ -47,9 +52,15 @@ export CXXFLAGS="$CXXFLAGS -DTIZEN_BUILD_EMULATOR"
 export FFLAGS="$FFLAGS -DTIZEN_BUILD_EMULATOR"
 %endif
 
-cmake . -DINSTALL_PREFIX=%{_pkg_dir} \
+cmake . -DP_NAME=%{P_NAME} \
+	-DORG_PREFIX=%{ORG_PREFIX} \
+	-DAPP_LABEL=%{APP_LABEL} \
+	-DINSTALL_PREFIX=%{_pkg_dir} \
+	-DINSTALL_OWNER_DATADIR=%{_pkg_rw_data_dir} \
+	-DINSTALL_RESDIR=%{_pkg_res_dir} \
 	-DSYS_ICONS_DIR=%{_sys_icons_dir} \
-	-DSYS_PACKAGES_DIR=%{_sys_packages_dir}
+	-DSYS_PACKAGES_DIR=%{_sys_packages_dir} \
+	-DCBOR_FILE=%{_cbor_file}
 make %{?jobs:-j%jobs}
 
 %install
@@ -64,22 +75,22 @@ make %{?jobs:-j%jobs}
 
 %post
 /sbin/ldconfig
-chsmack -a "User::Pkg::org.tizen.position-finder-server" %{_pkg_res_dir}/*.dat
+chsmack -a "User::Pkg::%{alias}" %{_pkg_res_dir}/*.dat
 chmod 444 %{_pkg_res_dir}/*.dat
 
-touch %{_pkg_rw_data_dir}/iotcon-test-svr-db-server.dat
-chsmack -a "User::Pkg::org.tizen.position-finder-server" %{_pkg_rw_data_dir}/*.dat
+touch %{_pkg_rw_data_dir}/%{_cbor_file}
+chsmack -a "User::Pkg::%{alias}" %{_pkg_rw_data_dir}/*.dat
 chmod 666 %{_pkg_rw_data_dir}/*.dat
 
 %postun -p /sbin/ldconfig
 
 %files
-%manifest org.tizen.position-finder-server.manifest
 %{_pkg_res_dir}/*.dat
-%{_pkg_rw_data_dir}
+%manifest %{alias}.manifest
 %defattr(-,root,root,-)
-%{_pkg_dir}/bin/position-finder-server
-%{_sys_packages_dir}/org.tizen.position-finder-server.xml
-%{_sys_icons_dir}/position_finder_server.png
+%{_pkg_rw_data_dir}
+%{_pkg_dir}/bin/%{P_NAME}
+%{_sys_packages_dir}/%{alias}.xml
+%{_sys_icons_dir}/*.png
 %{_pkg_dir}/author-signature.xml
 %{_pkg_dir}/signature1.xml

@@ -29,8 +29,6 @@
 #include "connectivity.h"
 
 #define ULTRASONIC_RESOURCE_TYPE "org.tizen.door"
-#define CBOR_FILE_IN_RES	"/home/owner/apps_rw/org.tizen.position-finder-server/res/iotcon-test-svr-db-server.dat"
-#define CBOR_FILE_IN_DATA	"/home/owner/apps_rw/org.tizen.position-finder-server/data/iotcon-test-svr-db-server.dat"
 #define BUFSIZE 1024
 
 static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);

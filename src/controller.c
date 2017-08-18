@@ -56,14 +56,14 @@ static Eina_Bool control_sensors_cb(void *data)
 	 */
 	for (i = 0; i < MULTIPLE_SENSOR_NUMBER; i++) {
 		/**
-		 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is detected.
+		 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is not detected.
 		 */
 		if (resource_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
 			_E("Failed to get Infrared Motion value [GPIO:%d]", gpio_num[i]);
 			continue;
 		}
 		/**
-		 * If one of the five infrared motion sensors detects motion (1),
+		 * If at least one of the five infrared motion sensors detects motion (1),
 		 * it is judged that there is a person (total == 1).
 		 */
 		total |= value[i];

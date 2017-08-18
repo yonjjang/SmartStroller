@@ -35,7 +35,6 @@ Server for Position Finder
 %define _pkg_dir %{TZ_SYS_RO_APP}/%{alias}
 %define _pkg_shared_dir %{_pkg_dir}/shared
 %define _pkg_data_dir %{_pkg_dir}/data
-%define _pkg_rw_data_dir /home/owner/apps_rw/%{alias}/data
 %define _pkg_res_dir %{_pkg_dir}/res
 %define _sys_icons_dir %{_pkg_shared_dir}/res
 %define _sys_packages_dir %{TZ_SYS_RO_PACKAGES}
@@ -56,7 +55,6 @@ cmake . -DP_NAME=%{P_NAME} \
 	-DORG_PREFIX=%{ORG_PREFIX} \
 	-DAPP_LABEL=%{APP_LABEL} \
 	-DINSTALL_PREFIX=%{_pkg_dir} \
-	-DINSTALL_OWNER_DATADIR=%{_pkg_rw_data_dir} \
 	-DINSTALL_RESDIR=%{_pkg_res_dir} \
 	-DSYS_ICONS_DIR=%{_sys_icons_dir} \
 	-DSYS_PACKAGES_DIR=%{_sys_packages_dir} \
@@ -78,17 +76,12 @@ make %{?jobs:-j%jobs}
 chsmack -a "User::Pkg::%{alias}" %{_pkg_res_dir}/*.dat
 chmod 444 %{_pkg_res_dir}/*.dat
 
-touch %{_pkg_rw_data_dir}/%{_cbor_file}
-chsmack -a "User::Pkg::%{alias}" %{_pkg_rw_data_dir}/*.dat
-chmod 666 %{_pkg_rw_data_dir}/*.dat
-
 %postun -p /sbin/ldconfig
 
 %files
 %{_pkg_res_dir}/*.dat
 %manifest %{alias}.manifest
 %defattr(-,root,root,-)
-%{_pkg_rw_data_dir}
 %{_pkg_dir}/bin/%{P_NAME}
 %{_sys_packages_dir}/%{alias}.xml
 %{_sys_icons_dir}/*.png

@@ -24,7 +24,7 @@
 #include "log.h"
 #include "resource.h"
 
-static resource_s resource_info[PIN_MAX] = { 0, };
+static resource_s resource_info[PIN_MAX] = { {0, NULL}, };
 
 resource_s *resource_get_info(int pin_num)
 {

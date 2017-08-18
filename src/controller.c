@@ -44,7 +44,7 @@ static Eina_Bool control_sensors_cb(void *data)
 	app_data *ad = data;
 
 	/**
-	 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is detected.
+	 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is not detected.
 	 */
 	if (resource_read_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM, &value) == -1)
 		_E("Failed to get Infrared Motion value [GPIO:%d]", GPIO_INFRARED_MOTION_NUM);

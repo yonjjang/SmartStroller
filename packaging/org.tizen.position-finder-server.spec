@@ -41,6 +41,7 @@ Server for Position Finder
 %define _sys_packages_dir %{TZ_SYS_RO_PACKAGES}
 %define _sys_license_dir %{TZ_SYS_SHARE}/license
 %define _cbor_file iotcon-test-svr-db-server.dat
+%define _conf_file .dev_id
 
 %ifarch %{arm}
 export CFLAGS="$CFLAGS -DTIZEN_BUILD_TARGET"
@@ -60,7 +61,8 @@ cmake . -DP_NAME=%{P_NAME} \
 	-DINSTALL_RESDIR=%{_pkg_res_dir} \
 	-DSYS_ICONS_DIR=%{_sys_icons_dir} \
 	-DSYS_PACKAGES_DIR=%{_sys_packages_dir} \
-	-DCBOR_FILE=%{_cbor_file}
+	-DCBOR_FILE=%{_cbor_file} \
+	-DCONF_FILE=%{_conf_file}
 make %{?jobs:-j%jobs}
 
 %install
@@ -81,6 +83,12 @@ chmod 444 %{_pkg_res_dir}/*.dat
 touch %{_pkg_rw_data_dir}/%{_cbor_file}
 chsmack -a "User::Pkg::%{alias}" %{_pkg_rw_data_dir}/*.dat
 chmod 666 %{_pkg_rw_data_dir}/*.dat
+
+# This routine will be used in the file of .dev_id.
+#touch %{_pkg_rw_data_dir}/%{_conf_file}
+#echo "/door/777" > %{_pkg_rw_data_dir}/%{_conf_file}
+#chsmack -a "User::Pkg::%{alias}" %{_pkg_rw_data_dir}/%{_conf_file}
+#chmod 444 %{_pkg_rw_data_dir}/%{_conf_file}
 
 %postun -p /sbin/ldconfig
 

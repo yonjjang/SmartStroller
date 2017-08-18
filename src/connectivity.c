@@ -32,6 +32,7 @@
 
 #define ULTRASONIC_RESOURCE_TYPE "org.tizen.door"
 #define BUFSIZE 1024
+#define URI_PATH_LEN 64
 
 static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
 
@@ -413,6 +414,28 @@ void connectivity_unset_resource(connectivity_resource_s *resource_info)
 	free(resource_info);
 }
 
+static int _get_default_uri_path_in_conf(char *buf, int size)
+{
+	FILE *in = NULL;
+	size_t nread = 0;
+
+	in = fopen(CONF_FILE, "r");
+	retv_if(!in, -1);
+
+	nread = fread(buf, 1, size, in);
+	if (nread <= 0) {
+		_I("No contents in the conf.");
+		return -1;
+	}
+
+	if (buf[nread - 1] == '\n')
+		buf[nread - 1] = '\0';
+
+	fclose(in);
+
+	return 0;
+}
+
 int connectivity_set_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info)
 {
 	iotcon_resource_types_h resource_types = NULL;
@@ -420,6 +443,18 @@ int connectivity_set_resource(const char *uri_path, const char *type, connectivi
 	connectivity_resource_s *resource_info = NULL;
 	uint8_t policies;
 	int ret = -1;
+	const char *final_uri_path = NULL;
+	char default_uri_path[URI_PATH_LEN] = { 0, };
+
+	if (uri_path) {
+		final_uri_path = uri_path;
+	} else {
+		ret = _get_default_uri_path_in_conf(default_uri_path, URI_PATH_LEN);
+		retv_if(ret < 0, -1);
+		final_uri_path = default_uri_path;
+	}
+
+	_D("uri path : [%s]", final_uri_path);
 
 	resource_info = calloc(1, sizeof(connectivity_resource_s));
 	retv_if(!resource_info, -1);
@@ -445,7 +480,7 @@ int connectivity_set_resource(const char *uri_path, const char *type, connectivi
 		IOTCON_RESOURCE_OBSERVABLE |
 		IOTCON_RESOURCE_SECURE;
 
-	ret = iotcon_resource_create(uri_path,
+	ret = iotcon_resource_create(final_uri_path,
 			resource_types,
 			ifaces,
 			policies,

@@ -22,6 +22,8 @@
 #ifndef __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__
 #define __POSITION_FINDER_CONNECTIVITY_INTERNAL_H__
 
+#include <iotcon.h>
+
 extern int connectivity_init(void);
 extern int connectivity_fini(void);
 

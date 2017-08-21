@@ -25,8 +25,6 @@
 #include <tizen.h>
 #include <service_app.h>
 
-#include <iotcon.h> // Please remove this after test
-
 #include "log.h"
 #include "resource.h"
 #include "connectivity.h"

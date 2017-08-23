@@ -28,17 +28,23 @@
 #include "log.h"
 #include "resource_internal.h"
 
-void resource_close_ultrasonic_sensor(int trig_pin_num, int echo_pin_num)
+void resource_close_ultrasonic_sensor_trig(int trig_pin_num)
 {
-	if (!resource_get_info(echo_pin_num)->opened) return;
 	if (!resource_get_info(trig_pin_num)->opened) return;
 
-	_I("Ultrasonic sensor is finishing...");
+	_I("Ultrasonic sensor's trig is finishing...");
 
 	peripheral_gpio_close(resource_get_info(trig_pin_num)->sensor_h);
-	peripheral_gpio_close(resource_get_info(echo_pin_num)->sensor_h);
-
 	resource_get_info(trig_pin_num)->opened = 0;
+}
+
+void resource_close_ultrasonic_sensor_echo(int echo_pin_num)
+{
+	if (!resource_get_info(echo_pin_num)->opened) return;
+
+	_I("Ultrasonic sensor's echo is finishing...");
+
+	peripheral_gpio_close(resource_get_info(echo_pin_num)->sensor_h);
 	resource_get_info(echo_pin_num)->opened = 0;
 }
 
@@ -85,6 +91,7 @@ int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource
 		retv_if(ret != 0, -1);
 
 		resource_get_info(trig_pin_num)->opened = 1;
+		resource_get_info(trig_pin_num)->close = resource_close_ultrasonic_sensor_trig;
 	}
 
 	if (!resource_get_info(echo_pin_num)->opened) {
@@ -100,6 +107,7 @@ int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource
 		retv_if(ret != 0, -1);
 
 		resource_get_info(echo_pin_num)->opened = 1;
+		resource_get_info(echo_pin_num)->close = resource_close_ultrasonic_sensor_echo;
 	}
 
 	if (resource_get_info(echo_pin_num)->sensor_h) {

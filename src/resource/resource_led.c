@@ -47,6 +47,7 @@ int resource_write_led(int pin_num, int write_value)
 		retv_if(ret != 0, -1);
 
 		resource_get_info(pin_num)->opened = 1;
+		resource_get_info(pin_num)->close = resource_close_led;
 	}
 
 	ret = peripheral_gpio_write(resource_get_info(pin_num)->sensor_h, write_value);

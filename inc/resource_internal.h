@@ -36,6 +36,7 @@
 struct _resource_s {
 	int opened;
 	peripheral_gpio_h sensor_h;
+	void (*close) (int);
 };
 typedef struct _resource_s resource_s;
 

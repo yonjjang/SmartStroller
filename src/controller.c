@@ -30,10 +30,8 @@
 #include "connectivity.h"
 #include "controller.h"
 
-#define GPIO_ULTRASONIC_TRIG_NUM_1 20
-#define GPIO_ULTRASONIC_ECHO_NUM_1 21
-#define MULTIPLE_SENSOR_NUMBER 5
 #define CONNECTIVITY_KEY "opened"
+#define SENSORING_TIME_INTERVAL 1.0f
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;
@@ -42,36 +40,9 @@ typedef struct app_data_s {
 
 static Eina_Bool control_sensors_cb(void *data)
 {
-	int value[MULTIPLE_SENSOR_NUMBER] = { 0, };
-	int total = 0;
-	int gpio_num[MULTIPLE_SENSOR_NUMBER] = { 5, 6, 13, 19, 26 };
-	int i = 0;
 	app_data *ad = data;
 
-	/**
-	 * This is the case when a number of the same sensors are installed.
-	 * Each of the five infrared motion sensors will receive the value.
-	 */
-	for (i = 0; i < MULTIPLE_SENSOR_NUMBER; i++) {
-		/**
-		 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is not detected.
-		 */
-		if (resource_read_infrared_motion_sensor(gpio_num[i], &value[i]) == -1) {
-			_E("Failed to get Infrared Motion value [GPIO:%d]", gpio_num[i]);
-			continue;
-		}
-		/**
-		 * If at least one of the five infrared motion sensors detects motion (1),
-		 * it is judged that there is a person (total == 1).
-		 */
-		total |= value[i];
-	}
-	_I("[5:%d] | [6:%d] | [13:%d] | [19:%d] | [26:%d] = [Total:%d]", value[0], value[1], value[2], value[3], value[4], total);
-
-	/**
-	 * Notifies specific clients that resource's attributes have changed.
-	 */
-	if (connectivity_notify_bool(ad->resource_info, CONNECTIVITY_KEY, total) == -1)
+	if (connectivity_notify_bool(ad->resource_info, CONNECTIVITY_KEY, true) == -1)
 		_E("Cannot notify message");
 
 	return ECORE_CALLBACK_RENEW;
@@ -91,14 +62,14 @@ static bool service_app_create(void *data)
 	/**
 	 * Create a connectivity resource and registers the resource in server.
 	 */
-	ret = connectivity_set_resource("/door/1", "org.tizen.door", &ad->resource_info);
+	ret = connectivity_set_resource(NULL, "org.tizen.door", &ad->resource_info);
 	if (ret == -1) _E("Cannot broadcast resource");
 
 	/**
 	 * Creates a timer to call the given function in the given period of time.
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
-	ad->getter_timer = ecore_timer_add(0.5f, control_sensors_cb, ad);
+	ad->getter_timer = ecore_timer_add(SENSORING_TIME_INTERVAL, control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add infrared motion getter timer");
 		return false;

@@ -27,11 +27,12 @@
 
 #include "log.h"
 #include "resource.h"
-#include "controller.h"
 #include "connectivity.h"
+#include "controller.h"
 
 #define GPIO_INFRARED_MOTION_NUM 20
 #define CONNECTIVITY_KEY "opened"
+#define SENSORING_TIME_INTERVAL 1.0f
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;
@@ -79,7 +80,7 @@ static bool service_app_create(void *data)
 	 * Creates a timer to call the given function in the given period of time.
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
-	ad->getter_timer = ecore_timer_add(0.5f, control_sensors_cb, ad);
+	ad->getter_timer = ecore_timer_add(SENSORING_TIME_INTERVAL, control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add infrared motion getter timer");
 		return false;

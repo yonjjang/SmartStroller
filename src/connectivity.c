@@ -31,6 +31,9 @@
 
 #define ULTRASONIC_RESOURCE_TYPE "org.tizen.door"
 #define BUFSIZE 1024
+#define URI_PATH_LEN 64
+#define URI_PATH "/door/1"
+#define PATH "path"
 
 static void _request_resource_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data);
 
@@ -66,14 +69,14 @@ static void _destroy_representation(iotcon_representation_h representation)
 	iotcon_representation_destroy(representation);
 }
 
-static iotcon_representation_h _create_representation_with_bool(iotcon_resource_h res, const char *key, bool value)
+static iotcon_representation_h _create_representation_with_bool(connectivity_resource_s *resource_info, const char *key, bool value)
 {
 	iotcon_attributes_h attributes = NULL;
 	iotcon_representation_h representation = NULL;
 	char *uri_path = NULL;
 	int ret = -1;
 
-	ret = iotcon_resource_get_uri_path(res, &uri_path);
+	ret = iotcon_resource_get_uri_path(resource_info->res, &uri_path);
 	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
 	ret = iotcon_representation_create(&representation);
@@ -83,6 +86,9 @@ static iotcon_representation_h _create_representation_with_bool(iotcon_resource_
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_representation_set_uri_path(representation, uri_path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_attributes_add_str(attributes, PATH, resource_info->path);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_attributes_add_bool(attributes, key, value);
@@ -102,14 +108,14 @@ error:
 	return NULL;
 }
 
-static iotcon_representation_h _create_representation_with_int(iotcon_resource_h res, const char *key, int value)
+static iotcon_representation_h _create_representation_with_int(connectivity_resource_s *resource_info, const char *key, int value)
 {
 	iotcon_attributes_h attributes = NULL;
 	iotcon_representation_h representation = NULL;
 	char *uri_path = NULL;
 	int ret = -1;
 
-	ret = iotcon_resource_get_uri_path(res, &uri_path);
+	ret = iotcon_resource_get_uri_path(resource_info->res, &uri_path);
 	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
 	ret = iotcon_representation_create(&representation);
@@ -121,7 +127,10 @@ static iotcon_representation_h _create_representation_with_int(iotcon_resource_h
 	ret = iotcon_representation_set_uri_path(representation, uri_path);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_attributes_add_int(attributes, "opened", value);
+	ret = iotcon_attributes_add_str(attributes, PATH, resource_info->path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_attributes_add_int(attributes, key, value);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_representation_set_attributes(representation, attributes);
@@ -138,14 +147,14 @@ error:
 	return NULL;
 }
 
-static iotcon_representation_h _create_representation_with_double(iotcon_resource_h res, const char *key, double value)
+static iotcon_representation_h _create_representation_with_double(connectivity_resource_s *resource_info, const char *key, double value)
 {
 	iotcon_attributes_h attributes = NULL;
 	iotcon_representation_h representation = NULL;
 	char *uri_path = NULL;
 	int ret = -1;
 
-	ret = iotcon_resource_get_uri_path(res, &uri_path);
+	ret = iotcon_resource_get_uri_path(resource_info->res, &uri_path);
 	retv_if(IOTCON_ERROR_NONE != ret, NULL);
 
 	ret = iotcon_representation_create(&representation);
@@ -157,7 +166,10 @@ static iotcon_representation_h _create_representation_with_double(iotcon_resourc
 	ret = iotcon_representation_set_uri_path(representation, uri_path);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	ret = iotcon_attributes_add_double(attributes, "opened", value);
+	ret = iotcon_attributes_add_str(attributes, PATH, resource_info->path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_attributes_add_double(attributes, key, value);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
 	ret = iotcon_representation_set_attributes(representation, attributes);
@@ -184,7 +196,7 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 
 	_D("Notify the value[%d]", value);
 
-	representation = _create_representation_with_bool(resource_info->res, key, value);
+	representation = _create_representation_with_bool(resource_info, key, value);
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
@@ -205,7 +217,7 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 
 	_D("Notify the value[%d]", value);
 
-	representation = _create_representation_with_int(resource_info->res, key, value);
+	representation = _create_representation_with_int(resource_info, key, value);
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
@@ -226,7 +238,7 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 
 	_D("Notify the value[%f]", value);
 
-	representation = _create_representation_with_double(resource_info->res, key, value);
+	representation = _create_representation_with_double(resource_info, key, value);
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
@@ -381,10 +393,11 @@ void connectivity_unset_resource(connectivity_resource_s *resource_info)
 	ret_if(!resource_info);
 	if (resource_info->observers) iotcon_observers_destroy(resource_info->observers);
 	if (resource_info->res) iotcon_resource_destroy(resource_info->res);
+	if (resource_info->path) free(resource_info->path);
 	free(resource_info);
 }
 
-int connectivity_set_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info)
+int connectivity_set_resource(const char *path, const char *type, connectivity_resource_s **out_resource_info)
 {
 	iotcon_resource_types_h resource_types = NULL;
 	iotcon_resource_interfaces_h ifaces = NULL;
@@ -392,9 +405,17 @@ int connectivity_set_resource(const char *uri_path, const char *type, connectivi
 	uint8_t policies;
 	int ret = -1;
 
+	retv_if(!path, -1);
+	retv_if(!type, -1);
+	retv_if(!out_resource_info, -1);
+
 	resource_info = calloc(1, sizeof(connectivity_resource_s));
 	retv_if(!resource_info, -1);
-	*out_resource_info = resource_info;
+
+	resource_info->path = strdup(path);
+	goto_if(!resource_info->path, error);
+
+	_D("Path : [%s]", resource_info->path);
 
 	ret = iotcon_resource_types_create(&resource_types);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
@@ -416,7 +437,7 @@ int connectivity_set_resource(const char *uri_path, const char *type, connectivi
 		IOTCON_RESOURCE_OBSERVABLE |
 		IOTCON_RESOURCE_SECURE;
 
-	ret = iotcon_resource_create(uri_path,
+	ret = iotcon_resource_create(URI_PATH,
 			resource_types,
 			ifaces,
 			policies,
@@ -430,6 +451,7 @@ int connectivity_set_resource(const char *uri_path, const char *type, connectivi
 
 	iotcon_resource_types_destroy(resource_types);
 	iotcon_resource_interfaces_destroy(ifaces);
+	*out_resource_info = resource_info;
 
 	return 0;
 
@@ -437,6 +459,7 @@ error:
 	if (ifaces) iotcon_resource_interfaces_destroy(ifaces);
 	if (resource_types) iotcon_resource_types_destroy(resource_types);
 	if (resource_info->res) iotcon_resource_destroy(resource_info->res);
+	if (resource_info->path) free(resource_info->path);
 	if (resource_info) free(resource_info);
 
 	return -1;

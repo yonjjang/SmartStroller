@@ -22,27 +22,26 @@
 #ifndef __POSITION_FINDER_CONNECTIVITY_H__
 #define __POSITION_FINDER_CONNECTIVITY_H__
 
-#include <iotcon.h>
-
 #include "connectivity_internal.h"
 
 struct connectivity_resource {
 	iotcon_resource_h res;
 	iotcon_observers_h observers;
+	char *path;
 };
 
 typedef struct connectivity_resource connectivity_resource_s;
 
 /**
  * @brief Create connectivity resource and registers the resource in server.
- * @param[in] uri_path The URI path of the resource
+ * @param[in] path The path of the resource
  * @param[in] type The string data to insert into the resource types (e.g. "org.tizen.light")
  * @param[out] out_resource_info A structure containing information about connectivity resource
  * @return 0 on success, otherwise a negative error value
  * @see uri_path length must be less than 128.
  * @see You must destroy resource by calling connectivity_unset_resource() if resource is no longer needed.
  */
-extern int connectivity_set_resource(const char *uri_path, const char *type, connectivity_resource_s **out_resource_info);
+extern int connectivity_set_resource(const char *path, const char *type, connectivity_resource_s **out_resource_info);
 
 /**
  * @brief Releases all resource about connectivity.

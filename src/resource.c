@@ -36,7 +36,7 @@ void resource_close_all(void)
 	int i = 0;
 	for (i = 0; i < PIN_MAX; i++) {
 		if (!resource_info[i].opened) continue;
-		_I("GPIO[%d] is closing...", i);
+		_I("[%d]th Resource is closing...", i);
 
 		if (resource_info[i].close)
 			resource_info[i].close(i);

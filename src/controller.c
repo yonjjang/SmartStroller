@@ -30,9 +30,7 @@
 #include "connectivity.h"
 #include "controller.h"
 
-#define GPIO_INFRARED_MOTION_NUM 20
 #define CONNECTIVITY_KEY "opened"
-#define SENSORING_TIME_INTERVAL 1.0f
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;
@@ -47,14 +45,18 @@ static Eina_Bool control_sensors_cb(void *data)
 	/**
 	 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is not detected.
 	 */
-	if (resource_read_infrared_motion_sensor(GPIO_INFRARED_MOTION_NUM, &value) == -1)
+	/*
+	if (resource_read_infrared_motion_sensor(Pin Number, &value) == -1)
 		_E("Failed to get Infrared Motion value [GPIO:%d]", GPIO_INFRARED_MOTION_NUM);
+	*/
 
 	/**
 	 * Notifies specific clients that resource's attributes have changed.
 	 */
+	/*
 	if (connectivity_notify_bool(ad->resource_info, CONNECTIVITY_KEY, value) == -1)
 		_E("Cannot notify message");
+	*/
 
 	return ECORE_CALLBACK_RENEW;
 }
@@ -68,23 +70,27 @@ static bool service_app_create(void *data)
 	 * No modification required!!!
 	 * Access only when modifying internal functions.
 	 */
-	controller_init_internal_functions();
+	//controller_init_internal_functions();
 
 	/**
 	 * Create a connectivity resource and registers the resource in server.
 	 */
+	/*
 	ret = connectivity_set_resource("/door/1", "org.tizen.door", &ad->resource_info);
 	if (ret == -1) _E("Cannot broadcast resource");
+	*/
 
 	/**
 	 * Creates a timer to call the given function in the given period of time.
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
-	ad->getter_timer = ecore_timer_add(SENSORING_TIME_INTERVAL, control_sensors_cb, ad);
+	/*
+	ad->getter_timer = ecore_timer_add(Duration, control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add infrared motion getter timer");
 		return false;
 	}
+	*/
 
     return true;
 }

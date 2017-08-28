@@ -54,7 +54,7 @@ static Eina_Bool control_sensors_cb(void *data)
 	 * Notifies specific clients that resource's attributes have changed.
 	 */
 	/*
-	if (connectivity_notify_bool(ad->resource_info, CONNECTIVITY_KEY, value) == -1)
+	if (connectivity_notify_bool(ad->resource_info, KEY, VALUE) == -1)
 		_E("Cannot notify message");
 	*/
 

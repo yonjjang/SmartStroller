@@ -186,6 +186,24 @@ error:
 	return NULL;
 }
 
+static void _print_iotcon_error(int err_no)
+{
+	switch (err_no) {
+		case IOTCON_ERROR_NOT_SUPPORTED:
+			_E("IOTCON_ERROR_NOT_SUPPORTED");
+			break;
+		case IOTCON_ERROR_PERMISSION_DENIED:
+			_E("IOTCON_ERROR_PERMISSION_DENIED");
+			break;
+		case IOTCON_ERROR_INVALID_PARAMETER:
+			_E("IOTCON_ERROR_INVALID_PARAMETER");
+			break;
+		default:
+			_E("Error : [%d]", err_no);
+			break;
+	}
+}
+
 int connectivity_notify_bool(connectivity_resource_s *resource_info, const char *key, bool value)
 {
 	iotcon_representation_h representation;
@@ -200,7 +218,11 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
-	retv_if(IOTCON_ERROR_NONE != ret, -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		_I("There are some troubles for notifying value[%d]", ret);
+		_print_iotcon_error(ret);
+		return -1;
+	}
 
 	_destroy_representation(representation);
 
@@ -221,7 +243,11 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
-	retv_if(IOTCON_ERROR_NONE != ret, -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		_I("There are some troubles for notifying value[%d]", ret);
+		_print_iotcon_error(ret);
+		return -1;
+	}
 
 	_destroy_representation(representation);
 
@@ -242,7 +268,11 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
-	retv_if(IOTCON_ERROR_NONE != ret, -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		_I("There are some troubles for notifying value[%d]", ret);
+		_print_iotcon_error(ret);
+		return -1;
+	}
 
 	_destroy_representation(representation);
 

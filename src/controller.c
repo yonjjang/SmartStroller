@@ -31,7 +31,7 @@
 #include "controller.h"
 
 #define CONNECTIVITY_KEY "opened"
-#define SENSORING_TIME_INTERVAL 1.0f
+#define SENSORING_TIME_INTERVAL 5.0f
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;

@@ -216,7 +216,7 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 	representation = _create_representation_with_bool(resource_info, key, value);
 	retv_if(!representation, -1);
 
-	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
+	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_LOW);
 	if (IOTCON_ERROR_NONE != ret) {
 		_I("There are some troubles for notifying value[%d]", ret);
 		_print_iotcon_error(ret);
@@ -241,7 +241,7 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 	representation = _create_representation_with_int(resource_info, key, value);
 	retv_if(!representation, -1);
 
-	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
+	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_LOW);
 	if (IOTCON_ERROR_NONE != ret) {
 		_I("There are some troubles for notifying value[%d]", ret);
 		_print_iotcon_error(ret);
@@ -266,7 +266,7 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 	representation = _create_representation_with_double(resource_info, key, value);
 	retv_if(!representation, -1);
 
-	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_HIGH);
+	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_LOW);
 	if (IOTCON_ERROR_NONE != ret) {
 		_I("There are some troubles for notifying value[%d]", ret);
 		_print_iotcon_error(ret);

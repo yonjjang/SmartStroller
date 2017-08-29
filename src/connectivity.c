@@ -388,18 +388,60 @@ error:
 	_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 }
 
+static void _copy_file(const char *in_filename, const char *out_filename)
+{
+	char buf[BUFSIZE] = { 0, };
+	size_t nread = 0;
+	FILE *in = NULL;
+	FILE *out = NULL;
+
+	ret_if(!in_filename);
+	ret_if(!out_filename);
+
+	in = fopen(in_filename, "r");
+	ret_if(!in);
+
+	out = fopen(out_filename, "w");
+	goto_if(!out, error);
+
+	rewind(in);
+	while ((nread = fread(buf, 1, sizeof(buf), in)) > 0) {
+		if (fwrite (buf, 1, nread, out) < nread) {
+			_E("critical error to copy a file");
+			break;
+		}
+	}
+
+	fclose(in);
+	fclose(out);
+
+	return;
+
+error:
+	fclose(out);
+}
+
 int connectivity_init(void)
 {
 	int ret = -1;
 	char buf[PATH_MAX] = {0,};
+	char data[PATH_MAX] = {0,};
 	char *prefix = NULL;
 
 	prefix = app_get_resource_path();
 	retv_if(!prefix, -1);
 	snprintf(buf, sizeof(buf)-1, "%s%s", prefix, "iotcon-test-svr-db-server.dat");
 	free(prefix);
+	prefix = NULL;
 
-	ret = iotcon_initialize(buf);
+	prefix = app_get_data_path();
+	retv_if(!prefix, -1);
+	snprintf(data, sizeof(data)-1, "%s%s", prefix, "iotcon-test-svr-db-server.dat");
+	free(prefix);
+
+	_copy_file(buf, data);
+
+	ret = iotcon_initialize(data);
 	retv_if(IOTCON_ERROR_NONE != ret, -1);
 
 	ret = iotcon_set_device_name(ULTRASONIC_RESOURCE_TYPE);

@@ -47,7 +47,7 @@ static Eina_Bool control_sensors_cb(void *data)
 	 */
 	/*
 	if (resource_read_infrared_motion_sensor(Pin Number, &value) == -1)
-		_E("Failed to get Infrared Motion value [GPIO:%d]", GPIO_INFRARED_MOTION_NUM);
+		_E("Failed to get DATA from Infrared Motion value");
 	*/
 
 	/**

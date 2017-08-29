@@ -5,4 +5,9 @@
         <label>position-finder-server</label>
         <icon>position-finder-server.png</icon>
     </service-application>
+    <privileges>
+        <privilege>http://tizen.org/privilege/appdir.shareddata</privilege>
+        <privilege>http://tizen.org/privilege/network.get</privilege>
+        <privilege>http://tizen.org/privilege/internet</privilege>
+    </privileges>
 </manifest>

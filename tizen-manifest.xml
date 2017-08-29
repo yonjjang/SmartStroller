@@ -3,7 +3,7 @@
     <profile name="wearable"/>
     <service-application appid="org.example.position-finder-server" exec="position-finder-server" multiple="false" nodisplay="true" taskmanage="false" type="capp">
         <label>position-finder-server</label>
-        <icon>position-finder-server.png</icon>
+        <icon>default_icon.png</icon>
     </service-application>
     <privileges>
         <privilege>http://tizen.org/privilege/appdir.shareddata</privilege>

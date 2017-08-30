@@ -30,8 +30,6 @@
 #include "connectivity.h"
 #include "controller.h"
 
-#define CONNECTIVITY_KEY "opened"
-
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;
 	connectivity_resource_s *resource_info;
@@ -46,15 +44,18 @@ static Eina_Bool control_sensors_cb(void *data)
 	 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is not detected.
 	 */
 	/*
-	if (resource_read_infrared_motion_sensor(Pin Number, &value) == -1)
+	if (resource_read_infrared_motion_sensor(PIN_NUMBER, &value) == -1)
 		_E("Failed to get DATA from Infrared Motion value");
+
+	_D("Sensor Value: %d", value);
 	*/
+
 
 	/**
 	 * Notifies specific clients that resource's attributes have changed.
 	 */
 	/*
-	if (connectivity_notify_bool(ad->resource_info, KEY, VALUE) == -1)
+	if (connectivity_notify_bool(ad->resource_info, "opened", value) == -1)
 		_E("Cannot notify message");
 	*/
 
@@ -70,7 +71,7 @@ static bool service_app_create(void *data)
 	 * No modification required!!!
 	 * Access only when modifying internal functions.
 	 */
-	//controller_init_internal_functions();
+	controller_init_internal_functions();
 
 	/**
 	 * Create a connectivity resource and registers the resource in server.

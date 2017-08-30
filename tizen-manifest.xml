@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<manifest xmlns="http://tizen.org/ns/packages" api-version="3.0" package="org.example.position-finder-server" version="1.0.0">
+<manifest xmlns="http://tizen.org/ns/packages" api-version="3.0" package="org.tizen.position-finder-server" version="1.0.0">
     <profile name="wearable"/>
-    <service-application appid="org.example.position-finder-server" exec="position-finder-server" multiple="false" nodisplay="true" taskmanage="false" type="capp">
+    <service-application appid="org.tizen.position-finder-server" exec="position-finder-server" multiple="false" nodisplay="true" taskmanage="false" type="capp">
         <label>position-finder-server</label>
         <icon>default_icon.png</icon>
     </service-application>

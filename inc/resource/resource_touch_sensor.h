@@ -25,7 +25,7 @@
 /**
  * @brief Reads the value of gpio connected touch sensor.
  * @param[in] pin_num The number of the gpio pin connected to the touch sensor
- * @param[out] out_value The vaule of the gpio (zero or non-zero)
+ * @param[out] out_value The value of the gpio (zero or non-zero)
  * @return 0 on success, otherwise a negative error value
  * @see If the gpio pin is not open, creates gpio handle before reading the value of gpio.
  */

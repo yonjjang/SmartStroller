@@ -18,6 +18,9 @@ pkg_check_modules(APP_PKGS REQUIRED
 	eina
 	iotcon
 	gio-2.0
+	libcurl
+	glib-2.0
+	json-glib-1.0
 )
 
 ADD_DEFINITIONS(-DCBOR_FILE_IN_RES="${INSTALL_RESDIR}/${CBOR_FILE}")
@@ -38,6 +41,7 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/controller.c
 	${PROJECT_ROOT_DIR}/src/controller_internal.c
 	${PROJECT_ROOT_DIR}/src/connectivity.c
+	${PROJECT_ROOT_DIR}/src/webutil.c
 	${PROJECT_ROOT_DIR}/src/resource.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_illuminance_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_infrared_motion_sensor.c

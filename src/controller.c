@@ -82,10 +82,8 @@ static void service_app_terminate(void *data)
 {
 	app_data *ad = (app_data *)data;
 
-	for (int i = 0; i < PIN_MAX; i++) {
-		if (ad->getter_timer) {
-			ecore_timer_del(ad->getter_timer);
-		}
+	if (ad->getter_timer) {
+		ecore_timer_del(ad->getter_timer);
 	}
 
 	/**

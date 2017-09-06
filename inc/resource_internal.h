@@ -33,6 +33,7 @@
 #include "resource/resource_vibration_sensor_internal.h"
 #include "resource/resource_flame_sensor_internal.h"
 #include "resource/resource_sound_detection_sensor_internal.h"
+#include "resource/resource_tilt_sensor_internal.h"
 
 #define PIN_MAX 40
 

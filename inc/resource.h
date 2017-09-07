@@ -33,6 +33,9 @@
 #include "resource/resource_led.h"
 #include "resource/resource_vibration_sensor.h"
 #include "resource/resource_flame_sensor.h"
+#include "resource/resource_rain_sensor.h"
+#include "resource/resource_sound_detection_sensor.h"
+#include "resource/resource_tilt_sensor.h"
 #include "resource/resource_gas_detection_sensor.h"
 
 #endif /* __POSITION_FINDER_RESOURCE_H__ */

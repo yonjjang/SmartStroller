@@ -49,6 +49,11 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/resource/resource_touch_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_ultrasonic_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_led.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_vibration_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_flame_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_rain_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_sound_detection_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_tilt_sensor.c
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} -lm)

@@ -19,22 +19,17 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_RESOURCE_H__
-#define __POSITION_FINDER_RESOURCE_H__
+#ifndef __POSITION_FINDER_RESOURCE_TILT_SENSOR_H__
+#define __POSITION_FINDER_RESOURCE_TILT_SENSOR_H__
 
-#include <peripheral_io.h>
+/**
+ * @brief Reads the value of gpio connected tilt sensor(SZH-EK084).
+ * @param[in] pin_num The number of the gpio pin connected to the tilt sensor
+ * @param[out] out_value The vaule of the gpio (zero or non-zero)
+ * @return 0 on success, otherwise a negative error value
+ *
+ * @see If the gpio pin is not open, creates gpio handle before reading the value of gpio.
+ */
+extern int resource_read_tilt_sensor(int pin_num, int *out_value);
 
-#include "resource_internal.h"
-#include "resource/resource_illuminance_sensor.h"
-#include "resource/resource_infrared_motion_sensor.h"
-#include "resource/resource_infrared_obstacle_avoidance_sensor.h"
-#include "resource/resource_touch_sensor.h"
-#include "resource/resource_ultrasonic_sensor.h"
-#include "resource/resource_led.h"
-#include "resource/resource_vibration_sensor.h"
-#include "resource/resource_flame_sensor.h"
-#include "resource/resource_rain_sensor.h"
-#include "resource/resource_sound_detection_sensor.h"
-#include "resource/resource_tilt_sensor.h"
-
-#endif /* __POSITION_FINDER_RESOURCE_H__ */
+#endif /* __POSITION_FINDER_RESOURCE_TILT_SENSOR_H__ */

@@ -51,8 +51,13 @@ int resource_read_gas_detection_sensor(int pin_num, int *out_value)
 		resource_get_info(pin_num)->close = resource_close_gas_detection_sensor;
 	}
 
+	/**
+	 * This model(FC-22) normally outputs 1, and outputs 0 as out_value when a flame is detected.
+	 */
 	ret = peripheral_gpio_read(resource_get_info(pin_num)->sensor_h, out_value);
 	retv_if(ret < 0, -1);
+
+	*out_value = !*out_value;
 
 	return 0;
 }

@@ -25,7 +25,7 @@
 /**
  * @brief Reads the value of i2c bus connected illuminance sensor.
  * @param[in] i2c_bus The i2c bus number that the slave device is connected
- * @param[out] out_value The vaule read by the illuminance sensor
+ * @param[out] out_value The value read by the illuminance sensor
  * @return 0 on success, otherwise a negative error value
  * @see If the i2c bus is not open, creates i2c handle before reading data from the i2c slave device.
  */

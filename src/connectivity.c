@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <glib.h>
 #include <Eina.h>
+#include <app_common.h>
 
 #include "log.h"
 #include "connectivity.h"

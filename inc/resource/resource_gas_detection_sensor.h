@@ -19,16 +19,16 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_RESOURCE_TOUCH_SENSOR_H__
-#define __POSITION_FINDER_RESOURCE_TOUCH_SENSOR_H__
+#ifndef __POSITION_FINDER_RESOURCE_GAS_DETECTION_SENSOR_H__
+#define __POSITION_FINDER_RESOURCE_GAS_DETECTION_SENSOR_H__
 
 /**
- * @brief Reads the value of gpio connected touch sensor.
- * @param[in] pin_num The number of the gpio pin connected to the touch sensor
+ * @brief Reads the value of gpio connected to the gas detection sensor(fc-22).
+ * @param[in] pin_num The number of the gpio pin connected to the digital pin of gas detection sensor
  * @param[out] out_value The value of the gpio (zero or non-zero)
  * @return 0 on success, otherwise a negative error value
  * @see If the gpio pin is not open, creates gpio handle before reading the value of gpio.
  */
-extern int resource_read_touch_sensor(int pin_num, int *out_value);
+extern int resource_read_gas_detection_sensor(int pin_num, int *out_value);
 
-#endif /* __POSITION_FINDER_RESOURCE_TOUCH_SENSOR_H__ */
+#endif /* __POSITION_FINDER_RESOURCE_GAS_DETECTION_SENSOR_H__ */

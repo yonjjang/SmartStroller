@@ -50,7 +50,7 @@ extern int connectivity_set_resource(const char *path, const char *type, connect
 extern void connectivity_unset_resource(connectivity_resource_s *resource);
 
 /**
- * @brief Notifies specific clients that resource's attributes have changed with boolean vaule.
+ * @brief Notifies specific clients that resource's attributes have changed with boolean value.
  * @param[in] resource_info A structure containing information about connectivity resource
  * @param[in] key A new key to be added into attributes
  * @param[in] value A boolean value to be added into attributes
@@ -60,7 +60,7 @@ extern void connectivity_unset_resource(connectivity_resource_s *resource);
 extern int connectivity_notify_bool(connectivity_resource_s *resource_info, const char *key, bool value);
 
 /**
- * @brief Notifies specific clients that resource's attributes have changed with int vaule.
+ * @brief Notifies specific clients that resource's attributes have changed with int value.
  * @param[in] resource_info A structure containing information about connectivity resource
  * @param[in] key A new key to be added into attributes
  * @param[in] value A int value to be added into attributes
@@ -70,7 +70,7 @@ extern int connectivity_notify_bool(connectivity_resource_s *resource_info, cons
 extern int connectivity_notify_int(connectivity_resource_s *resource_info, const char *key, int value);
 
 /**
- * @brief Notifies specific clients that resource's attributes have changed with double vaule.
+ * @brief Notifies specific clients that resource's attributes have changed with double value.
  * @param[in] resource_info A structure containing information about connectivity resource
  * @param[in] key A new key to be added into attributes
  * @param[in] value A double value to be added into attributes

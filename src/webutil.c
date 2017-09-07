@@ -27,6 +27,8 @@
 #include "log.h"
 #include "webutil.h"
 
+#define URI_PATH_LEN 64
+
 typedef struct _wu_json_handle {
 	JsonBuilder *builder;
 	bool is_begin;
@@ -174,6 +176,28 @@ int web_util_json_data_array_end(void)
 	return 0;
 }
 
+static int _get_default_path_in_conf(char *buf, int size)
+{
+	FILE *in = NULL;
+	size_t nread = 0;
+
+	in = fopen(CONF_FILE, "r");
+	retv_if(!in, -1);
+
+	nread = fread(buf, 1, size, in);
+	if (nread <= 0) {
+		_I("No contents in the conf.");
+		return -1;
+	}
+
+	if (buf[nread - 1] == '\n')
+		buf[nread - 1] = '\0';
+
+	fclose(in);
+
+	return 0;
+}
+
 int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_s *sensor_data)
 {
 	const char n_id[] = "SensorPiID";
@@ -184,13 +208,23 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 	const char n_vib[] = "Vibration";
 	const char n_co2[] = "CO2";
 	const char n_sound[] = "SoundLevel";
+	const char n_tilt[] = "Tilt";
+	const char n_light[] = "Light";
+	const char n_collision[] = "Collision";
+	const char n_obstacle[] = "Obstacle";
+	const char n_distance[] = "Distance";
+	const char n_rain[] = "Rain";
+	const char n_touch[] = "Touch";
+	const char n_gas[] = "Gas";
 	const char n_e_sensor[] = "SensorEnabled";
 	const char n_hash[] = "Hash";
+	const char *path = NULL;
+	char default_path[URI_PATH_LEN] = { 0, };
+	int ret = -1;
 
 	retv_if(Json_h.builder == NULL, -1);
 	retv_if(Json_h.is_begin == false, -1);
 	retv_if(Json_h.is_end == true, -1);
-	retv_if(sensorpi_id == NULL, -1);
 	retv_if(sensor_data == NULL, -1);
 
 	/* JSON structure :
@@ -203,15 +237,33 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 		Vibration: boolean,
 		CO2: double,
 		SoundLevel: int,
+		Tilt: int,
+		Light: int,
+		Collision: int,
+		Obstacle: int,
+		Distance: double,
+		Rain: int,
+		Touch: int,
+		Gas: int,
 		SensorEnabled: [Motion, ],
 		Hash: string,
 	}
 	*/
 
+	if (sensorpi_id) {
+		path = sensorpi_id;
+	} else {
+		ret = _get_default_path_in_conf(default_path, URI_PATH_LEN);
+		retv_if(ret < 0, -1);
+		path = default_path;
+	}
+	retv_if(!path, -1);
+	retv_if(0 == strlen(path), -1);
+
 	json_builder_begin_object(Json_h.builder);
 
 	json_builder_set_member_name(Json_h.builder, n_id);
-	json_builder_add_string_value(Json_h.builder, sensorpi_id);
+	json_builder_add_string_value(Json_h.builder, path);
 
 	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_MOTION) {
 		json_builder_set_member_name(Json_h.builder, n_motion);
@@ -248,6 +300,46 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 		json_builder_add_int_value(Json_h.builder, sensor_data->soundlevel);
 	}
 
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TILT) {
+		json_builder_set_member_name(Json_h.builder, n_tilt);
+		json_builder_add_int_value(Json_h.builder, sensor_data->tilt);
+	}
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_LIGHT) {
+		json_builder_set_member_name(Json_h.builder, n_light);
+		json_builder_add_int_value(Json_h.builder, sensor_data->light);
+	}
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_COLLISION) {
+		json_builder_set_member_name(Json_h.builder, n_collision);
+		json_builder_add_int_value(Json_h.builder, sensor_data->collision);
+	}
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_OBSTACLE) {
+		json_builder_set_member_name(Json_h.builder, n_obstacle);
+		json_builder_add_int_value(Json_h.builder, sensor_data->obstacle);
+	}
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_ULTRASONIC_DISTANCE) {
+		json_builder_set_member_name(Json_h.builder, n_distance);
+		json_builder_add_double_value(Json_h.builder, sensor_data->distance);
+	}
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_RAIN) {
+		json_builder_set_member_name(Json_h.builder, n_rain);
+		json_builder_add_int_value(Json_h.builder, sensor_data->rain);
+	}
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TOUCH) {
+		json_builder_set_member_name(Json_h.builder, n_touch);
+		json_builder_add_int_value(Json_h.builder, sensor_data->touch);
+	}
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_GAS) {
+		json_builder_set_member_name(Json_h.builder, n_gas);
+		json_builder_add_int_value(Json_h.builder, sensor_data->gas);
+	}
+
 	json_builder_set_member_name(Json_h.builder, n_e_sensor);
 	json_builder_begin_array(Json_h.builder);
 
@@ -271,6 +363,30 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 
 	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_SOUND)
 		json_builder_add_string_value(Json_h.builder, n_sound);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TILT)
+		json_builder_add_string_value(Json_h.builder, n_tilt);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_LIGHT)
+		json_builder_add_string_value(Json_h.builder, n_light);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_COLLISION)
+		json_builder_add_string_value(Json_h.builder, n_collision);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_OBSTACLE)
+		json_builder_add_string_value(Json_h.builder, n_obstacle);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_ULTRASONIC_DISTANCE)
+		json_builder_add_string_value(Json_h.builder, n_distance);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_RAIN)
+		json_builder_add_string_value(Json_h.builder, n_rain);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TOUCH)
+		json_builder_add_string_value(Json_h.builder, n_touch);
+
+	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_GAS)
+		json_builder_add_string_value(Json_h.builder, n_gas);
 
 	json_builder_end_array(Json_h.builder);
 

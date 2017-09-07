@@ -33,6 +33,14 @@ typedef enum {
 	WEB_UTIL_SENSOR_VIB = (1 << 4), /* vibration sensor */
 	WEB_UTIL_SENSOR_CO2 = (1 << 5), /* CO2 sensor */
 	WEB_UTIL_SENSOR_SOUND = (1 << 6), /* noise sensor */
+	WEB_UTIL_SENSOR_TILT = (1 << 7), /* tilt sensor */
+	WEB_UTIL_SENSOR_LIGHT = (1 << 8), /* light sensor */
+	WEB_UTIL_SENSOR_COLLISION = (1 << 9), /* collision sensor */
+	WEB_UTIL_SENSOR_OBSTACLE = (1 << 10), /* obstacle avoidance sensor */
+	WEB_UTIL_SENSOR_ULTRASONIC_DISTANCE = (1 << 11), /* ultrasonic distance sensor */
+	WEB_UTIL_SENSOR_RAIN = (1 << 12), /* rain sensor */
+	WEB_UTIL_SENSOR_TOUCH = (1 << 13), /* touch sensor */
+	WEB_UTIL_SENSOR_GAS = (1 << 14), /* gas sensor */
 } web_util_sensor_type_e;
 
 typedef struct _web_util_sensor_data_s web_util_sensor_data_s;
@@ -44,6 +52,14 @@ struct _web_util_sensor_data_s {
 	int virbration;
 	double co2;
 	int soundlevel;
+	int tilt;
+	int light;
+	int collision;
+	int obstacle;
+	double distance;
+	int rain;
+	int touch;
+	int gas;
 	web_util_sensor_type_e enabled_sensor;
 	char *hash;
 };

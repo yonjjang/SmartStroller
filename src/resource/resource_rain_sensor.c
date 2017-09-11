@@ -19,43 +19,43 @@
  * limitations under the License.
  */
 
- #include <stdlib.h>
- #include <unistd.h>
+#include <stdlib.h>
+#include <unistd.h>
 
- #include "log.h"
- #include "resource_internal.h"
+#include "log.h"
+#include "resource_internal.h"
 
- void resource_close_rain_sensor(int pin_num)
- {
-	 if (!resource_get_info(pin_num)->opened) return;
+void resource_close_rain_sensor(int pin_num)
+{
+	if (!resource_get_info(pin_num)->opened) return;
 
-	 _I("Rain Sensor is finishing...");
-	 peripheral_gpio_close(resource_get_info(pin_num)->sensor_h);
-	 resource_get_info(pin_num)->opened = 0;
- }
+	_I("Rain Sensor is finishing...");
+	peripheral_gpio_close(resource_get_info(pin_num)->sensor_h);
+	resource_get_info(pin_num)->opened = 0;
+}
 
- int resource_read_rain_sensor(int pin_num, int *out_value)
- {
-	 int ret = PERIPHERAL_ERROR_NONE;
+int resource_read_rain_sensor(int pin_num, int *out_value)
+{
+	int ret = PERIPHERAL_ERROR_NONE;
 
-	 if (!resource_get_info(pin_num)->opened) {
-		 ret = peripheral_gpio_open(pin_num, &resource_get_info(pin_num)->sensor_h);
-		 retv_if(!resource_get_info(pin_num)->sensor_h, -1);
+	if (!resource_get_info(pin_num)->opened) {
+		ret = peripheral_gpio_open(pin_num, &resource_get_info(pin_num)->sensor_h);
+		retv_if(!resource_get_info(pin_num)->sensor_h, -1);
 
-		 ret = peripheral_gpio_set_direction(resource_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
-		 retv_if(ret != 0, -1);
+		ret = peripheral_gpio_set_direction(resource_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_IN);
+		retv_if(ret != 0, -1);
 
-		 resource_get_info(pin_num)->opened = 1;
-		 resource_get_info(pin_num)->close = resource_close_flame_sensor;
-	 }
+		resource_get_info(pin_num)->opened = 1;
+		resource_get_info(pin_num)->close = resource_close_flame_sensor;
+	}
 
-	 /**
-	  * This model(FC-37 + YL-38) normally outputs 1, and outputs 0 as out_value when a rain is detected.
-	  */
-	 ret = peripheral_gpio_read(resource_get_info(pin_num)->sensor_h, out_value);
-	 retv_if(ret < 0, -1);
+	/**
+	 * This model(FC-37 + YL-38) normally outputs 1, and outputs 0 as out_value when a rain is detected.
+	 */
+	ret = peripheral_gpio_read(resource_get_info(pin_num)->sensor_h, out_value);
+	retv_if(ret < 0, -1);
 
-	 *out_value = !*out_value;
+	*out_value = !*out_value;
 
-	 return 0;
- }
+	return 0;
+}

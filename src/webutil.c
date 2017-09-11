@@ -43,7 +43,7 @@ static size_t _response_write_callback(char *ptr, size_t size, size_t nmemb, voi
 
 	res_size = size*nmemb;
 
-	if(res_size > 0)
+	if (res_size > 0)
 		_I("POST response : %s", ptr);
 	/* What should we do here, if response body has negative message? */
 
@@ -55,7 +55,7 @@ int web_util_noti_init(void)
 	int ret = 0;
 	CURLcode result;
 	result = curl_global_init(CURL_GLOBAL_DEFAULT);
-	if(result != CURLE_OK) {
+	if (result != CURLE_OK) {
 		_E("curl_global_init() failed: %s",
 			curl_easy_strerror(result));
 		ret = -1;
@@ -76,15 +76,15 @@ int web_util_noti_post(const char *resource, const char *json_data)
 	CURLcode response = CURLE_OK;
 	struct curl_slist *headers = NULL;
 
-	retv_if(resource == NULL,-1);
-	retv_if(json_data == NULL,-1);
+	retv_if(resource == NULL, -1);
+	retv_if(json_data == NULL, -1);
 
 	_I("server : %s", resource);
 	_I("json_data : %s", json_data);
 
 	curl = curl_easy_init();
 
-	if(!curl) {
+	if (!curl) {
 		_E("fail to init curl");
 		return -1;
 	}
@@ -100,7 +100,7 @@ int web_util_noti_post(const char *resource, const char *json_data)
 
 	response = curl_easy_perform(curl);
 
-	if(response != CURLE_OK) {
+	if (response != CURLE_OK) {
 		_E("curl_easy_perform() failed: %s",
 			curl_easy_strerror(response));
 		/* What should we do here, if response is kind of errors? */
@@ -116,9 +116,8 @@ int web_util_noti_post(const char *resource, const char *json_data)
 
 int web_util_json_init(void)
 {
-	if(Json_h.builder) {
+	if (Json_h.builder)
 		g_object_unref(Json_h.builder);
-	}
 
 	Json_h.is_begin = false;
 	Json_h.is_end = false;
@@ -131,7 +130,7 @@ int web_util_json_init(void)
 int web_util_json_fini(void)
 {
 
-	if(Json_h.builder) {
+	if (Json_h.builder) {
 		g_object_unref(Json_h.builder);
 		Json_h.builder = NULL;
 	}
@@ -157,7 +156,7 @@ int web_util_json_data_array_begin(void)
 	*/
 
 	json_builder_begin_object(Json_h.builder);
-	json_builder_set_member_name(Json_h.builder,"SensorDataList");
+	json_builder_set_member_name(Json_h.builder, "SensorDataList");
 	json_builder_begin_array(Json_h.builder);
 
 	return 0;
@@ -265,77 +264,77 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 	json_builder_set_member_name(Json_h.builder, n_id);
 	json_builder_add_string_value(Json_h.builder, path);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_MOTION) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_MOTION) {
 		json_builder_set_member_name(Json_h.builder, n_motion);
 		json_builder_add_int_value(Json_h.builder, sensor_data->motion);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_FLAME) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_FLAME) {
 		json_builder_set_member_name(Json_h.builder, n_flame);
 		json_builder_add_int_value(Json_h.builder, sensor_data->flame);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_HUMIDITY) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_HUMIDITY) {
 		json_builder_set_member_name(Json_h.builder, n_hum);
 		json_builder_add_double_value(Json_h.builder, sensor_data->humidity);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TEMPERATURE) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TEMPERATURE) {
 		json_builder_set_member_name(Json_h.builder, n_temp);
 		json_builder_add_double_value(Json_h.builder, sensor_data->temperature);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_VIB) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_VIB) {
 		json_builder_set_member_name(Json_h.builder, n_vib);
 		json_builder_add_int_value(Json_h.builder, sensor_data->virbration);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_CO2) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_CO2) {
 		json_builder_set_member_name(Json_h.builder, n_co2);
 		json_builder_add_double_value(Json_h.builder, sensor_data->co2);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_SOUND) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_SOUND) {
 		json_builder_set_member_name(Json_h.builder, n_sound);
 		json_builder_add_int_value(Json_h.builder, sensor_data->soundlevel);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TILT) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TILT) {
 		json_builder_set_member_name(Json_h.builder, n_tilt);
 		json_builder_add_int_value(Json_h.builder, sensor_data->tilt);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_LIGHT) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_LIGHT) {
 		json_builder_set_member_name(Json_h.builder, n_light);
 		json_builder_add_int_value(Json_h.builder, sensor_data->light);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_COLLISION) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_COLLISION) {
 		json_builder_set_member_name(Json_h.builder, n_collision);
 		json_builder_add_int_value(Json_h.builder, sensor_data->collision);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_OBSTACLE) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_OBSTACLE) {
 		json_builder_set_member_name(Json_h.builder, n_obstacle);
 		json_builder_add_int_value(Json_h.builder, sensor_data->obstacle);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_ULTRASONIC_DISTANCE) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_ULTRASONIC_DISTANCE) {
 		json_builder_set_member_name(Json_h.builder, n_distance);
 		json_builder_add_double_value(Json_h.builder, sensor_data->distance);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_RAIN) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_RAIN) {
 		json_builder_set_member_name(Json_h.builder, n_rain);
 		json_builder_add_int_value(Json_h.builder, sensor_data->rain);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TOUCH) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TOUCH) {
 		json_builder_set_member_name(Json_h.builder, n_touch);
 		json_builder_add_int_value(Json_h.builder, sensor_data->touch);
 	}
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_GAS) {
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_GAS) {
 		json_builder_set_member_name(Json_h.builder, n_gas);
 		json_builder_add_int_value(Json_h.builder, sensor_data->gas);
 	}
@@ -343,54 +342,54 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 	json_builder_set_member_name(Json_h.builder, n_e_sensor);
 	json_builder_begin_array(Json_h.builder);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_MOTION)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_MOTION)
 		json_builder_add_string_value(Json_h.builder, n_motion);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_FLAME)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_FLAME)
 		json_builder_add_string_value(Json_h.builder, n_flame);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_HUMIDITY)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_HUMIDITY)
 		json_builder_add_string_value(Json_h.builder, n_hum);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TEMPERATURE)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TEMPERATURE)
 		json_builder_add_string_value(Json_h.builder, n_temp);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_VIB)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_VIB)
 		json_builder_add_string_value(Json_h.builder, n_vib);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_CO2)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_CO2)
 		json_builder_add_string_value(Json_h.builder, n_co2);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_SOUND)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_SOUND)
 		json_builder_add_string_value(Json_h.builder, n_sound);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TILT)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TILT)
 		json_builder_add_string_value(Json_h.builder, n_tilt);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_LIGHT)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_LIGHT)
 		json_builder_add_string_value(Json_h.builder, n_light);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_COLLISION)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_COLLISION)
 		json_builder_add_string_value(Json_h.builder, n_collision);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_OBSTACLE)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_OBSTACLE)
 		json_builder_add_string_value(Json_h.builder, n_obstacle);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_ULTRASONIC_DISTANCE)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_ULTRASONIC_DISTANCE)
 		json_builder_add_string_value(Json_h.builder, n_distance);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_RAIN)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_RAIN)
 		json_builder_add_string_value(Json_h.builder, n_rain);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TOUCH)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_TOUCH)
 		json_builder_add_string_value(Json_h.builder, n_touch);
 
-	if(sensor_data->enabled_sensor & WEB_UTIL_SENSOR_GAS)
+	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_GAS)
 		json_builder_add_string_value(Json_h.builder, n_gas);
 
 	json_builder_end_array(Json_h.builder);
 
-	if(sensor_data->hash) {
+	if (sensor_data->hash) {
 		json_builder_set_member_name(Json_h.builder, n_hash);
 		json_builder_add_string_value(Json_h.builder, sensor_data->hash);
 	}
@@ -422,10 +421,10 @@ char *web_util_get_json_string(void)
 	return str;
 
 error_release_all:
-	if(root)
+	if (root)
 		json_node_free(root);
 
-	if(gen)
+	if (gen)
 		g_object_unref(gen);
 
 	return NULL;

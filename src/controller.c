@@ -75,16 +75,16 @@ static bool service_app_create(void *data)
 		return false;
 	}
 
-    return true;
+	return true;
 }
 
 static void service_app_terminate(void *data)
 {
 	app_data *ad = (app_data *)data;
 
-	if (ad->getter_timer) {
+	if (ad->getter_timer)
 		ecore_timer_del(ad->getter_timer);
-	}
+
 
 	/**
 	 * Releases the resource about connectivity.
@@ -102,7 +102,7 @@ static void service_app_terminate(void *data)
 
 static void service_app_control(app_control_h app_control, void *data)
 {
-    // Todo: add your code here.
+	// Todo: add your code here.
 }
 
 static void service_app_lang_changed(app_event_info_h event_info, void *user_data)

@@ -189,18 +189,18 @@ error:
 static void _print_iotcon_error(int err_no)
 {
 	switch (err_no) {
-		case IOTCON_ERROR_NOT_SUPPORTED:
-			_E("IOTCON_ERROR_NOT_SUPPORTED");
-			break;
-		case IOTCON_ERROR_PERMISSION_DENIED:
-			_E("IOTCON_ERROR_PERMISSION_DENIED");
-			break;
-		case IOTCON_ERROR_INVALID_PARAMETER:
-			_E("IOTCON_ERROR_INVALID_PARAMETER");
-			break;
-		default:
-			_E("Error : [%d]", err_no);
-			break;
+	case IOTCON_ERROR_NOT_SUPPORTED:
+		_E("IOTCON_ERROR_NOT_SUPPORTED");
+		break;
+	case IOTCON_ERROR_PERMISSION_DENIED:
+		_E("IOTCON_ERROR_PERMISSION_DENIED");
+		break;
+	case IOTCON_ERROR_INVALID_PARAMETER:
+		_E("IOTCON_ERROR_INVALID_PARAMETER");
+		break;
+	default:
+		_E("Error : [%d]", err_no);
+		break;
 	}
 }
 
@@ -406,7 +406,7 @@ static void _copy_file(const char *in_filename, const char *out_filename)
 
 	rewind(in);
 	while ((nread = fread(buf, 1, sizeof(buf), in)) > 0) {
-		if (fwrite (buf, 1, nread, out) < nread) {
+		if (fwrite(buf, 1, nread, out) < nread) {
 			_E("critical error to copy a file");
 			break;
 		}

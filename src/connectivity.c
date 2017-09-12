@@ -455,28 +455,6 @@ void connectivity_unset_resource(connectivity_resource_s *resource_info)
 	free(resource_info);
 }
 
-static int _get_default_path_in_conf(char *buf, int size)
-{
-	FILE *in = NULL;
-	size_t nread = 0;
-
-	in = fopen(CONF_FILE, "r");
-	retv_if(!in, -1);
-
-	nread = fread(buf, 1, size, in);
-	if (nread <= 0) {
-		_I("No contents in the conf.");
-		return -1;
-	}
-
-	if (buf[nread - 1] == '\n')
-		buf[nread - 1] = '\0';
-
-	fclose(in);
-
-	return 0;
-}
-
 int connectivity_set_resource(const char *path, const char *type, connectivity_resource_s **out_resource_info)
 {
 	iotcon_resource_types_h resource_types = NULL;
@@ -484,18 +462,15 @@ int connectivity_set_resource(const char *path, const char *type, connectivity_r
 	connectivity_resource_s *resource_info = NULL;
 	uint8_t policies;
 	int ret = -1;
-	char default_path[URI_PATH_LEN] = { 0, };
+
+	retv_if(!path, -1);
+	retv_if(!type, -1);
+	retv_if(!out_resource_info, -1);
 
 	resource_info = calloc(1, sizeof(connectivity_resource_s));
 	retv_if(!resource_info, -1);
 
-	if (path) {
-		resource_info->path = strdup(path);
-	} else {
-		ret = _get_default_path_in_conf(default_path, URI_PATH_LEN);
-		retv_if(ret < 0, -1);
-		resource_info->path = strdup(default_path);
-	}
+	resource_info->path = strdup(path);
 	goto_if(!resource_info->path, error);
 
 	_D("Path : [%s]", resource_info->path);

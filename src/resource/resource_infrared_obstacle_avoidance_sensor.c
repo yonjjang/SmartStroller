@@ -56,5 +56,7 @@ int resource_read_infrared_obstacle_avoidance_sensor(int pin_num, int *out_value
 
 	_I("Infrared Obstacle Avoidance Sensor Value : %d", *out_value);
 
+	*out_value = !*out_value;
+
 	return 0;
 }

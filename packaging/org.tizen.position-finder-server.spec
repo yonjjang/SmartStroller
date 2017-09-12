@@ -44,7 +44,7 @@ Server for Position Finder
 %define _sys_packages_dir %{TZ_SYS_RO_PACKAGES}
 %define _sys_license_dir %{TZ_SYS_SHARE}/license
 %define _cbor_file iotcon-test-svr-db-server.dat
-%define _conf_file .dev_id
+%define _conf_file pi.conf
 
 %ifarch %{arm}
 export CFLAGS="$CFLAGS -DTIZEN_BUILD_TARGET"
@@ -97,6 +97,7 @@ chmod 666 %{_pkg_rw_data_dir}/*.dat
 
 %files
 %{_pkg_res_dir}/*.dat
+%{_pkg_res_dir}/*.conf
 %manifest %{alias}.manifest
 %defattr(-,root,root,-)
 %{_pkg_rw_data_dir}

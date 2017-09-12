@@ -19,22 +19,11 @@
  * limitations under the License.
  */
 
-#include <iotcon.h>
+#ifndef __POSITION_FINDER_CONTROLLER_UTIL_H__
+#define __POSITION_FINDER_CONTROLLER_UTIL_H__
 
-#include "log.h"
-#include "connectivity.h"
-#include "resource.h"
-#include "controller_util.h"
+int controller_util_get_path(const char **path);
+int controller_util_get_address(const char **address);
+void controller_util_free(void);
 
-void controller_init_internal_functions(void)
-{
-	connectivity_init();
-}
-
-void controller_fini_internal_functions(void)
-{
-	_I("Terminating...");
-	resource_close_all();
-	connectivity_fini();
-	controller_util_free();
-}
+#endif /* __POSITION_FINDER_CONTROLLER_UTIL_H__ */

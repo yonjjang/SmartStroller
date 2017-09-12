@@ -175,28 +175,6 @@ int web_util_json_data_array_end(void)
 	return 0;
 }
 
-static int _get_default_path_in_conf(char *buf, int size)
-{
-	FILE *in = NULL;
-	size_t nread = 0;
-
-	in = fopen(CONF_FILE, "r");
-	retv_if(!in, -1);
-
-	nread = fread(buf, 1, size, in);
-	if (nread <= 0) {
-		_I("No contents in the conf.");
-		return -1;
-	}
-
-	if (buf[nread - 1] == '\n')
-		buf[nread - 1] = '\0';
-
-	fclose(in);
-
-	return 0;
-}
-
 int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_s *sensor_data)
 {
 	const char n_id[] = "SensorPiID";
@@ -217,10 +195,8 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 	const char n_gas[] = "Gas";
 	const char n_e_sensor[] = "SensorEnabled";
 	const char n_hash[] = "Hash";
-	const char *path = NULL;
-	char default_path[URI_PATH_LEN] = { 0, };
-	int ret = -1;
 
+	retv_if(!sensorpi_id, -1);
 	retv_if(Json_h.builder == NULL, -1);
 	retv_if(Json_h.is_begin == false, -1);
 	retv_if(Json_h.is_end == true, -1);
@@ -249,20 +225,11 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 	}
 	*/
 
-	if (sensorpi_id) {
-		path = sensorpi_id;
-	} else {
-		ret = _get_default_path_in_conf(default_path, URI_PATH_LEN);
-		retv_if(ret < 0, -1);
-		path = default_path;
-	}
-	retv_if(!path, -1);
-	retv_if(0 == strlen(path), -1);
 
 	json_builder_begin_object(Json_h.builder);
 
 	json_builder_set_member_name(Json_h.builder, n_id);
-	json_builder_add_string_value(Json_h.builder, path);
+	json_builder_add_string_value(Json_h.builder, sensorpi_id);
 
 	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_MOTION) {
 		json_builder_set_member_name(Json_h.builder, n_motion);

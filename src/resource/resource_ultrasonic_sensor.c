@@ -48,26 +48,37 @@ void resource_close_ultrasonic_sensor_echo(int echo_pin_num)
 	resource_get_info(echo_pin_num)->opened = 0;
 }
 
-static void _resource_read_ultrasonic_sensor_cb(gpio_isr_cb_s *data, void *user_data)
+static unsigned long long _get_timestamp(void)
+{
+	struct timespec t;
+	clock_gettime(CLOCK_REALTIME, &t);
+	return ((unsigned long long)(t.tv_sec)*1000000000LL + t.tv_nsec) / 1000;
+}
+
+static void _resource_read_ultrasonic_sensor_cb(peripheral_gpio_h gpio, peripheral_error_e error, void *user_data)
 {
 	float dist = 0;
-	static unsigned long long timestamp = 0;
+	uint32_t value;
+	static unsigned long long prev = 0;
+	unsigned long long now = _get_timestamp();
 	resource_read_s *resource_read_info = user_data;
 
 	ret_if(!resource_read_info);
 	ret_if(!resource_read_info->cb);
 
-	if (timestamp > 0 && data->value == 0) {
-		dist = data->timestamp - timestamp;
+	peripheral_gpio_read(gpio, &value);
+
+	if (prev > 0 && value == 0) {
+		dist = now - prev;
 		dist = (dist * 34300) / 2000000;
 		_I("Measured Distance : %0.2fcm\n", dist);
 
 		resource_read_info->cb(dist, resource_read_info->data);
-		peripheral_gpio_unregister_cb(resource_get_info(resource_read_info->pin_num)->sensor_h);
+		peripheral_gpio_unset_interrupted_cb(resource_get_info(resource_read_info->pin_num)->sensor_h);
 		free(resource_read_info);
 	}
 
-	timestamp = data->timestamp;
+	prev = now;
 }
 
 int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource_read_cb cb, void *data)
@@ -87,7 +98,7 @@ int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource
 		ret = peripheral_gpio_open(trig_pin_num, &resource_get_info(trig_pin_num)->sensor_h);
 		retv_if(!resource_get_info(trig_pin_num)->sensor_h, -1);
 
-		ret = peripheral_gpio_set_direction(resource_get_info(trig_pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_OUT);
+		ret = peripheral_gpio_set_direction(resource_get_info(trig_pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_OUT_INITIALLY_LOW);
 		retv_if(ret != 0, -1);
 
 		resource_get_info(trig_pin_num)->opened = 1;
@@ -111,7 +122,7 @@ int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource
 	}
 
 	if (resource_get_info(echo_pin_num)->sensor_h) {
-		ret = peripheral_gpio_register_cb(resource_get_info(echo_pin_num)->sensor_h, _resource_read_ultrasonic_sensor_cb, resource_read_info);
+		ret = peripheral_gpio_set_interrupted_cb(resource_get_info(echo_pin_num)->sensor_h, _resource_read_ultrasonic_sensor_cb, resource_read_info);
 		retv_if(ret != 0, -1);
 	}
 

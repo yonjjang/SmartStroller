@@ -27,6 +27,7 @@
  * @param[in] trig_pin_num The number of the gpio pin connected to the trig of the ultrasonic sensor
  * @param[in] echo_pin_num The number of the gpio pin connected to the echo of the ultrasonic sensor
  */
-extern void resource_close_ultrasonic_sensor(int echo_pin_num, int trig_pin_num);
+extern void resource_close_ultrasonic_sensor_trig(int trig_pin_num);
+extern void resource_close_ultrasonic_sensor_echo(int echo_pin_num);
 
 #endif /* __POSITION_FINDER_RESOURCE_ULTRASONIC_SENSOR_INTERNAL_H__ */

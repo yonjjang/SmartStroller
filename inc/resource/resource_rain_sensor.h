@@ -30,6 +30,6 @@
  *
  * @see If the gpio pin is not open, creates gpio handle before reading the value of gpio.
  */
-extern int resource_read_rain_sensor(int pin_num, int *out_value);
+extern int resource_read_rain_sensor(int pin_num, uint32_t *out_value);
 
 #endif /* __POSITION_FINDER_RESOURCE_RAIN_SENSOR_H__ */

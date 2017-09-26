@@ -47,7 +47,7 @@ void resource_close_illuminance_sensor(void)
 	resource_sensor_s.opened = 0;
 }
 
-int resource_read_illuminance_sensor(int i2c_bus, int *out_value)
+int resource_read_illuminance_sensor(int i2c_bus, uint32_t *out_value)
 {
 	int ret = PERIPHERAL_ERROR_NONE;
 	unsigned char buf[10] = { 0, };
@@ -58,7 +58,8 @@ int resource_read_illuminance_sensor(int i2c_bus, int *out_value)
 		resource_sensor_s.opened = 1;
 	}
 
-	ret = peripheral_i2c_write_byte(resource_sensor_s.sensor_h, GY30_CONT_HIGH_RES_MODE);
+	buf[0] = GY30_CONT_HIGH_RES_MODE;
+	ret = peripheral_i2c_write(resource_sensor_s.sensor_h, buf, 1);
 	retv_if(ret < 0, -1);
 
 	ret = peripheral_i2c_read(resource_sensor_s.sensor_h, buf, 2);

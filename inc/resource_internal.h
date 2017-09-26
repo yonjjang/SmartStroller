@@ -23,6 +23,7 @@
 #define __POSITION_FINDER_RESOURCE_INTERNAL_H__
 
 #include <peripheral_io.h>
+#include <stdint.h>
 
 #include "resource/resource_illuminance_sensor_internal.h"
 #include "resource/resource_infrared_motion_sensor_internal.h"

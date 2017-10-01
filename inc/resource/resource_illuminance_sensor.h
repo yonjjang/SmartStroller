@@ -29,7 +29,7 @@
  * @return 0 on success, otherwise a negative error value
  * @see If the i2c bus is not open, creates i2c handle before reading data from the i2c slave device.
  */
-extern int resource_read_illuminance_sensor(int i2c_bus, int *out_value);
+extern int resource_read_illuminance_sensor(int i2c_bus, uint32_t *out_value);
 
 #endif /* __POSITION_FINDER_RESOURCE_ILLUMINANCE_SENSOR_H__ */
 

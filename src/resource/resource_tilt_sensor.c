@@ -36,7 +36,7 @@ void resource_close_tilt_sensor(int pin_num)
 	resource_get_info(pin_num)->opened = 0;
 }
 
-int resource_read_tilt_sensor(int pin_num, int *out_value)
+int resource_read_tilt_sensor(int pin_num, uint32_t *out_value)
 {
 	int ret = PERIPHERAL_ERROR_NONE;
 

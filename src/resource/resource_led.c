@@ -43,7 +43,7 @@ int resource_write_led(int pin_num, int write_value)
 		ret = peripheral_gpio_open(pin_num, &resource_get_info(pin_num)->sensor_h);
 		retv_if(!resource_get_info(pin_num)->sensor_h, -1);
 
-		ret = peripheral_gpio_set_direction(resource_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_OUT);
+		ret = peripheral_gpio_set_direction(resource_get_info(pin_num)->sensor_h, PERIPHERAL_GPIO_DIRECTION_OUT_INITIALLY_LOW);
 		retv_if(ret != 0, -1);
 
 		resource_get_info(pin_num)->opened = 1;
@@ -53,7 +53,7 @@ int resource_write_led(int pin_num, int write_value)
 	ret = peripheral_gpio_write(resource_get_info(pin_num)->sensor_h, write_value);
 	retv_if(ret < 0, -1);
 
-	_I("LED Value : %s", write_value ? "ON" : "OFF");
+	_I("LED Value : %s", write_value ? "ON":"OFF");
 
 	return 0;
 }

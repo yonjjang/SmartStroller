@@ -21,6 +21,7 @@ pkg_check_modules(APP_PKGS REQUIRED
 	libcurl
 	glib-2.0
 	json-glib-1.0
+	capi-system-info
 )
 
 ADD_DEFINITIONS(-DCBOR_FILE_IN_RES="${INSTALL_RESDIR}/${CBOR_FILE}")
@@ -56,6 +57,8 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/resource/resource_sound_detection_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_tilt_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_gas_detection_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_sound_level_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_adc_mcp3008.c
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} -lm)
@@ -66,7 +69,6 @@ Message("APP_LABEL : ${APP_LABEL}")
 CONFIGURE_FILE(${PROJECT_ROOT_DIR}/tizen-manifest.xml.in ${ORG_PREFIX}.${PROJECT_NAME}.xml @ONLY)
 # Install
 INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_EXEC_PREFIX})
-INSTALL(DIRECTORY DESTINATION ${INSTALL_OWNER_DATADIR})
 INSTALL(FILES ${ORG_PREFIX}.${PROJECT_NAME}.xml DESTINATION ${SYS_PACKAGES_DIR})
 INSTALL(FILES ${PROJECT_ROOT_DIR}/shared/res/default_icon.png DESTINATION ${SYS_ICONS_DIR} RENAME ${PROJECT_NAME}.png)
 INSTALL(FILES ${PROJECT_ROOT_DIR}/res/${CBOR_FILE} DESTINATION ${INSTALL_RESDIR})

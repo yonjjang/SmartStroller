@@ -26,6 +26,7 @@ BuildRequires:  pkgconfig(gio-2.0)
 BuildRequires:  pkgconfig(libcurl)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(json-glib-1.0)
+BuildRequires:  pkgconfig(capi-system-info)
 
 %description
 Server for Position Finder
@@ -83,16 +84,6 @@ make %{?jobs:-j%jobs}
 chsmack -a "User::Pkg::%{alias}" %{_pkg_res_dir}/*.dat
 chmod 444 %{_pkg_res_dir}/*.dat
 
-touch %{_pkg_rw_data_dir}/%{_cbor_file}
-chsmack -a "User::Pkg::%{alias}" %{_pkg_rw_data_dir}/*.dat
-chmod 666 %{_pkg_rw_data_dir}/*.dat
-
-# This routine will be used in the file of .dev_id.
-#touch %{_pkg_rw_data_dir}/%{_conf_file}
-#echo "/door/777" > %{_pkg_rw_data_dir}/%{_conf_file}
-#chsmack -a "User::Pkg::%{alias}" %{_pkg_rw_data_dir}/%{_conf_file}
-#chmod 444 %{_pkg_rw_data_dir}/%{_conf_file}
-
 %postun -p /sbin/ldconfig
 
 %files
@@ -100,7 +91,6 @@ chmod 666 %{_pkg_rw_data_dir}/*.dat
 %{_pkg_res_dir}/*.conf
 %manifest %{alias}.manifest
 %defattr(-,root,root,-)
-%{_pkg_rw_data_dir}
 %{_pkg_dir}/bin/%{P_NAME}
 %{_sys_packages_dir}/%{alias}.xml
 %{_sys_icons_dir}/*.png

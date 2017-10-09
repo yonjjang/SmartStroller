@@ -19,28 +19,18 @@
  * limitations under the License.
  */
 
-#include <peripheral_io.h>
+#ifndef __POSITION_FINDER_RESOURCE_SOUND_LEVEL_SENSOR_H__
+#define __POSITION_FINDER_RESOURCE_SOUND_LEVEL_SENSOR_H__
 
-#include "log.h"
-#include "resource.h"
+ /**
+  * @brief Reads the value from sound level sensor through AD converter(MCP3008).
+  * @remarks We assume that only one AD converter is connected with device.
+  * @param[in] ch_num The number of channel connected to the sound level sensor with AD converter
+  * @param[out] out_value The value of a sound level
+  * @return 0 on success, otherwise a negative error value
+  *
+  */
+extern int resource_read_sound_level_sensor(int ch_num, unsigned int *out_value);
 
-static resource_s resource_info[PIN_MAX] = { {0, NULL, NULL}, };
+#endif /* __POSITION_FINDER_RESOURCE_SOUND_LEVEL_SENSOR_H__ */
 
-resource_s *resource_get_info(int pin_num)
-{
-	return &resource_info[pin_num];
-}
-
-void resource_close_all(void)
-{
-	int i = 0;
-	for (i = 0; i < PIN_MAX; i++) {
-		if (!resource_info[i].opened) continue;
-		_I("GPIO[%d] is closing...", i);
-
-		if (resource_info[i].close)
-			resource_info[i].close(i);
-	}
-	resource_close_illuminance_sensor();
-	resource_close_sound_level_sensor();
-}

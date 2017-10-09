@@ -18,6 +18,10 @@ pkg_check_modules(APP_PKGS REQUIRED
 	eina
 	iotcon
 	gio-2.0
+	libcurl
+	glib-2.0
+	json-glib-1.0
+	capi-system-info
 )
 
 ADD_DEFINITIONS(-DCBOR_FILE_IN_RES="${INSTALL_RESDIR}/${CBOR_FILE}")
@@ -50,6 +54,8 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/resource/resource_sound_detection_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_tilt_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_gas_detection_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_sound_level_sensor.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_adc_mcp3008.c
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} -lm)

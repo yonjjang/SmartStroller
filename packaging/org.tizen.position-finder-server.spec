@@ -23,6 +23,10 @@ BuildRequires:  pkgconfig(ecore)
 BuildRequires:  pkgconfig(eina)
 BuildRequires:  pkgconfig(iotcon)
 BuildRequires:  pkgconfig(gio-2.0)
+BuildRequires:  pkgconfig(libcurl)
+BuildRequires:  pkgconfig(glib-2.0)
+BuildRequires:  pkgconfig(json-glib-1.0)
+BuildRequires:  pkgconfig(capi-system-info)
 
 %description
 Server for Position Finder

@@ -19,28 +19,12 @@
  * limitations under the License.
  */
 
-#include <peripheral_io.h>
+#ifndef __POSITION_FINDER_RESOURCE_ADC_MCP3008_H__
+#define __POSITION_FINDER_RESOURCE_ADC_MCP3008_H__
 
-#include "log.h"
-#include "resource.h"
+int resource_adc_mcp3008_init(void);
+int resource_read_adc_mcp3008(int ch_num, unsigned int *out_value);
+void resource_adc_mcp3008_fini(void);
 
-static resource_s resource_info[PIN_MAX] = { {0, NULL, NULL}, };
+#endif /* __POSITION_FINDER_RESOURCE_ADC_MCP3008_H__ */
 
-resource_s *resource_get_info(int pin_num)
-{
-	return &resource_info[pin_num];
-}
-
-void resource_close_all(void)
-{
-	int i = 0;
-	for (i = 0; i < PIN_MAX; i++) {
-		if (!resource_info[i].opened) continue;
-		_I("GPIO[%d] is closing...", i);
-
-		if (resource_info[i].close)
-			resource_info[i].close(i);
-	}
-	resource_close_illuminance_sensor();
-	resource_close_sound_level_sensor();
-}

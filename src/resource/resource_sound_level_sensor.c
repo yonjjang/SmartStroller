@@ -19,28 +19,37 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>
+#include <unistd.h>
 #include <peripheral_io.h>
+#include <sys/time.h>
 
 #include "log.h"
-#include "resource.h"
+#include "resource/resource_adc_mcp3008.h"
 
-static resource_s resource_info[PIN_MAX] = { {0, NULL, NULL}, };
+static bool initialized = false;
 
-resource_s *resource_get_info(int pin_num)
+void resource_close_sound_level_sensor(void)
 {
-	return &resource_info[pin_num];
+	resource_adc_mcp3008_fini();
+	initialized = false;
 }
 
-void resource_close_all(void)
+int resource_read_sound_level_sensor(int ch_num, unsigned int *out_value)
 {
-	int i = 0;
-	for (i = 0; i < PIN_MAX; i++) {
-		if (!resource_info[i].opened) continue;
-		_I("GPIO[%d] is closing...", i);
+	unsigned int read_value = 0;
+	int ret = 0;
 
-		if (resource_info[i].close)
-			resource_info[i].close(i);
+	if (!initialized) {
+		ret = resource_adc_mcp3008_init();
+		retv_if(ret != 0, -1);
+		initialized = true;
 	}
-	resource_close_illuminance_sensor();
-	resource_close_sound_level_sensor();
+	ret = resource_read_adc_mcp3008(ch_num, &read_value);
+	retv_if(ret != 0, -1);
+
+	*out_value = read_value;
+
+	return 0;
 }
+

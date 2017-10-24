@@ -79,4 +79,14 @@ extern int connectivity_notify_int(connectivity_resource_s *resource_info, const
  */
 extern int connectivity_notify_double(connectivity_resource_s *resource_info, const char *key, double value);
 
+/**
+ * @brief Notifies specific clients that resource's attributes have changed with string value.
+ * @param[in] resource_info A structure containing information about connectivity resource
+ * @param[in] key A new key to be added into attributes
+ * @param[in] value A string value to be added into attributes
+ * @return 0 on success, otherwise a negative error value
+ * @see If key is already exists, current value will be replaced with new value.
+ */
+extern int connectivity_notify_string(connectivity_resource_s *resource_info, const char *key, char *value);
+
 #endif /* __POSITION_FINDER_CONNECTIVITY_H__ */

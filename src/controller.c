@@ -82,22 +82,22 @@ static bool service_app_create(void *data)
 	/**
 	 * Create a connectivity resource and registers the resource in server.
 	 */
-	/*
-	ret = connectivity_set_resource("/door/1", "org.tizen.door", &ad->resource_info);
+#if 0
+	ret = connectivity_set_resource("/door/0", "org.tizen.door", &ad->resource_info);
 	if (ret == -1) _E("Cannot broadcast resource");
-	*/
+#endif
 
 	/**
 	 * Creates a timer to call the given function in the given period of time.
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
-	/*
+#if 0
 	ad->getter_timer = ecore_timer_add( Duration , _control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add infrared motion getter timer");
 		return false;
 	}
-	*/
+#endif
 
     return true;
 }

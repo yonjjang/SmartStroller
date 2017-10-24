@@ -35,29 +35,48 @@ typedef struct app_data_s {
 	connectivity_resource_s *resource_info;
 } app_data;
 
-static Eina_Bool control_sensors_cb(void *data)
+static void _ultrasonic_sensor_read_cb(float value, void *data)
 {
-	double value = 0.0f;
 	app_data *ad = data;
 
 	/**
-	 * Infrared motion sensor outputs 1 if motion is detected, or 0 if motion is not detected.
+	 * TODO: Send the value of the ultrasonic sensor to the Client.
 	 */
+
 	/*
-	if (resource_read_infrared_motion_sensor(PIN_NUMBER, &value) == -1)
-		_E("Failed to get DATA from Infrared Motion value");
-
-	_D("Sensor Value: %d", value);
+	if (value < 0) {
+		_E("OUT OF RANGE");
+	} else {
+		_D("Measured Distance : %0.2fcm", value);
+	}
 	*/
+}
 
+static Eina_Bool _control_sensors_cb(void *data)
+{
+	app_data *ad = data;
+	int ret = 0;
 
 	/**
+	 * TODO: Prepare to read the value of the ultrasonic sensor.
+	 */
+
+    /*
+	ret = resource_read_ultrasonic_sensor(TRIG_PIN_NUMBER, ECHO_PIN_NUMBER, _ultrasonic_sensor_read_cb, NULL);
+	*/
+
+	if (ret < 0) {
+		_E("Failed to read from ultrasonic sensor");
+	}
+
+	/*
 	 * Notifies specific clients that resource's attributes have changed.
 	 */
 	/*
 	if (connectivity_notify_double(ad->resource_info, "distance", value) == -1)
 		_E("Cannot notify message");
 	*/
+
 
 	return ECORE_CALLBACK_RENEW;
 }
@@ -86,7 +105,7 @@ static bool service_app_create(void *data)
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
 	/*
-	ad->getter_timer = ecore_timer_add(Duration, control_sensors_cb, ad);
+	ad->getter_timer = ecore_timer_add( Duration , _control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add infrared motion getter timer");
 		return false;

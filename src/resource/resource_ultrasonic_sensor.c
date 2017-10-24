@@ -28,6 +28,9 @@
 #include "log.h"
 #include "resource_internal.h"
 
+static resource_read_s *resource_read_info = NULL;
+static unsigned long long triggered_time = 0;
+
 void resource_close_ultrasonic_sensor_trig(int trig_pin_num)
 {
 	if (!resource_get_info(trig_pin_num)->opened) return;
@@ -46,6 +49,8 @@ void resource_close_ultrasonic_sensor_echo(int echo_pin_num)
 
 	peripheral_gpio_close(resource_get_info(echo_pin_num)->sensor_h);
 	resource_get_info(echo_pin_num)->opened = 0;
+	free(resource_read_info);
+	resource_read_info = NULL;
 }
 
 static unsigned long long _get_timestamp(void)
@@ -59,8 +64,7 @@ static void _resource_read_ultrasonic_sensor_cb(peripheral_gpio_h gpio, peripher
 {
 	float dist = 0;
 	uint32_t value;
-	static unsigned long long prev = 0;
-	unsigned long long now = _get_timestamp();
+	unsigned long long returned_time = 0;
 	resource_read_s *resource_read_info = user_data;
 
 	ret_if(!resource_read_info);
@@ -68,26 +72,36 @@ static void _resource_read_ultrasonic_sensor_cb(peripheral_gpio_h gpio, peripher
 
 	peripheral_gpio_read(gpio, &value);
 
-	if (prev > 0 && value == 0) {
-		dist = now - prev;
-		dist = (dist * 34300) / 2000000;
-		_I("Measured Distance : %0.2fcm\n", dist);
-
-		resource_read_info->cb(dist, resource_read_info->data);
-		peripheral_gpio_unset_interrupted_cb(resource_get_info(resource_read_info->pin_num)->sensor_h);
-		free(resource_read_info);
+	if (value == 1) {
+		triggered_time = _get_timestamp();
+	} else if (value == 0) {
+		returned_time = _get_timestamp();
 	}
 
-	prev = now;
+	if (triggered_time > 0 && value == 0) {
+		dist = returned_time - triggered_time;
+		if (dist < 150 || dist > 25000) {
+			dist = -1;
+		} else {
+			dist = (dist * 34300) / 2000000;
+		}
+
+		resource_read_info->cb(dist, resource_read_info->data);
+	}
 }
 
 int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource_read_cb cb, void *data)
 {
 	int ret = 0;
-	resource_read_s *resource_read_info = NULL;
 
-	resource_read_info = calloc(1, sizeof(resource_read_s));
-	retv_if(!resource_read_info, -1);
+	triggered_time = 0;
+
+	if (resource_read_info == NULL) {
+		resource_read_info = calloc(1, sizeof(resource_read_s));
+		retv_if(!resource_read_info, -1);
+	} else {
+		peripheral_gpio_unset_interrupted_cb(resource_get_info(resource_read_info->pin_num)->sensor_h);
+	}
 	resource_read_info->cb = cb;
 	resource_read_info->data = data;
 	resource_read_info->pin_num = echo_pin_num;
@@ -129,8 +143,12 @@ int resource_read_ultrasonic_sensor(int trig_pin_num, int echo_pin_num, resource
 	ret = peripheral_gpio_write(resource_get_info(trig_pin_num)->sensor_h, 0);
 	retv_if(ret < 0, -1);
 
+	usleep(20000);
+
 	ret = peripheral_gpio_write(resource_get_info(trig_pin_num)->sensor_h, 1);
 	retv_if(ret < 0, -1);
+
+	usleep(20000);
 
 	ret = peripheral_gpio_write(resource_get_info(trig_pin_num)->sensor_h, 0);
 	retv_if(ret < 0, -1);

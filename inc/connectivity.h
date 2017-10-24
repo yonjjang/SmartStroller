@@ -50,33 +50,43 @@ extern int connectivity_set_resource(const char *path, const char *type, connect
 extern void connectivity_unset_resource(connectivity_resource_s *resource);
 
 /**
- * @brief Notifies specific clients that resource's attributes have changed with boolean value.
+ * @brief Notifies a resource's value to observed clients.
  * @param[in] resource_info A structure containing information about connectivity resource
- * @param[in] key A new key to be added into attributes
- * @param[in] value A boolean value to be added into attributes
+ * @param[in] key A key to be sended.
+ * @param[in] value A value to be sended.
  * @return 0 on success, otherwise a negative error value
  * @see If key is already exists, current value will be replaced with new value.
  */
 extern int connectivity_notify_bool(connectivity_resource_s *resource_info, const char *key, bool value);
 
 /**
- * @brief Notifies specific clients that resource's attributes have changed with int value.
+ * @brief Notifies a resource's value to observed clients.
  * @param[in] resource_info A structure containing information about connectivity resource
- * @param[in] key A new key to be added into attributes
- * @param[in] value A int value to be added into attributes
+ * @param[in] key A key to be sended.
+ * @param[in] value A value to be sended.
  * @return 0 on success, otherwise a negative error value
  * @see If key is already exists, current value will be replaced with new value.
  */
 extern int connectivity_notify_int(connectivity_resource_s *resource_info, const char *key, int value);
 
 /**
- * @brief Notifies specific clients that resource's attributes have changed with double value.
+ * @brief Notifies a resource's value to observed clients.
  * @param[in] resource_info A structure containing information about connectivity resource
- * @param[in] key A new key to be added into attributes
- * @param[in] value A double value to be added into attributes
+ * @param[in] key A key to be sended.
+ * @param[in] value A value to be sended.
  * @return 0 on success, otherwise a negative error value
  * @see If key is already exists, current value will be replaced with new value.
  */
 extern int connectivity_notify_double(connectivity_resource_s *resource_info, const char *key, double value);
+
+/**
+ * @brief Notifies a resource's value to observed clients.
+ * @param[in] resource_info A structure containing information about connectivity resource
+ * @param[in] key A key to be sended.
+ * @param[in] value A value to be sended.
+ * @return 0 on success, otherwise a negative error value
+ * @see If key is already exists, current value will be replaced with new value.
+ */
+extern int connectivity_notify_string(connectivity_resource_s *resource_info, const char *key, char *value);
 
 #endif /* __POSITION_FINDER_CONNECTIVITY_H__ */

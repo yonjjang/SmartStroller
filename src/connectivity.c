@@ -186,6 +186,45 @@ error:
 	return NULL;
 }
 
+static iotcon_representation_h _create_representation_with_string(connectivity_resource_s *resource_info, const char *key, char *value)
+{
+	iotcon_attributes_h attributes = NULL;
+	iotcon_representation_h representation = NULL;
+	char *uri_path = NULL;
+	int ret = -1;
+
+	ret = iotcon_resource_get_uri_path(resource_info->res, &uri_path);
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
+
+	ret = iotcon_representation_create(&representation);
+	retv_if(IOTCON_ERROR_NONE != ret, NULL);
+
+	ret = iotcon_attributes_create(&attributes);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_representation_set_uri_path(representation, uri_path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_attributes_add_str(attributes, PATH, resource_info->path);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_attributes_add_str(attributes, key, value);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	ret = iotcon_representation_set_attributes(representation, attributes);
+	goto_if(IOTCON_ERROR_NONE != ret, error);
+
+	iotcon_attributes_destroy(attributes);
+
+	return representation;
+
+error:
+	if (attributes) iotcon_attributes_destroy(attributes);
+	if (representation) iotcon_representation_destroy(representation);
+
+	return NULL;
+}
+
 static void _print_iotcon_error(int err_no)
 {
 	switch (err_no) {
@@ -262,9 +301,34 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 	retv_if(!resource_info, -1);
 	retv_if(!resource_info->observers, -1);
 
-	_D("Notify the value[%f]", value);
+	_D("Notify the value [%.2lf]", value);
 
 	representation = _create_representation_with_double(resource_info, key, value);
+	retv_if(!representation, -1);
+
+	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_LOW);
+	if (IOTCON_ERROR_NONE != ret) {
+		_I("There are some troubles for notifying value[%d]", ret);
+		_print_iotcon_error(ret);
+		return -1;
+	}
+
+	_destroy_representation(representation);
+
+	return 0;
+}
+
+int connectivity_notify_string(connectivity_resource_s *resource_info, const char *key, char *value)
+{
+	iotcon_representation_h representation;
+	int ret = -1;
+
+	retv_if(!resource_info, -1);
+	retv_if(!resource_info->observers, -1);
+
+	_D("Notify the value [%s]", value);
+
+	representation = _create_representation_with_string(resource_info, key, value);
 	retv_if(!representation, -1);
 
 	ret = iotcon_resource_notify(resource_info->res, representation, resource_info->observers, IOTCON_QOS_LOW);

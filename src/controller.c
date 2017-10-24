@@ -37,7 +37,7 @@ typedef struct app_data_s {
 
 static Eina_Bool control_sensors_cb(void *data)
 {
-	int value = 0;
+	double value = 0.0f;
 	app_data *ad = data;
 
 	/**
@@ -55,7 +55,7 @@ static Eina_Bool control_sensors_cb(void *data)
 	 * Notifies specific clients that resource's attributes have changed.
 	 */
 	/*
-	if (connectivity_notify_bool(ad->resource_info, "opened", value) == -1)
+	if (connectivity_notify_double(ad->resource_info, "distance", value) == -1)
 		_E("Cannot notify message");
 	*/
 

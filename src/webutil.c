@@ -141,7 +141,7 @@ int web_util_json_fini(void)
 	return 0;
 }
 
-int web_util_json_data_array_begin(void)
+int web_util_json_begin(void)
 {
 	retv_if(Json_h.builder == NULL, -1);
 	retv_if(Json_h.is_begin == true, -1);
@@ -149,13 +149,131 @@ int web_util_json_data_array_begin(void)
 
 	Json_h.is_begin = true;
 
-	/*
-	{
-		SensorsDataList : [ SensorData ]
-	}
-	*/
-
 	json_builder_begin_object(Json_h.builder);
+
+	return 0;
+}
+
+int web_util_json_end(void)
+{
+	retv_if(Json_h.builder == NULL, -1);
+	retv_if(Json_h.is_begin == false, -1);
+	retv_if(Json_h.is_end == true, -1);
+
+	json_builder_end_object(Json_h.builder);
+	Json_h.is_end = true;
+
+	return 0;
+}
+
+int web_util_json_add_int(const char* key, long long int value)
+{
+	retv_if(!key, -1);
+
+	if (Json_h.builder == NULL) {
+		_E("Handle for json is not initialized, call web_util_json_init() first");
+		return -1;
+	}
+
+	if (Json_h.is_begin == false) {
+		_E("json object has not begun, call web_util_json_begin() first");
+		return -1;
+	}
+
+	if (Json_h.is_end == true) {
+		_E("json object has already ended, call web_util_json_begin() first");
+		return -1;
+	}
+
+	json_builder_set_member_name(Json_h.builder, key);
+	json_builder_add_int_value(Json_h.builder, value);
+
+	return 0;
+}
+
+int web_util_json_add_double(const char* key, double value)
+{
+	retv_if(!key, -1);
+
+	if (Json_h.builder == NULL) {
+		_E("Handle for json is not initialized, call web_util_json_init() first");
+		return -1;
+	}
+
+	if (Json_h.is_begin == false) {
+		_E("json object has not begun, call web_util_json_begin() first");
+		return -1;
+	}
+
+	if (Json_h.is_end == true) {
+		_E("json object has already ended, call web_util_json_begin() first");
+		return -1;
+	}
+
+	json_builder_set_member_name(Json_h.builder, key);
+	json_builder_add_double_value(Json_h.builder, value);
+
+	return 0;
+}
+
+int web_util_json_add_boolean(const char* key, bool value)
+{
+	retv_if(!key, -1);
+
+	if (Json_h.builder == NULL) {
+		_E("Handle for json is not initialized, call web_util_json_init() first");
+		return -1;
+	}
+
+	if (Json_h.is_begin == false) {
+		_E("json object has not begun, call web_util_json_begin() first");
+		return -1;
+	}
+
+	if (Json_h.is_end == true) {
+		_E("json object has already ended, call web_util_json_begin() first");
+		return -1;
+	}
+
+	json_builder_set_member_name(Json_h.builder, key);
+	json_builder_add_boolean_value(Json_h.builder, value);
+
+	return 0;
+}
+
+int web_util_json_add_string(const char* key, const char *value)
+{
+	retv_if(!key, -1);
+
+	if (Json_h.builder == NULL) {
+		_E("Handle for json is not initialized, call web_util_json_init() first");
+		return -1;
+	}
+
+	if (Json_h.is_begin == false) {
+		_E("json object has not begun, call web_util_json_begin() first");
+		return -1;
+	}
+
+	if (Json_h.is_end == true) {
+		_E("json object has already ended, call web_util_json_begin() first");
+		return -1;
+	}
+
+	json_builder_set_member_name(Json_h.builder, key);
+	json_builder_add_string_value(Json_h.builder, value);
+
+	return 0;
+}
+
+int web_util_json_data_array_begin(void)
+{
+	int ret = 0;
+	retv_if(Json_h.builder == NULL, -1);
+
+	ret = web_util_json_begin();
+	retv_if(ret, -1);
+
 	json_builder_set_member_name(Json_h.builder, "SensorDataList");
 	json_builder_begin_array(Json_h.builder);
 
@@ -169,8 +287,7 @@ int web_util_json_data_array_end(void)
 	retv_if(Json_h.is_end == true, -1);
 
 	json_builder_end_array(Json_h.builder);
-	json_builder_end_object(Json_h.builder);
-	Json_h.is_end = true;
+	web_util_json_end();
 
 	return 0;
 }

@@ -70,8 +70,14 @@ int web_util_noti_post(const char *resource, const char *json_data);
 
 int web_util_json_init(void);
 int web_util_json_fini(void);
+int web_util_json_begin(void);
+int web_util_json_end(void);
 int web_util_json_data_array_begin(void);
 int web_util_json_data_array_end(void);
+int web_util_json_add_int(const char* key, long long int value);
+int web_util_json_add_double(const char* key, double value);
+int web_util_json_add_boolean(const char* key, bool value);
+int web_util_json_add_string(const char* key, const char *value);
 int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_s *sensor_data);
 char *web_util_get_json_string(void);
 

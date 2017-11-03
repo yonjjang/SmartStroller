@@ -44,17 +44,16 @@ static Eina_Bool _control_sensors_cb(void *data)
 
 #if 0
 	ret = resource_read_infrared_motion_sensor(PIN_NUMBER, &value);
-	if (ret != 0) {
-		_E("Cannot read sensor value");
-	}
+	if (ret != 0) _E("Cannot read sensor value");
+
+	_D("Detected value : %d", value);
 #endif
 
 #if 0
 	ret = connectivity_notify_int(ad->resource_info, KEY, value);
-	if (ret != 0) {
-		_E("Cannot notify value");
-	}
+	if (ret != 0) _E("Cannot notify value");
 #endif
+
 	return ECORE_CALLBACK_RENEW;
 }
 
@@ -71,12 +70,12 @@ static bool service_app_create(void *data)
 
 #if 0
 	ret = connectivity_set_connectivity_type(CONNECTIVITY_TYPE);
-	if (ret == -1) _E("Cannot set connectivity type");
+	if (ret != 0) _E("Cannot set connectivity type");
 #endif
 
 #if 0
 	ret = connectivity_set_resource("/door/0", "org.tizen.door", &ad->resource_info);
-	if (ret == -1) _E("Cannot set connectivity resource");
+	if (ret != 0) _E("Cannot set connectivity resource");
 #endif
 
 	/**

@@ -35,36 +35,26 @@ typedef struct app_data_s {
 	connectivity_resource_s *resource_info;
 } app_data;
 
-static void _ultrasonic_sensor_read_cb(double value, void *data)
-{
-	app_data *ad = data;
-
-#if 0
-	if (value < 0) {
-		_E("OUT OF RANGE");
-	} else {
-		_D("Measured Distance : %0.2fcm", value);
-
-		if (connectivity_notify_double(ad->resource_info, "distance", value) == -1)
-			_E("Cannot notify message");
-	}
-#endif
-
-	return;
-}
 
 static Eina_Bool _control_sensors_cb(void *data)
 {
 	app_data *ad = data;
-	int ret = 0;
+	int value = -1;
+	int ret = -1;
 
 #if 0
-	ret = resource_read_ultrasonic_sensor(TRIG_PIN_NUMBER, ECHO_PIN_NUMBER, _ultrasonic_sensor_read_cb, ad);
-	if (ret < 0) {
-		_E("Failed to read from ultrasonic sensor");
+	ret = resource_read_infrared_motion_sensor(PIN_NUMBER, &value);
+	if (ret != 0) {
+		_E("Cannot read sensor value");
 	}
 #endif
 
+#if 0
+	ret = connectivity_notify_int(ad->resource_info, KEY, value);
+	if (ret != 0) {
+		_E("Cannot notify value");
+	}
+#endif
 	return ECORE_CALLBACK_RENEW;
 }
 
@@ -74,17 +64,19 @@ static bool service_app_create(void *data)
 	int ret = -1;
 
 	/**
-	 * No modification required!!!
+	 * DO NOT EDIT: please don't edit the function below.
 	 * Access only when modifying internal functions.
 	 */
 	controller_init_internal_functions();
 
-	/**
-	 * Create a connectivity resource and registers the resource in server.
-	 */
+#if 0
+	ret = connectivity_set_connectivity_type(CONNECTIVITY_TYPE);
+	if (ret == -1) _E("Cannot set connectivity type");
+#endif
+
 #if 0
 	ret = connectivity_set_resource("/door/0", "org.tizen.door", &ad->resource_info);
-	if (ret == -1) _E("Cannot broadcast resource");
+	if (ret == -1) _E("Cannot set connectivity resource");
 #endif
 
 	/**
@@ -94,7 +86,7 @@ static bool service_app_create(void *data)
 #if 0
 	ad->getter_timer = ecore_timer_add( Duration , _control_sensors_cb, ad);
 	if (!ad->getter_timer) {
-		_E("Failed to add infrared motion getter timer");
+		_E("Failed to add getter timer");
 		return false;
 	}
 #endif
@@ -110,13 +102,10 @@ static void service_app_terminate(void *data)
 		ecore_timer_del(ad->getter_timer);
 	}
 
-	/**
-	 * Releases the resource about connectivity.
-	 */
 	connectivity_unset_resource(ad->resource_info);
 
 	/**
-	 * No modification required!!!
+	 * DO NOT EDIT: please don't edit the function below.
 	 * Access only when modifying internal functions.
 	 */
 	controller_fini_internal_functions();
@@ -126,7 +115,7 @@ static void service_app_terminate(void *data)
 
 static void service_app_control(app_control_h app_control, void *data)
 {
-    // Todo: add your code here.
+    /* APP_CONTROL */
 }
 
 static void service_app_lang_changed(app_event_info_h event_info, void *user_data)

@@ -24,13 +24,14 @@
 
 #include "connectivity_internal.h"
 
-struct connectivity_resource {
-	iotcon_resource_h res;
-	iotcon_observers_h observers;
-	char *path;
-};
+typedef struct _connectivity_resource connectivity_resource_s;
 
-typedef struct connectivity_resource connectivity_resource_s;
+typedef enum {
+	CONNECTIVITY_TYPE_DEFAULT = 0,
+	CONNECTIVITY_TYPE_IOTIVITY,
+	CONNECTIVITY_TYPE_HTTP,
+	CONNECTIVITY_TYPE_MAX
+} connectivity_type_e;
 
 /**
  * @brief Create connectivity resource and registers the resource in server.
@@ -87,6 +88,14 @@ extern int connectivity_notify_double(connectivity_resource_s *resource_info, co
  * @return 0 on success, otherwise a negative error value
  * @see If key is already exists, current value will be replaced with new value.
  */
-extern int connectivity_notify_string(connectivity_resource_s *resource_info, const char *key, char *value);
+extern int connectivity_notify_string(connectivity_resource_s *resource_info, const char *key, const char *value);
+
+/* Here is six new functions, I don't like a name of these functions, please recommand me a good name */
+extern int connectivity_set_connectivity_type(connectivity_type_e connectivity_type);
+extern int connectivity_notify_multi_add_bool(connectivity_resource_s *resource_info, const char *key, bool value);
+extern int connectivity_notify_multi_add_int(connectivity_resource_s *resource_info, const char *key, int value);
+extern int connectivity_notify_multi_add_double(connectivity_resource_s *resource_info, const char *key, double value);
+extern int connectivity_notify_multi_add_string(connectivity_resource_s *resource_info, const char *key, const char *value);
+extern int connectivity_notify_multi_perform(connectivity_resource_s *resource_info);
 
 #endif /* __POSITION_FINDER_CONNECTIVITY_H__ */

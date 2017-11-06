@@ -41,7 +41,7 @@
 struct _connectivity_resource {
 	char *path;
 	char *type;
-	connectivity_type_e conn_type;
+	connectivity_protocol_e protocol_type;
 	GHashTable *value_hash;
 	union {
 		struct {
@@ -72,7 +72,7 @@ typedef struct _conn_data_value_s {
 	};
 } conn_data_value_s;
 
-static connectivity_type_e ConnectivityType = CONNECTIVITY_TYPE_DEFAULT;
+static connectivity_protocol_e ProtocolType = CONNECTIVITY_PROTOCOL_DEFAULT;
 static int connectivity_iotcon_intialized = 0;
 static int connectivity_http_intialized = 0;
 
@@ -277,7 +277,7 @@ static int __init_iotcon(connectivity_resource_s *resource_info)
 	char *prefix = NULL;
 
 	retv_if(!resource_info, -1);
-	retv_if(resource_info->conn_type != CONNECTIVITY_TYPE_IOTIVITY, -1);
+	retv_if(resource_info->protocol_type != CONNECTIVITY_PROTOCOL_IOTIVITY, -1);
 
 	prefix = app_get_resource_path();
 	retv_if(!prefix, -1);
@@ -557,7 +557,6 @@ static iotcon_representation_h _create_representation_with_string(connectivity_r
 	ret = iotcon_attributes_add_str(attributes, PATH, resource_info->path);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
-	/* WTF - type of 2nd argument of iotcon_attributes_add_str() should be "const char *" */
 	ret = iotcon_attributes_add_str(attributes, key, (char *)value);
 	goto_if(IOTCON_ERROR_NONE != ret, error);
 
@@ -603,8 +602,8 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 
 	_D("Notify key[%s], value[%d]", key, value);
 
-	switch (resource_info->conn_type) {
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (resource_info->protocol_type) {
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		retv_if(!resource_info->conn_data.iotcon_data.res, -1);
 		retv_if(!resource_info->conn_data.iotcon_data.observers, -1);
 		{
@@ -621,7 +620,7 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 			_destroy_representation(representation);
 		}
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
+	case CONNECTIVITY_PROTOCOL_HTTP:
 		ret = web_util_json_init();
 		retv_if(ret, -1);
 
@@ -629,7 +628,7 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 		retv_if(ret, -1);
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
-		web_util_json_add_string("SensorPiType", resource_info->type); /* need it? */
+		web_util_json_add_string("SensorPiType", resource_info->type);
 		web_util_json_add_boolean(key, value);
 		web_util_json_end();
 
@@ -638,7 +637,7 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 		web_util_json_fini();
 		break;
 	default:
-		_E("Unknown connectivity type[%d]", resource_info->conn_type);
+		_E("Unknown protocol type[%d]", resource_info->protocol_type);
 		return -1;
 		break;
 	}
@@ -646,7 +645,6 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 	return 0;
 }
 
-/* WTF - I want to use 'long long int' type as a value, but iotcon api accept 'int' type */
 int connectivity_notify_int(connectivity_resource_s *resource_info, const char *key, int value)
 {
 	int ret = -1;
@@ -656,8 +654,8 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 
 	_D("Notify key[%s], value[%d]", key, value);
 
-	switch (resource_info->conn_type) {
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (resource_info->protocol_type) {
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		retv_if(!resource_info->conn_data.iotcon_data.res, -1);
 		retv_if(!resource_info->conn_data.iotcon_data.observers, -1);
 		{
@@ -674,7 +672,7 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 			_destroy_representation(representation);
 		}
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
+	case CONNECTIVITY_PROTOCOL_HTTP:
 		ret = web_util_json_init();
 		retv_if(ret, -1);
 
@@ -682,7 +680,7 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 		retv_if(ret, -1);
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
-		web_util_json_add_string("SensorPiType", resource_info->type); /* need it? */
+		web_util_json_add_string("SensorPiType", resource_info->type);
 		web_util_json_add_int(key, value);
 		web_util_json_end();
 
@@ -691,7 +689,7 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 		web_util_json_fini();
 		break;
 	default:
-		_E("Unknown connectivity type[%d]", resource_info->conn_type);
+		_E("Unknown protocol type[%d]", resource_info->protocol_type);
 		return -1;
 		break;
 	}
@@ -707,8 +705,8 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 
 	_D("Notify key[%s], value[%lf]", key, value);
 
-	switch (resource_info->conn_type) {
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (resource_info->protocol_type) {
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		retv_if(!resource_info->conn_data.iotcon_data.res, -1);
 		retv_if(!resource_info->conn_data.iotcon_data.observers, -1);
 		{
@@ -725,7 +723,7 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 			_destroy_representation(representation);
 		}
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
+	case CONNECTIVITY_PROTOCOL_HTTP:
 		ret = web_util_json_init();
 		retv_if(ret, -1);
 
@@ -733,7 +731,7 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 		retv_if(ret, -1);
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
-		web_util_json_add_string("SensorPiType", resource_info->type); /* need it? */
+		web_util_json_add_string("SensorPiType", resource_info->type);
 		web_util_json_add_double(key, value);
 		web_util_json_end();
 
@@ -742,7 +740,7 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 		web_util_json_fini();
 		break;
 	default:
-		_E("Unknown connectivity type[%d]", resource_info->conn_type);
+		_E("Unknown protocol type[%d]", resource_info->protocol_type);
 		return -1;
 		break;
 	}
@@ -759,8 +757,8 @@ int connectivity_notify_string(connectivity_resource_s *resource_info, const cha
 
 	_D("Notify key[%s], value[%s]", key, value);
 
-	switch (resource_info->conn_type) {
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (resource_info->protocol_type) {
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		retv_if(!resource_info->conn_data.iotcon_data.res, -1);
 		retv_if(!resource_info->conn_data.iotcon_data.observers, -1);
 		{
@@ -777,7 +775,7 @@ int connectivity_notify_string(connectivity_resource_s *resource_info, const cha
 			_destroy_representation(representation);
 		}
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
+	case CONNECTIVITY_PROTOCOL_HTTP:
 		ret = web_util_json_init();
 		retv_if(ret, -1);
 
@@ -785,7 +783,7 @@ int connectivity_notify_string(connectivity_resource_s *resource_info, const cha
 		retv_if(ret, -1);
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
-		web_util_json_add_string("SensorPiType", resource_info->type); /* need it? */
+		web_util_json_add_string("SensorPiType", resource_info->type);
 		web_util_json_add_string(key, value);
 		web_util_json_end();
 
@@ -794,7 +792,7 @@ int connectivity_notify_string(connectivity_resource_s *resource_info, const cha
 		web_util_json_fini();
 		break;
 	default:
-		_E("Unknown connectivity type[%d]", resource_info->conn_type);
+		_E("Unknown protocol type[%d]", resource_info->protocol_type);
 		return -1;
 		break;
 	}
@@ -834,7 +832,7 @@ static int __add_value_to_hash(connectivity_resource_s *resource_info, const cha
 	return 0;
 }
 
-int connectivity_notify_multi_add_bool(connectivity_resource_s *resource_info, const char *key, bool value)
+int connectivity_attributes_add_bool(connectivity_resource_s *resource_info, const char *key, bool value)
 {
 	conn_data_value_s *data_value = NULL;
 
@@ -852,8 +850,7 @@ int connectivity_notify_multi_add_bool(connectivity_resource_s *resource_info, c
 	return __add_value_to_hash(resource_info, key, data_value);
 }
 
-/* WTF - I want to use 'long long int' type as a value, but iotcon api accept 'int' type */
-int connectivity_notify_multi_add_int(connectivity_resource_s *resource_info, const char *key, int value)
+int connectivity_attributes_add_int(connectivity_resource_s *resource_info, const char *key, int value)
 {
 	conn_data_value_s *data_value = NULL;
 
@@ -871,7 +868,7 @@ int connectivity_notify_multi_add_int(connectivity_resource_s *resource_info, co
 	return __add_value_to_hash(resource_info, key, data_value);
 }
 
-int connectivity_notify_multi_add_double(connectivity_resource_s *resource_info, const char *key, double value)
+int connectivity_attributes_add_double(connectivity_resource_s *resource_info, const char *key, double value)
 {
 	conn_data_value_s *data_value = NULL;
 
@@ -889,7 +886,7 @@ int connectivity_notify_multi_add_double(connectivity_resource_s *resource_info,
 	return __add_value_to_hash(resource_info, key, data_value);
 }
 
-int connectivity_notify_multi_add_string(connectivity_resource_s *resource_info, const char *key, const char *value)
+int connectivity_attributes_add_string(connectivity_resource_s *resource_info, const char *key, const char *value)
 {
 	conn_data_value_s *data_value = NULL;
 
@@ -1011,15 +1008,15 @@ static int __create_attributes(connectivity_resource_s *resource_info, iotcon_at
 	return 0;
 }
 
-int connectivity_notify_multi_perform(connectivity_resource_s *resource_info)
+int connectivity_attributes_notify_all(connectivity_resource_s *resource_info)
 {
 	int ret = 0;
 
 	retv_if(!resource_info, -1);
 	retv_if(!resource_info->value_hash, -1);
 
-	switch (resource_info->conn_type) {
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (resource_info->protocol_type) {
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		retv_if(!resource_info->conn_data.iotcon_data.res, -1);
 		retv_if(!resource_info->conn_data.iotcon_data.observers, -1);
 		{
@@ -1064,7 +1061,7 @@ int connectivity_notify_multi_perform(connectivity_resource_s *resource_info)
 			iotcon_attributes_destroy(attributes);
 		}
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
+	case CONNECTIVITY_PROTOCOL_HTTP:
 		/* TODO */
 		ret = web_util_json_init();
 		retv_if(ret, -1);
@@ -1073,7 +1070,7 @@ int connectivity_notify_multi_perform(connectivity_resource_s *resource_info)
 		retv_if(ret, -1);
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
-		web_util_json_add_string("SensorPiType", resource_info->type); /* need it? */
+		web_util_json_add_string("SensorPiType", resource_info->type);
 		g_hash_table_foreach(resource_info->value_hash, __json_add_data_iter_cb, NULL);
 		web_util_json_end();
 
@@ -1091,29 +1088,18 @@ int connectivity_notify_multi_perform(connectivity_resource_s *resource_info)
 	return ret;
 }
 
-/* Remove init and fini function or Not? */
-int connectivity_init(void)
-{
-	return 0;
-}
-
-int connectivity_fini(void)
-{
-	return 0;
-}
-
 void connectivity_unset_resource(connectivity_resource_s *resource_info)
 {
 	ret_if(!resource_info);
 
-	switch (resource_info->conn_type) {
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (resource_info->protocol_type) {
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		if (resource_info->conn_data.iotcon_data.observers) iotcon_observers_destroy(resource_info->conn_data.iotcon_data.observers);
 		if (resource_info->conn_data.iotcon_data.res) iotcon_resource_destroy(resource_info->conn_data.iotcon_data.res);
 		iotcon_deinitialize();
 		connectivity_iotcon_intialized = 0;
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
+	case CONNECTIVITY_PROTOCOL_HTTP:
 		web_util_noti_fini();
 		connectivity_http_intialized = 0;
 		break;
@@ -1146,20 +1132,20 @@ int connectivity_set_resource(const char *path, const char *type, connectivity_r
 	resource_info->type = strdup(type);
 	goto_if(!resource_info->type, error);
 
-	resource_info->conn_type = ConnectivityType;
+	resource_info->protocol_type = ProtocolType;
 
-	_D("Path[%s], Type[%s], conn_type[%d]" , resource_info->path, resource_info->type, resource_info->conn_type);
+	_D("Path[%s], Type[%s], protocol_type[%d]" , resource_info->path, resource_info->type, resource_info->protocol_type);
 
-	switch (resource_info->conn_type) {
-	case CONNECTIVITY_TYPE_DEFAULT:
-		_D("default connectivity type is iotivity\n \
-			 To set connectivity use connectivity_set_connectivity_type() function");
-		resource_info->conn_type = CONNECTIVITY_TYPE_IOTIVITY;
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (resource_info->protocol_type) {
+	case CONNECTIVITY_PROTOCOL_DEFAULT:
+		_D("default protocol type is iotivity\n \
+			 To set connectivity use connectivity_set_protocol_type() function");
+		resource_info->protocol_type = CONNECTIVITY_PROTOCOL_IOTIVITY;
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		ret = __init_iotcon(resource_info);
 		goto_if(ret, error);
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
+	case CONNECTIVITY_PROTOCOL_HTTP:
 		ret = __init_http(resource_info);
 		goto_if(ret, error);
 		break;
@@ -1180,29 +1166,29 @@ error:
 	return -1;
 }
 
-int connectivity_set_connectivity_type(connectivity_type_e connectivity_type)
+int connectivity_set_protocol(connectivity_protocol_e protocol_type)
 {
 	int ret = 0;
-	retv_if(connectivity_type >= CONNECTIVITY_TYPE_MAX, -1);
+	retv_if(protocol_type >= CONNECTIVITY_PROTOCOL_MAX, -1);
 
-	switch (connectivity_type) {
-	case CONNECTIVITY_TYPE_DEFAULT:
-	case CONNECTIVITY_TYPE_IOTIVITY:
+	switch (protocol_type) {
+	case CONNECTIVITY_PROTOCOL_DEFAULT:
+	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		if (connectivity_iotcon_intialized) {
-			_E("connectivity type[%d] aleady initialized", connectivity_type);
+			_E("protocol type[%d] aleady initialized", protocol_type);
 			return -1;
 		}
-		ConnectivityType = CONNECTIVITY_TYPE_IOTIVITY;
+		ProtocolType = CONNECTIVITY_PROTOCOL_IOTIVITY;
 		break;
-	case CONNECTIVITY_TYPE_HTTP:
-		if (connectivity_iotcon_intialized) {
-			_E("connectivity type[%d] aleady initialized", connectivity_type);
+	case CONNECTIVITY_PROTOCOL_HTTP:
+		if (connectivity_http_intialized) {
+			_E("protocol type[%d] aleady initialized", protocol_type);
 			return -1;
 		}
-		ConnectivityType = CONNECTIVITY_TYPE_HTTP;
+		ProtocolType = CONNECTIVITY_PROTOCOL_HTTP;
 		break;
 	default:
-		_E("unknown connectivity type[%d]", connectivity_type);
+		_E("unknown protocol type[%d]", protocol_type);
 		return -1;
 		break;
 	}

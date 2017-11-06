@@ -67,6 +67,7 @@ struct _web_util_sensor_data_s {
 int web_util_noti_init(void);
 void web_util_noti_fini(void);
 int web_util_noti_post(const char *resource, const char *json_data);
+int web_util_noti_get(const char *resource, char **res);
 
 int web_util_json_init(void);
 int web_util_json_fini(void);

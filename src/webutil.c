@@ -28,6 +28,7 @@
 #include "webutil.h"
 
 #define URI_PATH_LEN 64
+#define REQ_CON_TIMEOUT 5L
 
 typedef struct _wu_json_handle {
 	JsonBuilder *builder;
@@ -37,7 +38,7 @@ typedef struct _wu_json_handle {
 
 static wu_json_handle Json_h = {NULL, false, false};
 
-static size_t _response_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t _post_response_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	size_t res_size = 0;
 
@@ -46,6 +47,21 @@ static size_t _response_write_callback(char *ptr, size_t size, size_t nmemb, voi
 	if (res_size > 0)
 		_I("POST response : %s", ptr);
 	/* What should we do here, if response body has negative message? */
+
+	return res_size;
+}
+
+static size_t _get_response_write_callback(void *ptr, size_t size, size_t nmemb, void *data)
+{
+	size_t res_size = 0;
+	char **received = (char **)data;
+
+	res_size = size*nmemb;
+
+	if (received && res_size > 0)
+		*received = strndup((char *)ptr, size*nmemb);
+	else
+		_E("fail to get response [res size : %d]", res_size);
 
 	return res_size;
 }
@@ -96,7 +112,8 @@ int web_util_noti_post(const char *resource, const char *json_data)
 	curl_easy_setopt(curl, CURLOPT_POST, 1L);
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _response_write_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _post_response_write_callback);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, REQ_CON_TIMEOUT);
 
 	response = curl_easy_perform(curl);
 
@@ -113,6 +130,42 @@ int web_util_noti_post(const char *resource, const char *json_data)
 	return ret;
 }
 
+int web_util_noti_get(const char *resource, char **res)
+{
+	int ret = 0;
+	CURL *curl = NULL;
+	CURLcode response = CURLE_OK;
+
+	retv_if(resource == NULL, -1);
+
+	_I("GET to [%s]", resource);
+
+	curl = curl_easy_init();
+
+	if (!curl) {
+		_E("fail to init curl");
+		return -1;
+	}
+
+	curl_easy_setopt(curl, CURLOPT_URL, resource);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _get_response_write_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)res);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "tizen-iot-agent/1.0");
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, REQ_CON_TIMEOUT);
+
+	response = curl_easy_perform(curl);
+
+	if (response != CURLE_OK) {
+		_E("curl_easy_perform() failed: %s",
+		curl_easy_strerror(response));
+		/* What should we do here, if response is kind of errors? */
+		ret = -1;
+	}
+
+	curl_easy_cleanup(curl);
+
+	return ret;
+}
 
 int web_util_json_init(void)
 {

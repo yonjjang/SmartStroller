@@ -95,5 +95,7 @@ extern int connectivity_attributes_add_int(connectivity_resource_s *resource_inf
 extern int connectivity_attributes_add_double(connectivity_resource_s *resource_info, const char *key, double value);
 extern int connectivity_attributes_add_string(connectivity_resource_s *resource_info, const char *key, const char *value);
 extern int connectivity_attributes_notify_all(connectivity_resource_s *resource_info);
+extern int connectivity_attributes_remove_value_by_key(connectivity_resource_s *resource_info, const char *key);
+extern int connectivity_attributes_remove_all(connectivity_resource_s *resource_info);
 
 #endif /* __POSITION_FINDER_CONNECTIVITY_H__ */

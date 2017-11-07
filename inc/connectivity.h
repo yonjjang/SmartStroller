@@ -22,15 +22,14 @@
 #ifndef __POSITION_FINDER_CONNECTIVITY_H__
 #define __POSITION_FINDER_CONNECTIVITY_H__
 
-#include "connectivity_internal.h"
+typedef struct _connectivity_resource connectivity_resource_s;
 
-struct connectivity_resource {
-	iotcon_resource_h res;
-	iotcon_observers_h observers;
-	char *path;
-};
-
-typedef struct connectivity_resource connectivity_resource_s;
+typedef enum {
+	CONNECTIVITY_PROTOCOL_DEFAULT = 0,
+	CONNECTIVITY_PROTOCOL_IOTIVITY,
+	CONNECTIVITY_PROTOCOL_HTTP,
+	CONNECTIVITY_PROTOCOL_MAX
+   } connectivity_protocol_e;
 
 /**
  * @brief Create connectivity resource and registers the resource in server.
@@ -87,6 +86,14 @@ extern int connectivity_notify_double(connectivity_resource_s *resource_info, co
  * @return 0 on success, otherwise a negative error value
  * @see If key is already exists, current value will be replaced with new value.
  */
-extern int connectivity_notify_string(connectivity_resource_s *resource_info, const char *key, char *value);
+extern int connectivity_notify_string(connectivity_resource_s *resource_info, const char *key, const char *value);
+
+/* TODO : add comments for these functions */
+extern int connectivity_set_protocol(connectivity_protocol_e protocol_type);
+extern int connectivity_attributes_add_bool(connectivity_resource_s *resource_info, const char *key, bool value);
+extern int connectivity_attributes_add_int(connectivity_resource_s *resource_info, const char *key, int value);
+extern int connectivity_attributes_add_double(connectivity_resource_s *resource_info, const char *key, double value);
+extern int connectivity_attributes_add_string(connectivity_resource_s *resource_info, const char *key, const char *value);
+extern int connectivity_attributes_notify_all(connectivity_resource_s *resource_info);
 
 #endif /* __POSITION_FINDER_CONNECTIVITY_H__ */

@@ -905,6 +905,29 @@ int connectivity_attributes_add_string(connectivity_resource_s *resource_info, c
 	return __add_value_to_hash(resource_info, key, data_value);
 }
 
+int connectivity_attributes_remove_value_by_key(connectivity_resource_s *resource_info, const char *key)
+{
+	retv_if(!resource_info, -1);
+	retv_if(!key, -1);
+
+	if (resource_info->value_hash)
+		g_hash_table_remove(resource_info->value_hash, key);
+
+	return 0;
+}
+
+int connectivity_attributes_remove_all(connectivity_resource_s *resource_info)
+{
+	retv_if(!resource_info, -1);
+
+	if (resource_info->value_hash) {
+		g_hash_table_destroy(resource_info->value_hash);
+		resource_info->value_hash = NULL;
+	}
+
+	return 0;
+}
+
 static void __json_add_data_iter_cb(gpointer key, gpointer value, gpointer user_data)
 {
 	char *name = key;
@@ -1013,7 +1036,12 @@ int connectivity_attributes_notify_all(connectivity_resource_s *resource_info)
 	int ret = 0;
 
 	retv_if(!resource_info, -1);
-	retv_if(!resource_info->value_hash, -1);
+
+	if (resource_info->value_hash == NULL) {
+		_W("You have nothing to notify now");
+		return 0;
+	}
+
 
 	switch (resource_info->protocol_type) {
 	case CONNECTIVITY_PROTOCOL_IOTIVITY:
@@ -1062,7 +1090,6 @@ int connectivity_attributes_notify_all(connectivity_resource_s *resource_info)
 		}
 		break;
 	case CONNECTIVITY_PROTOCOL_HTTP:
-		/* TODO */
 		ret = web_util_json_init();
 		retv_if(ret, -1);
 

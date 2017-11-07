@@ -21,12 +21,14 @@
 
 #include <stdlib.h>
 #include <glib.h>
-
+#include <stdio.h>
+#include <app_common.h>
 #include "log.h"
 
 #define CONF_GROUP_DEFAULT_NAME "default"
 #define CONF_KEY_PATH_NAME "path"
 #define CONF_KEY_ADDRESS_NAME "address"
+#define CONF_FILE_NAME "pi.conf"
 
 struct controller_util_s {
 	char *path;
@@ -38,12 +40,20 @@ struct controller_util_s controller_util = { 0, };
 static int _read_conf_file(void)
 {
 	GKeyFile *gkf = NULL;
+	char conf_path[PATH_MAX] = {0,};
+	char *prefix = NULL;
 
 	gkf = g_key_file_new();
 	retv_if(!gkf, -1);
 
-	if (!g_key_file_load_from_file(gkf, CONF_FILE, G_KEY_FILE_NONE, NULL)) {
-		_E("could not read config file %s", CONF_FILE);
+	prefix = app_get_resource_path();
+	retv_if(!prefix, -1);
+	snprintf(conf_path, sizeof(conf_path)-1, "%s%s", prefix, CONF_FILE_NAME);
+	free(prefix);
+	prefix = NULL;
+
+	if (!g_key_file_load_from_file(gkf, conf_path, G_KEY_FILE_NONE, NULL)) {
+		_E("could not read config file %s", conf_path);
 		return -1;
 	}
 

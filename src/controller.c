@@ -69,7 +69,7 @@ static bool service_app_create(void *data)
 	controller_init_internal_functions();
 
 #if 0
-	ret = connectivity_set_connectivity_type(CONNECTIVITY_TYPE);
+	ret = connectivity_set_protocol(CONNECTIVITY_PROTOCOL);
 	if (ret != 0) _E("Cannot set connectivity type");
 #endif
 
@@ -83,7 +83,7 @@ static bool service_app_create(void *data)
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
 #if 0
-	ad->getter_timer = ecore_timer_add( Duration , _control_sensors_cb, ad);
+	ad->getter_timer = ecore_timer_add(Duration , _control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add getter timer");
 		return false;

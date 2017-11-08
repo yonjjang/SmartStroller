@@ -28,13 +28,14 @@
 
 void controller_init_internal_functions(void)
 {
-	connectivity_init();
+	return;
 }
 
 void controller_fini_internal_functions(void)
 {
 	_I("Terminating...");
 	resource_close_all();
-	connectivity_fini();
 	controller_util_free();
+
+	return;
 }

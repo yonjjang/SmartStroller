@@ -33,7 +33,7 @@
 #include "webutil.h"
 
 #define CONNECTIVITY_KEY "opened"
-#define SENSORING_TIME_INTERVAL 1.0f
+#define SENSORING_TIME_INTERVAL 5.0f
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;
@@ -43,8 +43,10 @@ typedef struct app_data_s {
 static Eina_Bool control_sensors_cb(void *data)
 {
 	app_data *ad = data;
+	int value = 1;
 
-	if (connectivity_notify_bool(ad->resource_info, CONNECTIVITY_KEY, true) == -1)
+	/* This is example, get value from sensors first */
+	if (connectivity_notify_int(ad->resource_info, "Motion", value) == -1)
 		_E("Cannot notify message");
 
 	return ECORE_CALLBACK_RENEW;
@@ -54,6 +56,7 @@ static bool service_app_create(void *data)
 {
 	app_data *ad = data;
 	int ret = -1;
+	const char *path = NULL;
 
 	/**
 	 * No modification required!!!
@@ -64,7 +67,15 @@ static bool service_app_create(void *data)
 	/**
 	 * Create a connectivity resource and registers the resource in server.
 	 */
-	ret = connectivity_set_resource(NULL, "org.tizen.door", &ad->resource_info);
+	connectivity_set_protocol(CONNECTIVITY_PROTOCOL_HTTP);
+
+	controller_util_get_path(&path);
+	if (path == NULL) {
+		_E("Failed to get path");
+		return false;
+	}
+
+	ret = connectivity_set_resource(path, "org.tizen.door", &ad->resource_info);
 	if (ret == -1) _E("Cannot broadcast resource");
 
 	/**

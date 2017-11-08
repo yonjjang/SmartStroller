@@ -39,7 +39,7 @@ typedef struct app_data_s {
 static Eina_Bool _control_sensors_cb(void *data)
 {
 	app_data *ad = data;
-	int value = -1;
+	uint32_t value = -1;
 	int ret = -1;
 
 #if 0

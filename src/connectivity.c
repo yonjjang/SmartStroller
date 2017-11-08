@@ -913,6 +913,11 @@ int connectivity_attributes_remove_value_by_key(connectivity_resource_s *resourc
 	if (resource_info->value_hash)
 		g_hash_table_remove(resource_info->value_hash, key);
 
+	if (g_hash_table_size(resource_info->value_hash) == 0) {
+		g_hash_table_unref(resource_info->value_hash);
+		resource_info->value_hash = NULL;
+	}
+
 	return 0;
 }
 

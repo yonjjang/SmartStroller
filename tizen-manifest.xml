@@ -9,5 +9,6 @@
         <privilege>http://tizen.org/privilege/appdir.shareddata</privilege>
         <privilege>http://tizen.org/privilege/network.get</privilege>
         <privilege>http://tizen.org/privilege/internet</privilege>
+        <privilege>http://tizen.org/privilege/peripheralio</privilege>
     </privileges>
 </manifest>

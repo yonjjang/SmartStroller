@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<manifest xmlns="http://tizen.org/ns/packages" api-version="3.0" package="@ORG_PREFIX@.@PROJECT_NAME@" version="1.0.0">
+<manifest xmlns="http://tizen.org/ns/packages" api-version="4.0" package="@ORG_PREFIX@.@PROJECT_NAME@" version="1.0.0">
     <profile name="mobile"/>
     <author email="jinny.yoon@samsung.com" href="www.samsung.com">Jin Yoon</author>
     <author email="gs86.lee@samsung.com" href="www.samsung.com">Geunsun Lee</author>
@@ -10,7 +10,8 @@
         <icon>@PROJECT_NAME@.png</icon>
     </service-application>
     <privileges>
-        <privilege>http://tizen.org/privilege/network.get</privilege>
+		<privilege>http://tizen.org/privilege/network.get</privilege>
 		<privilege>http://tizen.org/privilege/internet</privilege>
+		<privilege>http://tizen.org/privilege/peripheralio</privilege>
     </privileges>
 </manifest>

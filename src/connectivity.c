@@ -126,7 +126,7 @@ static void _copy_file(const char *in_filename, const char *out_filename)
 	return;
 
 error:
-	fclose(out);
+	fclose(in);
 	return;
 }
 
@@ -834,6 +834,7 @@ static int __add_value_to_hash(connectivity_resource_s *resource_info, const cha
 
 int connectivity_attributes_add_bool(connectivity_resource_s *resource_info, const char *key, bool value)
 {
+	int ret = 0;
 	conn_data_value_s *data_value = NULL;
 
 	retv_if(!resource_info, -1);
@@ -847,11 +848,18 @@ int connectivity_attributes_add_bool(connectivity_resource_s *resource_info, con
 	data_value->type = DATA_VAL_TYPE_BOOL;
 	data_value->b_val = value;
 
-	return __add_value_to_hash(resource_info, key, data_value);
+	ret = __add_value_to_hash(resource_info, key, data_value);
+	if (ret) {
+		free(data_value);
+		return -1;
+	}
+
+	return 0;
 }
 
 int connectivity_attributes_add_int(connectivity_resource_s *resource_info, const char *key, int value)
 {
+	int ret = 0;
 	conn_data_value_s *data_value = NULL;
 
 	retv_if(!resource_info, -1);
@@ -865,11 +873,18 @@ int connectivity_attributes_add_int(connectivity_resource_s *resource_info, cons
 	data_value->type = DATA_VAL_TYPE_INT;
 	data_value->i_val = value;
 
-	return __add_value_to_hash(resource_info, key, data_value);
+	ret = __add_value_to_hash(resource_info, key, data_value);
+	if (ret) {
+		free(data_value);
+		return -1;
+	}
+
+	return 0;
 }
 
 int connectivity_attributes_add_double(connectivity_resource_s *resource_info, const char *key, double value)
 {
+	int ret = 0;
 	conn_data_value_s *data_value = NULL;
 
 	retv_if(!resource_info, -1);
@@ -883,11 +898,18 @@ int connectivity_attributes_add_double(connectivity_resource_s *resource_info, c
 	data_value->type = DATA_VAL_TYPE_DOUBLE;
 	data_value->d_val = value;
 
-	return __add_value_to_hash(resource_info, key, data_value);
+	ret = __add_value_to_hash(resource_info, key, data_value);
+	if (ret) {
+		free(data_value);
+		return -1;
+	}
+
+	return 0;
 }
 
 int connectivity_attributes_add_string(connectivity_resource_s *resource_info, const char *key, const char *value)
 {
+	int ret = 0;
 	conn_data_value_s *data_value = NULL;
 
 	retv_if(!resource_info, -1);
@@ -902,7 +924,14 @@ int connectivity_attributes_add_string(connectivity_resource_s *resource_info, c
 	data_value->type = DATA_VAL_TYPE_STRING;
 	data_value->s_val = strdup(value);
 
-	return __add_value_to_hash(resource_info, key, data_value);
+	ret = __add_value_to_hash(resource_info, key, data_value);
+	if (ret) {
+		free(data_value->s_val);
+		free(data_value);
+		return -1;
+	}
+
+	return 0;
 }
 
 int connectivity_attributes_remove_value_by_key(connectivity_resource_s *resource_info, const char *key)
@@ -939,8 +968,8 @@ static void __json_add_data_iter_cb(gpointer key, gpointer value, gpointer user_
 	conn_data_value_s *data = value;
 	int ret = 0;
 
-	ret_if(name);
-	ret_if(data);
+	ret_if(!name);
+	ret_if(!data);
 
 	switch (data->type) {
 	case DATA_VAL_TYPE_BOOL:
@@ -978,9 +1007,9 @@ static void __attr_add_data_iter_cb(gpointer key, gpointer value, gpointer user_
 	iotcon_attributes_h attr = user_data;
 	int ret = 0;
 
-	ret_if(name);
-	ret_if(data);
-	ret_if(attr);
+	ret_if(!name);
+	ret_if(!data);
+	ret_if(!attr);
 
 	switch (data->type) {
 	case DATA_VAL_TYPE_BOOL:

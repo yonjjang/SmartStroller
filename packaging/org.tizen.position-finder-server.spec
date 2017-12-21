@@ -27,6 +27,7 @@ BuildRequires:  pkgconfig(libcurl)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(json-glib-1.0)
 BuildRequires:  pkgconfig(capi-system-info)
+BuildRequires:  pkgconfig(capi-network-connection)
 
 %description
 Server for Position Finder

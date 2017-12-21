@@ -43,6 +43,7 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/controller_internal.c
 	${PROJECT_ROOT_DIR}/src/controller_util.c
 	${PROJECT_ROOT_DIR}/src/connectivity.c
+	${PROJECT_ROOT_DIR}/src/connection_manager.c
 	${PROJECT_ROOT_DIR}/src/webutil.c
 	${PROJECT_ROOT_DIR}/src/resource.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_illuminance_sensor.c

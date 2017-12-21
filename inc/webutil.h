@@ -61,7 +61,8 @@ struct _web_util_sensor_data_s {
 	int touch;
 	int gas;
 	web_util_sensor_type_e enabled_sensor;
-	char *hash;
+	const char *hash;
+	const char *ip_addr;
 };
 
 int web_util_noti_init(void);

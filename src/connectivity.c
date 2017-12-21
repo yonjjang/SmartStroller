@@ -30,6 +30,7 @@
 #include "connectivity.h"
 #include "webutil.h"
 #include "controller_util.h"
+#include "connection_manager.h"
 
 #define DEFAULT_RESOURCE_TYPE "org.tizen.door"
 #define BUFSIZE 1024
@@ -41,6 +42,7 @@
 struct _connectivity_resource {
 	char *path;
 	char *type;
+	char *ip;
 	connectivity_protocol_e protocol_type;
 	GHashTable *value_hash;
 	union {
@@ -629,6 +631,7 @@ int connectivity_notify_bool(connectivity_resource_s *resource_info, const char 
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
 		web_util_json_add_string("SensorPiType", resource_info->type);
+		web_util_json_add_string("SensorPiIP", resource_info->ip);
 		web_util_json_add_boolean(key, value);
 		web_util_json_end();
 
@@ -681,6 +684,7 @@ int connectivity_notify_int(connectivity_resource_s *resource_info, const char *
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
 		web_util_json_add_string("SensorPiType", resource_info->type);
+		web_util_json_add_string("SensorPiIP", resource_info->ip);
 		web_util_json_add_int(key, value);
 		web_util_json_end();
 
@@ -732,6 +736,7 @@ int connectivity_notify_double(connectivity_resource_s *resource_info, const cha
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
 		web_util_json_add_string("SensorPiType", resource_info->type);
+		web_util_json_add_string("SensorPiIP", resource_info->ip);
 		web_util_json_add_double(key, value);
 		web_util_json_end();
 
@@ -784,6 +789,7 @@ int connectivity_notify_string(connectivity_resource_s *resource_info, const cha
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
 		web_util_json_add_string("SensorPiType", resource_info->type);
+		web_util_json_add_string("SensorPiIP", resource_info->ip);
 		web_util_json_add_string(key, value);
 		web_util_json_end();
 
@@ -1132,6 +1138,7 @@ int connectivity_attributes_notify_all(connectivity_resource_s *resource_info)
 
 		web_util_json_add_string("SensorPiID", resource_info->path);
 		web_util_json_add_string("SensorPiType", resource_info->type);
+		web_util_json_add_string("SensorPiIP", resource_info->ip);
 		g_hash_table_foreach(resource_info->value_hash, __json_add_data_iter_cb, NULL);
 		web_util_json_end();
 
@@ -1170,6 +1177,7 @@ void connectivity_unset_resource(connectivity_resource_s *resource_info)
 
 	if (resource_info->path) free(resource_info->path);
 	if (resource_info->type) free(resource_info->type);
+	if (resource_info->ip) free(resource_info->ip);
 	free(resource_info);
 
 	return;
@@ -1178,6 +1186,7 @@ void connectivity_unset_resource(connectivity_resource_s *resource_info)
 int connectivity_set_resource(const char *path, const char *type, connectivity_resource_s **out_resource_info)
 {
 	connectivity_resource_s *resource_info = NULL;
+	const char *ip = NULL;
 	int ret = -1;
 
 	retv_if(!path, -1);
@@ -1192,6 +1201,10 @@ int connectivity_set_resource(const char *path, const char *type, connectivity_r
 
 	resource_info->type = strdup(type);
 	goto_if(!resource_info->type, error);
+
+	connection_manager_get_ip(&ip);
+	resource_info->ip = strdup(ip);
+	goto_if(!resource_info->ip, error);
 
 	resource_info->protocol_type = ProtocolType;
 
@@ -1222,6 +1235,7 @@ int connectivity_set_resource(const char *path, const char *type, connectivity_r
 error:
 	if (resource_info->path) free(resource_info->path);
 	if (resource_info->type) free(resource_info->type);
+	if (resource_info->ip) free(resource_info->ip);
 	if (resource_info) free(resource_info);
 
 	return -1;

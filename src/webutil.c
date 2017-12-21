@@ -367,6 +367,7 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 	const char n_gas[] = "Gas";
 	const char n_e_sensor[] = "SensorEnabled";
 	const char n_hash[] = "Hash";
+	const char n_ip[] = "SensorPiIP";
 
 	retv_if(!sensorpi_id, -1);
 	retv_if(Json_h.builder == NULL, -1);
@@ -377,6 +378,7 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 	/* JSON structure :
 	{
 		SensorPiID: string,
+		SensorPiIP: string,
 		Motion: boolean,
 		Flame: boolean,
 		Humidity: double,
@@ -402,6 +404,11 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 
 	json_builder_set_member_name(Json_h.builder, n_id);
 	json_builder_add_string_value(Json_h.builder, sensorpi_id);
+
+	if (sensor_data->ip_addr) {
+		json_builder_set_member_name(Json_h.builder, n_ip);
+		json_builder_add_string_value(Json_h.builder, sensor_data->ip_addr);
+	}
 
 	if (sensor_data->enabled_sensor & WEB_UTIL_SENSOR_MOTION) {
 		json_builder_set_member_name(Json_h.builder, n_motion);
@@ -562,9 +569,6 @@ char *web_util_get_json_string(void)
 error_release_all:
 	if (root)
 		json_node_free(root);
-
-	if (gen)
-		g_object_unref(gen);
 
 	return NULL;
 }

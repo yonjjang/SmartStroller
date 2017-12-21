@@ -29,6 +29,7 @@
 
 #define URI_PATH_LEN 64
 #define REQ_CON_TIMEOUT 5L
+#define REQ_TIMEOUT 7L
 
 typedef struct _wu_json_handle {
 	JsonBuilder *builder;
@@ -114,6 +115,7 @@ int web_util_noti_post(const char *resource, const char *json_data)
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _post_response_write_callback);
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, REQ_CON_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, REQ_TIMEOUT);
 
 	response = curl_easy_perform(curl);
 

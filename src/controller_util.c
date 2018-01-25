@@ -28,11 +28,13 @@
 #define CONF_GROUP_DEFAULT_NAME "default"
 #define CONF_KEY_PATH_NAME "path"
 #define CONF_KEY_ADDRESS_NAME "address"
+#define CONF_KEY_IMAGE_UPLOAD_NAME "image_address"
 #define CONF_FILE_NAME "pi.conf"
 
 struct controller_util_s {
 	char *path;
 	char *address;
+	char *image_upload;
 };
 
 struct controller_util_s controller_util = { 0, };
@@ -71,6 +73,13 @@ static int _read_conf_file(void)
 	if (!controller_util.address)
 		_E("could not get the key string");
 
+	controller_util.image_upload = g_key_file_get_string(gkf,
+			CONF_GROUP_DEFAULT_NAME,
+			CONF_KEY_IMAGE_UPLOAD_NAME,
+			NULL);
+	if (!controller_util.image_upload)
+		_E("could not get the key string");
+
 	g_key_file_free(gkf);
 
 	return 0;
@@ -102,6 +111,21 @@ int controller_util_get_address(const char **address)
 	}
 
 	*address = controller_util.address;
+
+	return 0;
+}
+
+int controller_util_get_image_address(const char **image_upload)
+{
+	retv_if(!image_upload, -1);
+
+	if (!controller_util.image_upload) {
+		int ret = -1;
+		ret = _read_conf_file();
+		retv_if(-1 == ret, -1);
+	}
+
+	*image_upload = controller_util.image_upload;
 
 	return 0;
 }

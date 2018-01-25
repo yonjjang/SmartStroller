@@ -5,7 +5,7 @@
     <author email="gs86.lee@samsung.com" href="www.samsung.com">Geunsun Lee</author>
     <author email="ey928.lee@samsung.com" href="www.samsung.com">Eunyoung Lee</author>
     <author email="junkyu.han@samsung.com" href="www.samsung.com">Junkyu Han</author>
-    <service-application appid="@ORG_PREFIX@.@PROJECT_NAME@" auto-restart="true" exec="@PROJECT_NAME@" multiple="false" nodisplay="true" on-boot="true" taskmanage="false" type="capp">
+    <service-application appid="@ORG_PREFIX@.@PROJECT_NAME@" auto-restart="false" exec="@PROJECT_NAME@" multiple="false" nodisplay="true" on-boot="false" taskmanage="false" type="capp">
         <label>@APP_LABEL@</label>
         <icon>@PROJECT_NAME@.png</icon>
     </service-application>
@@ -13,5 +13,6 @@
 		<privilege>http://tizen.org/privilege/network.get</privilege>
 		<privilege>http://tizen.org/privilege/internet</privilege>
 		<privilege>http://tizen.org/privilege/peripheralio</privilege>
+		<privilege>http://tizen.org/privilege/camera</privilege>
     </privileges>
 </manifest>

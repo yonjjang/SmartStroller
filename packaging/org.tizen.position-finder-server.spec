@@ -28,6 +28,7 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(json-glib-1.0)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(capi-network-connection)
+BuildRequires:  pkgconfig(capi-media-camera)
 
 %description
 Server for Position Finder

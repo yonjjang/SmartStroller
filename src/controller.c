@@ -34,16 +34,69 @@
 
 #define CONNECTIVITY_KEY "opened"
 #define SENSORING_TIME_INTERVAL 5.0f
+#define CAMERA_TIME_INTERVAL 2
+#define TEST_CAMERA_SAVE 0
+#define CAMERA_ENABLED 0
 
 typedef struct app_data_s {
 	Ecore_Timer *getter_timer;
 	connectivity_resource_s *resource_info;
 } app_data;
 
+static void __resource_camera_capture_completed_cb(const void *image, unsigned int size, void *user_data)
+{
+	/* TODO */
+	const char *path = NULL;
+	const char *url = NULL;
+
+	controller_util_get_path(&path);
+
+	controller_util_get_image_address(&url);
+
+	web_util_noti_post_image_data(url, path, image, size);
+
+#if TEST_CAMERA_SAVE
+	FILE *fp = NULL;
+	char *data_path = NULL;
+	char file[256];
+
+	data_path = app_get_data_path();
+
+	snprintf(file, sizeof(file), "%sjjoggoba.jpg", data_path);
+	free(data_path);
+	_D("File : %s", file);
+
+	fp = fopen(file, "w");
+	if (!fp) {
+		_E("Failed to open file: %s", file);
+		return;
+	}
+
+	if (fwrite(image, size, 1, fp) != 1) {
+		_E("Failed to write image to file");
+		return;
+	}
+
+	fclose(fp);
+#endif
+}
+
 static Eina_Bool control_sensors_cb(void *data)
 {
 	app_data *ad = data;
 	int value = 1;
+	int ret = 0;
+#if CAMERA_ENABLED
+	static unsigned int count = 0;
+
+	if (count % CAMERA_TIME_INTERVAL == 0) {
+		ret = resource_capture_camera(__resource_camera_capture_completed_cb, NULL);
+		if (ret < 0)
+			_E("Failed to capture camera");
+	}
+
+	count++;
+#endif
 
 	/* This is example, get value from sensors first */
 	if (connectivity_notify_int(ad->resource_info, "Motion", value) == -1)

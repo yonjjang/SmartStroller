@@ -38,5 +38,6 @@
 #include "resource/resource_tilt_sensor.h"
 #include "resource/resource_gas_detection_sensor.h"
 #include "resource/resource_sound_level_sensor.h"
+#include "resource/resource_camera.h"
 
 #endif /* __POSITION_FINDER_RESOURCE_H__ */

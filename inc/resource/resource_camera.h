@@ -19,12 +19,12 @@
  * limitations under the License.
  */
 
-#ifndef __POSITION_FINDER_CONTROLLER_UTIL_H__
-#define __POSITION_FINDER_CONTROLLER_UTIL_H__
+#include <camera.h>
 
-int controller_util_get_path(const char **path);
-int controller_util_get_address(const char **address);
-int controller_util_get_image_address(const char **image_upload);
-void controller_util_free(void);
+#define MAX_IMAGE_FILE_LEN 256
+#define DEFAULT_FILE_PATH "/home/owner/media"
 
-#endif /* __POSITION_FINDER_CONTROLLER_UTIL_H__ */
+typedef void (*capture_completed_cb)(const void *image, unsigned int size, void *user_data);
+
+int resource_capture_camera(capture_completed_cb capture_completed_cb, void *data);
+void resource_close_camera(void);

@@ -22,6 +22,8 @@ pkg_check_modules(APP_PKGS REQUIRED
 	glib-2.0
 	json-glib-1.0
 	capi-system-info
+	capi-network-connection
+	capi-media-camera
 )
 
 ADD_DEFINITIONS(-DCBOR_FILE_IN_RES="${INSTALL_RESDIR}/${CBOR_FILE}")
@@ -60,6 +62,7 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 	${PROJECT_ROOT_DIR}/src/resource/resource_gas_detection_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_sound_level_sensor.c
 	${PROJECT_ROOT_DIR}/src/resource/resource_adc_mcp3008.c
+	${PROJECT_ROOT_DIR}/src/resource/resource_camera.c
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_LDFLAGS} -lm)

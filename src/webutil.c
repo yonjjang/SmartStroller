@@ -22,7 +22,7 @@
 
 #include <stdbool.h>
 #include <curl/curl.h>
-#include <glib-object.h>
+#include <glib.h>
 #include <json-glib/json-glib.h>
 #include "log.h"
 #include "webutil.h"
@@ -67,6 +67,62 @@ static size_t _get_response_write_callback(void *ptr, size_t size, size_t nmemb,
 	return res_size;
 }
 
+static int __curl_debug(CURL *handle, curl_infotype type,
+	char *data, size_t size, void *userptr)
+{
+	const char *prefix = NULL;
+	char *message = NULL;
+
+	switch (type) {
+	case CURLINFO_END:
+		return 0;
+	case CURLINFO_TEXT:
+		_D("== text Info: %s", data);
+		return 0;
+	case CURLINFO_HEADER_OUT:
+		prefix = "=> Send header:";
+		break;
+	case CURLINFO_DATA_OUT:
+		prefix = "=> Send data:";
+		break;
+	case CURLINFO_SSL_DATA_OUT:
+		prefix = "=> Send SSL data:";
+		break;
+	case CURLINFO_HEADER_IN:
+		prefix = "<= Recv header:";
+		break;
+	case CURLINFO_DATA_IN:
+		prefix = "<= Recv data:";
+		break;
+	case CURLINFO_SSL_DATA_IN:
+		prefix = "<= Recv SSL data:";
+		break;
+	}
+	message = g_strndup(data, size);
+	_D("%s %s", prefix, message);
+	g_free(message);
+	return 0;
+}
+
+static const char *_get_time_str(void)
+{
+	struct timeval val;
+	struct tm *ptm;
+	static char res_time[40] = {0, };
+
+	gettimeofday(&val, NULL);
+	ptm = localtime(&val.tv_sec);
+
+	// format : YY-MM-DD_hh:mm:ss:uuuuuu
+	snprintf(res_time, sizeof(res_time), "%04d-%02d-%02d_%02d:%02d:%02d:%06ld"
+		, ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday
+		, ptm->tm_hour, ptm->tm_min, ptm->tm_sec
+		, val.tv_usec);
+
+	return (const char *)res_time;
+}
+
+
 int web_util_noti_init(void)
 {
 	int ret = 0;
@@ -84,6 +140,71 @@ void web_util_noti_fini(void)
 {
 	curl_global_cleanup();
 	return;
+}
+
+int web_util_noti_post_image_data(const char *url, const char *device_id,
+	const void *image_data, unsigned int image_size)
+{
+	int ret = 0;
+	CURL *curl = NULL;
+	CURLcode response = CURLE_OK;
+	struct curl_httppost *formpost = NULL;
+	struct curl_httppost *lastptr = NULL;
+	char *filename = NULL;
+	char *post_url = NULL;
+
+	retv_if(url == NULL, -1);
+	retv_if(device_id == NULL, -1);
+	retv_if(image_data == NULL, -1);
+	retv_if(image_size == 0, -1);
+
+	curl = curl_easy_init();
+
+	if (!curl) {
+		_E("fail to init curl");
+		return -1;
+	}
+
+	filename = g_strdup_printf("%s_%s.jpg", device_id, _get_time_str());
+	post_url = g_strdup_printf("%s?id=%s", url, device_id);
+	_D("FileName: [%s], PostUrl: [%s]", filename, post_url);
+
+	curl_formadd(&formpost, &lastptr,
+		CURLFORM_COPYNAME, "content-type:",
+		CURLFORM_COPYCONTENTS, "multipart/form-data",
+		CURLFORM_END);
+
+	curl_formadd(&formpost, &lastptr,
+		CURLFORM_COPYNAME, "imageFile",
+		CURLFORM_BUFFER, filename,
+		CURLFORM_BUFFERPTR, image_data,
+		CURLFORM_BUFFERLENGTH, image_size,
+		CURLFORM_END);
+
+	curl_easy_setopt(curl, CURLOPT_URL, post_url);
+	curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+
+	/* if CURLOPT_VERBOSE is enabled, __curl_debug() function will be called */
+	// curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+	curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, __curl_debug);
+
+	// curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, REQ_CON_TIMEOUT);
+	// curl_easy_setopt(curl, CURLOPT_TIMEOUT, REQ_TIMEOUT);
+
+	response = curl_easy_perform(curl);
+
+	if (response != CURLE_OK) {
+		_E("curl_easy_perform() failed: %s",
+			curl_easy_strerror(response));
+		ret = -1;
+	}
+
+	curl_easy_cleanup(curl);
+	curl_formfree(formpost);
+	g_free(post_url);
+	g_free(filename);
+
+	return ret;
 }
 
 int web_util_noti_post(const char *resource, const char *json_data)
@@ -398,7 +519,6 @@ int web_util_json_add_sensor_data(const char* sensorpi_id, web_util_sensor_data_
 		Hash: string,
 	}
 	*/
-
 
 	json_builder_begin_object(Json_h.builder);
 

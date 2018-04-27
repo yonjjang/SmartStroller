@@ -382,13 +382,13 @@ static bool __print_attributes_cb(iotcon_attributes_h attributes, const char *ke
 		iotcon_attributes_get_double(attributes, key, &value);
 		_D("key[%s] - double value [%lf]", key, value);
 		}
-	break;
+		break;
 	case IOTCON_TYPE_STR: {
 		char *value = 0;
 		iotcon_attributes_get_str(attributes, key, &value);
 		_D("key[%s] - string value [%s]", key, value);
 		}
-	break;
+		break;
 	case IOTCON_TYPE_NONE:
 	case IOTCON_TYPE_BYTE_STR:
 	case IOTCON_TYPE_NULL:
@@ -589,8 +589,9 @@ static inline void __noti_by_http(void)
 		else
 			_E("fail to get url");
 		free(json_data);
-	} else
+	} else {
 		_E("fail to get json_data");
+	}
 
 	return;
 }

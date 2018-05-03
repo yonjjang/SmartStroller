@@ -1251,14 +1251,14 @@ int connectivity_set_protocol(connectivity_protocol_e protocol_type)
 	case CONNECTIVITY_PROTOCOL_DEFAULT:
 	case CONNECTIVITY_PROTOCOL_IOTIVITY:
 		if (connectivity_iotcon_intialized) {
-			_E("protocol type[%d] aleady initialized", protocol_type);
+			_E("protocol type[%d] already initialized", protocol_type);
 			return -1;
 		}
 		ProtocolType = CONNECTIVITY_PROTOCOL_IOTIVITY;
 		break;
 	case CONNECTIVITY_PROTOCOL_HTTP:
 		if (connectivity_http_intialized) {
-			_E("protocol type[%d] aleady initialized", protocol_type);
+			_E("protocol type[%d] already initialized", protocol_type);
 			return -1;
 		}
 		ProtocolType = CONNECTIVITY_PROTOCOL_HTTP;

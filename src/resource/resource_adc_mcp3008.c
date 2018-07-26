@@ -62,7 +62,7 @@ int resource_adc_mcp3008_init(void)
 	char *model_name = NULL;
 
 	if (MCP3008_H) {
-		_D("SPI device aleady initialized [ref_count : %u]", ref_count);
+		_D("SPI device already initialized [ref_count : %u]", ref_count);
 		ref_count++;
 		return 0;
 	}

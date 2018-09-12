@@ -17,6 +17,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *
+ * ===================== Modified by =====================
+ *
+ * Ewha Womans University, Computer Science & Engineering
+ *
+ * 1515029 Jeong-min Seo <chersoul@gmail.com>
+ * 1515013 Seung-Yun Kim <fic1214@gmail.com>
+ *
+ *
  */
 
 #ifndef __POSITION_FINDER_RESOURCE_INTERNAL_H__
@@ -38,6 +48,8 @@
 #include "resource/resource_tilt_sensor_internal.h"
 #include "resource/resource_gas_detection_sensor_internal.h"
 #include "resource/resource_sound_level_sensor_internal.h"
+#include "resource/resource_motor_driver_L298N_internal.h"
+#include "resource/resource_pressure_sensor_internal.h"
 
 #define PIN_MAX 40
 

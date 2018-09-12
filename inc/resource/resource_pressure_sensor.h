@@ -29,28 +29,18 @@
  *
  */
 
-#ifndef __POSITION_FINDER_RESOURCE_H__
-#define __POSITION_FINDER_RESOURCE_H__
+#ifndef __POSITION_FINDER_RESOURCE_PRESSURE_SENSOR_H__
+#define __POSITION_FINDER_RESOURCE_PRESSURE_SENSOR_H__
 
-#include <peripheral_io.h>
+ /**
+  * @brief Reads the value from sound level sensor through AD converter(MCP3008).
+  * @remarks We assume that only one AD converter is connected with device.
+  * @param[in] ch_num The number of channel connected to the sound level sensor with AD converter
+  * @param[out] out_value The value of a sound level
+  * @return 0 on success, otherwise a negative error value
+  *
+  */
+extern int resource_read_pressure_sensor(int ch_num, unsigned int *out_value);
 
-#include "resource_internal.h"
-#include "resource/resource_illuminance_sensor.h"
-#include "resource/resource_infrared_motion_sensor.h"
-#include "resource/resource_infrared_obstacle_avoidance_sensor.h"
-#include "resource/resource_touch_sensor.h"
-#include "resource/resource_ultrasonic_sensor.h"
-#include "resource/resource_led.h"
-#include "resource/resource_vibration_sensor.h"
-#include "resource/resource_flame_sensor.h"
-#include "resource/resource_rain_sensor.h"
-#include "resource/resource_sound_detection_sensor.h"
-#include "resource/resource_tilt_sensor.h"
-#include "resource/resource_gas_detection_sensor.h"
-#include "resource/resource_sound_level_sensor.h"
-#include "resource/resource_motor_driver_L298N.h"
-#include "resource/resource_PCA9685.h"
-#include "resource/resource_pressure_sensor.h"
-#include "resource/resource_gyro_sensor.h"
+#endif /* __POSITION_FINDER_RESOURCE_PRESSURE_SENSOR_H__ */
 
-#endif /* __POSITION_FINDER_RESOURCE_H__ */

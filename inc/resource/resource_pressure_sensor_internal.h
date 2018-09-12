@@ -29,27 +29,9 @@
  *
  */
 
-#ifndef __POSITION_FINDER_RESOURCE_H__
-#define __POSITION_FINDER_RESOURCE_H__
+#ifndef __POSITION_FINDER_RESOURCE_PRESSURE_SENSOR_INTERNAL_H__
+#define __POSITION_FINDER_RESOURCE_PRESSURE_SENSOR_INTERNAL_H__
 
-#include <peripheral_io.h>
+extern void resource_close_pressure_sensor(void);
 
-#include "resource_internal.h"
-#include "resource/resource_illuminance_sensor.h"
-#include "resource/resource_infrared_motion_sensor.h"
-#include "resource/resource_infrared_obstacle_avoidance_sensor.h"
-#include "resource/resource_touch_sensor.h"
-#include "resource/resource_ultrasonic_sensor.h"
-#include "resource/resource_led.h"
-#include "resource/resource_vibration_sensor.h"
-#include "resource/resource_flame_sensor.h"
-#include "resource/resource_rain_sensor.h"
-#include "resource/resource_sound_detection_sensor.h"
-#include "resource/resource_tilt_sensor.h"
-#include "resource/resource_gas_detection_sensor.h"
-#include "resource/resource_sound_level_sensor.h"
-#include "resource/resource_motor_driver_L298N.h"
-#include "resource/resource_PCA9685.h"
-#include "resource/resource_pressure_sensor.h"
-
-#endif /* __POSITION_FINDER_RESOURCE_H__ */
+#endif /* __POSITION_FINDER_RESOURCE_PRESSURE_SENSOR_INTERNAL_H__ */

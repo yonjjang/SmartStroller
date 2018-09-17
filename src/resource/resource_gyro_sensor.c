@@ -50,31 +50,31 @@ int resource_gyro_sensor_init()
 	if (g_i2c_h == NULL)
 		ret = peripheral_i2c_open(RPI3_I2C_BUS, MPU6050_Address , &g_i2c_h);
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,SMPLRT_DIV, 7);  #write to sample rate register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,SMPLRT_DIV, 7); //write to sample rate register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,PWR_MGMT_1, 1);  #Write to power management register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,PWR_MGMT_1, 1);  //Write to power management register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,CONFIG, 0);  #Write to Configuration register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,CONFIG, 0);  //Write to Configuration register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,GYRO_CONFIG, 24);  #Write to Gyro configuration register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,GYRO_CONFIG, 24);  //Write to Gyro configuration register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,INT_ENABLE, 1);  #Write to interrupt enable register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,INT_ENABLE, 1);  //Write to interrupt enable register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;

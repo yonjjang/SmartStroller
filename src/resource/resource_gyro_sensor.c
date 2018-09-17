@@ -41,6 +41,9 @@
 
 static peripheral_i2c_h g_i2c_h = NULL;
 static unsigned int ref_count = 0;
+float Angle_x=0;
+float Angle_y=0;
+float Angle_z=0;
 
 int resource_gyro_sensor_init()
 {
@@ -50,7 +53,7 @@ int resource_gyro_sensor_init()
 	if (g_i2c_h == NULL)
 		ret = peripheral_i2c_open(RPI3_I2C_BUS, MPU6050_Address , &g_i2c_h);
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,SMPLRT_DIV, 7); //write to sample rate register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,SMPLRT_DIV, 7);  //write to sample rate register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
@@ -99,17 +102,17 @@ short read_raw_data(int addr){
 	ret = peripheral_i2c_read_register_byte(g_i2c_h, addr , &high_byte);
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to read register");
-		goto ERROR;
+
 	}
 
 	ret = peripheral_i2c_read_register_byte(g_i2c_h, addr+1 ,&low_byte);
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to read register");
-		goto ERROR;
+
 	}
 	value = (high_byte << 8) + low_byte;
-	if(value > 32768)
-        	value = value - 65536
+	if (value > 32768)
+		value=value-65536;
 	return value;
 }
 
@@ -120,6 +123,7 @@ int resource_read_gyro_sensor(){
 	float Gyro_x,Gyro_y,Gyro_z;
 	float Ax=0, Ay=0, Az=0;
 	float Gx=0, Gy=0, Gz=0;
+
 
 	ret = resource_gyro_sensor_init();
 
@@ -139,7 +143,13 @@ int resource_read_gyro_sensor(){
 	Gy = Gyro_y/131;
 	Gz = Gyro_z/131;
 
-	_D("\n Gx=%.3f °/s\tGy=%.3f °/s\tGz=%.3f °/s\tAx=%.3f g\tAy=%.3f g\tAz=%.3f g\n",Gx,Gy,Gz,Ax,Ay,Az);
+	_D("\n Gx=%.3f °/s\tGy=%.3f °/s\tGz=%.3f °/s",Gx+1,Gy+1,Gz+1); //보정을 위한 +1
+	_D("\n Ax=%.1f g\tAy=%.1f g\tAz=%.1f g \n",Ax,Ay,Az);
+
+	Angle_x += (Gx+1) * 0.1;
+	Angle_y += (Gy+1) * 0.1;
+	Angle_z += (Gz+1) * 0.1;
+
+	_D("\n Angle_x = %.1f\tAngle_x = %.1fAngle_x = %.1f",Angle_x,Angle_y,Angle_z);
 
 }
-

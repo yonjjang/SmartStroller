@@ -42,11 +42,11 @@ static Eina_Bool _control_sensors_cb(void *data)
 	uint32_t value = -1;
 	int ret = -1;
 
-#if 0
-	ret = resource_read_infrared_motion_sensor(PIN_NUMBER, &value);
+#if 1
+	ret = resource_read_gyro_sensor();
 	if (ret != 0) _E("Cannot read sensor value");
 
-	_D("Detected value : %d", value);
+
 #endif
 
 #if 0
@@ -82,12 +82,14 @@ static bool service_app_create(void *data)
 	 * Creates a timer to call the given function in the given period of time.
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
-#if 0
-	ad->getter_timer = ecore_timer_add(Duration , _control_sensors_cb, ad);
+#if 1
+	ad->getter_timer = ecore_timer_add(0.1f, _control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add getter timer");
 		return false;
 	}
+
+
 #endif
 
     return true;

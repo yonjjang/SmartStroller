@@ -45,7 +45,7 @@ typedef struct app_data_s {
 	connectivity_resource_s *resource_info;
 } app_data;
 
-float interval = 0.1f;
+float interval = 0.1;
 
 static Eina_Bool _control_sensors_cb(void *data)
 {
@@ -56,13 +56,10 @@ static Eina_Bool _control_sensors_cb(void *data)
 	float tilt=0;
 	int i;
 
+
 #if 1
-<<<<<<< HEAD
 
 	ret = resource_read_pressure_sensor(0, &pressure);
-=======
-	ret = resource_read_gyro_sensor();
->>>>>>> f6c0b9fc0f891b6a91218b89fe6c3db8e596ac69
 	if (ret != 0) _E("Cannot read sensor value");
 	_D("Detected pressure value : %d", pressure);
 
@@ -79,13 +76,8 @@ static Eina_Bool _control_sensors_cb(void *data)
 	}
 
 
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> f6c0b9fc0f891b6a91218b89fe6c3db8e596ac69
 #endif
+
 
 #if 0
 	ret = connectivity_notify_int(ad->resource_info, KEY, value);
@@ -121,11 +113,9 @@ static bool service_app_create(void *data)
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
 #if 1
-<<<<<<< HEAD
+
 	ad->getter_timer = ecore_timer_add(interval, _control_sensors_cb, ad);
-=======
-	ad->getter_timer = ecore_timer_add(0.1f, _control_sensors_cb, ad);
->>>>>>> f6c0b9fc0f891b6a91218b89fe6c3db8e596ac69
+
 	if (!ad->getter_timer) {
 		_E("Failed to add getter timer");
 		return false;

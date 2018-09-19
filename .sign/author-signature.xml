@@ -4,7 +4,7 @@
 <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"></SignatureMethod>
 <Reference URI="bin%2Fposition-finder-server">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod>
-<DigestValue>QPdulmZyjHnMc5xDRkjeL3V8ATtNCBdhARJ8aiPfDk8=</DigestValue>
+<DigestValue>3/fIuGKbwND8rmjjVwgqDTEwTjvqR6hMU8XQCZZN3iY=</DigestValue>
 </Reference>
 <Reference URI="lib%2Flibperipheralio.so">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod>
@@ -35,9 +35,9 @@
 </Reference>
 </SignedInfo>
 <SignatureValue>
-ZjLl11VokYtgOfAKdPEPRTjGLMzyVc9ea6ynC4NX/EjEkmyjHOIBaji/zfglRhQxzt3cxflFeCNH
-niNjkhu9l+k29+lsNq59buzah3+ZZLv70bPB8zQnjl9APYnMVP+M/lzx8cOhZLn/9rNdOsKJDj19
-wvxGXvEdiDq/d8os1pA=
+Cl45KyrKMtDi2W5WI39g7BZ6zhzNayaNTPi4Z1HNc1PiWkoe0OsSgugli/ZkMtrWA8O2rErQSd8V
+6ssm7Ikg6YB0O9sPYhWNqC0z5Nh/EJalFL7OevZTLkQ16G7PX2A7atXG/YqWLOv/G0qTmEjkEBhl
+cDuiuxg0xiJ9Qt5NWPA=
 </SignatureValue>
 <KeyInfo>
 <X509Data>

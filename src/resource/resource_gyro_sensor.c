@@ -42,11 +42,9 @@
 static peripheral_i2c_h g_i2c_h = NULL;
 static unsigned int ref_count = 0;
 float Angle_x=0;
-<<<<<<< HEAD
-=======
+
 float Angle_y=0;
 float Angle_z=0;
->>>>>>> f6c0b9fc0f891b6a91218b89fe6c3db8e596ac69
 
 int resource_gyro_sensor_init()
 {
@@ -155,29 +153,12 @@ int resource_read_gyro_sensor(float interval, float *tilt){
 	Gy = Gyro_y/131;
 	Gz = Gyro_z/131;
 
-<<<<<<< HEAD
 
 	_D("\n Gx=%d °/s\tGy=%.3f °/s\tGz=%.3f °/s", (int)Gx+1, Gy+1, Gz);
 	_D("\n Ax=%.1f g\tAy=%.1f g\tAz=%.1f g \n", Ax, Ay, Az);
 
 	*tilt= resource_calculate_tilt((int)Gx+1, interval);
 
-
 	return 0;
-=======
-	_D("\n Gx=%.3f °/s\tGy=%.3f °/s\tGz=%.3f °/s",Gx+1,Gy+1,Gz+1); //보정을 위한 +1
-	_D("\n Ax=%.1f g\tAy=%.1f g\tAz=%.1f g \n",Ax,Ay,Az);
->>>>>>> f6c0b9fc0f891b6a91218b89fe6c3db8e596ac69
-
-	Angle_x += (Gx+1) * 0.1;
-	Angle_y += (Gy+1) * 0.1;
-	Angle_z += (Gz+1) * 0.1;
-
-<<<<<<< HEAD
-
-
-=======
-	_D("\n Angle_x = %.1f\tAngle_x = %.1fAngle_x = %.1f",Angle_x,Angle_y,Angle_z);
 
 }
->>>>>>> f6c0b9fc0f891b6a91218b89fe6c3db8e596ac69

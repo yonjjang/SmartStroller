@@ -40,6 +40,6 @@
  *
  * @see If the gpio pin is not open, creates gpio handle before reading the value of gpio.
  */
-extern int resource_read_gyro_sensor();
+extern int resource_read_gyro_sensor(float interval, float *tilt);
 
 #endif /* __POSITION_FINDER_RESOURCE_TILT_SENSOR_H__ */

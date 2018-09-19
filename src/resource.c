@@ -41,6 +41,5 @@ void resource_close_all(void)
 		if (resource_info[i].close)
 			resource_info[i].close(i);
 	}
-	resource_close_illuminance_sensor();
-	resource_close_sound_level_sensor();
+
 }

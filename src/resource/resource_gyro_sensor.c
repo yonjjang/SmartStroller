@@ -41,6 +41,7 @@
 
 static peripheral_i2c_h g_i2c_h = NULL;
 static unsigned int ref_count = 0;
+float Angle_x=0;
 
 int resource_gyro_sensor_init()
 {
@@ -50,31 +51,31 @@ int resource_gyro_sensor_init()
 	if (g_i2c_h == NULL)
 		ret = peripheral_i2c_open(RPI3_I2C_BUS, MPU6050_Address , &g_i2c_h);
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,SMPLRT_DIV, 7);  #write to sample rate register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,SMPLRT_DIV, 7);  //write to sample rate register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,PWR_MGMT_1, 1);  #Write to power management register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,PWR_MGMT_1, 1);  //Write to power management register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,CONFIG, 0);  #Write to Configuration register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,CONFIG, 0);  //Write to Configuration register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,GYRO_CONFIG, 24);  #Write to Gyro configuration register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,GYRO_CONFIG, 24);  //Write to Gyro configuration register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
 	}
 
-	ret = peripheral_i2c_write_register_byte(g_i2c_h,INT_ENABLE, 1);  #Write to interrupt enable register
+	ret = peripheral_i2c_write_register_byte(g_i2c_h,INT_ENABLE, 1);  //Write to interrupt enable register
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to write register");
 		goto ERROR;
@@ -99,21 +100,30 @@ short read_raw_data(int addr){
 	ret = peripheral_i2c_read_register_byte(g_i2c_h, addr , &high_byte);
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to read register");
-		goto ERROR;
+
 	}
 
 	ret = peripheral_i2c_read_register_byte(g_i2c_h, addr+1 ,&low_byte);
 	if (ret != PERIPHERAL_ERROR_NONE) {
 		_E("failed to read register");
-		goto ERROR;
+
 	}
 	value = (high_byte << 8) + low_byte;
-	if(value > 32768)
-        	value = value - 65536
+	if (value > 32768)
+		value=value-65536;
 	return value;
 }
 
-int resource_read_gyro_sensor(){
+int resource_calculate_tilt(float rate_Gx, float interval){
+
+	Angle_x += (rate_Gx)*interval;
+	_D("\n Angle_x = %.1f", Angle_x);
+
+	return Angle_x;
+
+}
+
+int resource_read_gyro_sensor(float interval, float *tilt){
 
 	int ret = PERIPHERAL_ERROR_NONE;
 	float Acc_x,Acc_y,Acc_z;
@@ -139,7 +149,16 @@ int resource_read_gyro_sensor(){
 	Gy = Gyro_y/131;
 	Gz = Gyro_z/131;
 
-	_D("\n Gx=%.3f °/s\tGy=%.3f °/s\tGz=%.3f °/s\tAx=%.3f g\tAy=%.3f g\tAz=%.3f g\n",Gx,Gy,Gz,Ax,Ay,Az);
+
+	_D("\n Gx=%d °/s\tGy=%.3f °/s\tGz=%.3f °/s", (int)Gx+1, Gy+1, Gz);
+	_D("\n Ax=%.1f g\tAy=%.1f g\tAz=%.1f g \n", Ax, Ay, Az);
+
+	*tilt= resource_calculate_tilt((int)Gx+1, interval);
+
+
+	return 0;
 
 }
+
+
 

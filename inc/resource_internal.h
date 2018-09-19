@@ -35,19 +35,6 @@
 #include <peripheral_io.h>
 #include <stdint.h>
 
-#include "resource/resource_illuminance_sensor_internal.h"
-#include "resource/resource_infrared_motion_sensor_internal.h"
-#include "resource/resource_infrared_obstacle_avoidance_sensor_internal.h"
-#include "resource/resource_touch_sensor_internal.h"
-#include "resource/resource_ultrasonic_sensor_internal.h"
-#include "resource/resource_led_internal.h"
-#include "resource/resource_vibration_sensor_internal.h"
-#include "resource/resource_flame_sensor_internal.h"
-#include "resource/resource_rain_sensor_internal.h"
-#include "resource/resource_sound_detection_sensor_internal.h"
-#include "resource/resource_tilt_sensor_internal.h"
-#include "resource/resource_gas_detection_sensor_internal.h"
-#include "resource/resource_sound_level_sensor_internal.h"
 #include "resource/resource_motor_driver_L298N_internal.h"
 #include "resource/resource_pressure_sensor_internal.h"
 

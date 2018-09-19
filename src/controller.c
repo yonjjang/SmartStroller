@@ -17,6 +17,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *
+ * ===================== Modified by =====================
+ *
+ * Ewha Womans University, Computer Science & Engineering
+ *
+ * 1515029 Jeong-min Seo <chersoul@gmail.com>
+ * 1515013 Seung-Yun Kim <fic1214@gmail.com>
+ *
+ *
  */
 
 #include <unistd.h>
@@ -35,18 +45,38 @@ typedef struct app_data_s {
 	connectivity_resource_s *resource_info;
 } app_data;
 
+float interval = 0.1f;
 
 static Eina_Bool _control_sensors_cb(void *data)
 {
 	app_data *ad = data;
 	uint32_t value = -1;
 	int ret = -1;
+	int pressure, speed=0;
+	float tilt=0;
+	int i;
 
-#if 0
-	ret = resource_read_infrared_motion_sensor(PIN_NUMBER, &value);
+#if 1
+
+	ret = resource_read_pressure_sensor(0, &pressure);
 	if (ret != 0) _E("Cannot read sensor value");
+	_D("Detected pressure value : %d", pressure);
 
-	_D("Detected value : %d", value);
+	if (pressure > 2) {
+		resource_read_gyro_sensor(interval, &tilt);
+		_D("Calculated tilt value : %.2f", tilt);
+
+		speed = pressure*5 + tilt * 20; // not exact speed formula
+		for(i=0; i<4; i++)
+			resource_set_motor_driver_L298N_speed(i, speed);
+	} else {
+		for(i=0; i<4; i++)
+			resource_set_motor_driver_L298N_speed(i, speed);
+	}
+
+
+
+
 #endif
 
 #if 0
@@ -82,12 +112,14 @@ static bool service_app_create(void *data)
 	 * Creates a timer to call the given function in the given period of time.
 	 * In the control_sensors_cb(), each sensor reads the measured value or writes a specific value to the sensor.
 	 */
-#if 0
-	ad->getter_timer = ecore_timer_add(Duration , _control_sensors_cb, ad);
+#if 1
+	ad->getter_timer = ecore_timer_add(interval, _control_sensors_cb, ad);
 	if (!ad->getter_timer) {
 		_E("Failed to add getter timer");
 		return false;
 	}
+
+
 #endif
 
     return true;
